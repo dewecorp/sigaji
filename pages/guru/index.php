@@ -94,11 +94,14 @@ $tunjangan_list = $result_tunjangan ? $result_tunjangan->fetch_all(MYSQLI_ASSOC)
                                         
                                         /* Style untuk tabel utama */
                                         #tableGuru {
-                                            font-size: 14px;
+                                            font-family: 'Nunito', sans-serif;
+                                            font-size: 16px;
                                         }
                                         #tableGuru thead th {
                                             background-color: #667eea !important;
                                             color: white !important;
+                                            font-family: 'Nunito', sans-serif;
+                                            font-size: 16px;
                                             font-weight: 600;
                                             text-align: center;
                                             padding: 12px 10px;
@@ -113,12 +116,22 @@ $tunjangan_list = $result_tunjangan ? $result_tunjangan->fetch_all(MYSQLI_ASSOC)
                                             cursor: pointer !important;
                                         }
                                         #tableGuru tbody td {
+                                            font-family: 'Nunito', sans-serif;
+                                            font-size: 16px;
                                             padding: 10px;
                                             vertical-align: middle;
                                             border: 1px solid #dee2e6;
                                         }
                                         #tableGuru tbody tr:hover {
                                             background-color: #f8f9fa;
+                                        }
+                                        /* Pastikan semua elemen dalam tabel menggunakan font yang sama */
+                                        #tableGuru tbody td strong,
+                                        #tableGuru tbody td span,
+                                        #tableGuru tbody td .badge,
+                                        #tableGuru tbody td button {
+                                            font-family: 'Nunito', sans-serif;
+                                            font-size: 16px;
                                         }
                                         
                                         /* Hide all sorting indicators and disable sorting */
@@ -330,11 +343,14 @@ $tunjangan_list = $result_tunjangan ? $result_tunjangan->fetch_all(MYSQLI_ASSOC)
                             <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
                                 <style>
                                     #tableEditMultiple {
-                                        font-size: 14px;
+                                        font-family: 'Nunito', sans-serif;
+                                        font-size: 16px;
                                     }
                                     #tableEditMultiple thead th {
                                         background-color: #667eea !important;
                                         color: white !important;
+                                        font-family: 'Nunito', sans-serif;
+                                        font-size: 16px;
                                         font-weight: 600;
                                         text-align: center;
                                         padding: 12px 8px;
@@ -342,6 +358,8 @@ $tunjangan_list = $result_tunjangan ? $result_tunjangan->fetch_all(MYSQLI_ASSOC)
                                         white-space: nowrap;
                                     }
                                     #tableEditMultiple tbody td {
+                                        font-family: 'Nunito', sans-serif;
+                                        font-size: 16px;
                                         padding: 10px 8px;
                                         vertical-align: middle;
                                         border: 1px solid #dee2e6;
@@ -349,8 +367,14 @@ $tunjangan_list = $result_tunjangan ? $result_tunjangan->fetch_all(MYSQLI_ASSOC)
                                     #tableEditMultiple tbody tr:hover {
                                         background-color: #f8f9fa;
                                     }
+                                    /* Pastikan semua elemen dalam tabel edit multiple menggunakan font yang sama */
+                                    #tableEditMultiple tbody td input,
+                                    #tableEditMultiple tbody td select {
+                                        font-family: 'Nunito', sans-serif;
+                                    }
                                     #tableEditMultiple .form-control-sm {
-                                        font-size: 13px;
+                                        font-family: 'Nunito', sans-serif;
+                                        font-size: 15px;
                                         padding: 6px 10px;
                                         border: 1px solid #ced4da;
                                         width: 100%;
