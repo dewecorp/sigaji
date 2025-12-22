@@ -67,6 +67,8 @@
     color: rgba(255, 255, 255, 0.9);
     text-decoration: none;
     transition: all 0.3s ease;
+    font-size: 16px;
+    font-weight: 500;
 }
 
 .sidebar-menu li a i {
@@ -74,6 +76,7 @@
     margin-right: 10px;
     text-align: center;
     color: rgba(255, 255, 255, 0.9);
+    font-size: 18px;
 }
 
 .sidebar-menu li.active > a,

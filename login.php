@@ -47,7 +47,42 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 
                 logActivity($conn, "User {$user['username']} berhasil login", 'success');
                 
-                header('Location: ' . BASE_URL . 'pages/dashboard.php');
+                // Store welcome data for JavaScript
+                $welcome_name = $user['nama_lengkap'] ?? $user['username'];
+                $redirect_url = BASE_URL . 'pages/dashboard.php';
+                
+                // Show welcome message before redirect
+                ?>
+                <!DOCTYPE html>
+                <html lang="id">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" name="viewport">
+                    <title>Login - <?php echo APP_NAME; ?></title>
+                    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+                </head>
+                <body>
+                    <script>
+                        const welcomeName = <?php echo json_encode($welcome_name); ?>;
+                        const redirectUrl = <?php echo json_encode($redirect_url); ?>;
+                        
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Selamat Datang!',
+                            html: '<p style="font-size: 18px; margin-bottom: 10px;">Halo, <strong>' + welcomeName + '</strong></p><p style="color: #666;">Selamat datang di Sistem Informasi Gaji</p>',
+                            confirmButtonText: 'Mulai',
+                            confirmButtonColor: '#667eea',
+                            timer: 3000,
+                            timerProgressBar: true,
+                            allowOutsideClick: false,
+                            allowEscapeKey: false
+                        }).then(() => {
+                            window.location.href = redirectUrl;
+                        });
+                    </script>
+                </body>
+                </html>
+                <?php
                 exit();
             } else {
                 $error = 'Username atau password salah!';

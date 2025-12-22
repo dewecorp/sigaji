@@ -72,10 +72,14 @@ function isActive($url, $current_page) {
             <div class="main-sidebar sidebar-style-2">
                 <aside id="sidebar-wrapper">
                     <div class="sidebar-brand">
-                        <a href="<?php echo BASE_URL; ?>pages/dashboard.php"><?php echo APP_NAME; ?></a>
+                        <a href="<?php echo BASE_URL; ?>pages/dashboard.php">
+                            <i class="fas fa-money-bill-wave mr-2"></i><?php echo APP_NAME; ?>
+                        </a>
                     </div>
                     <div class="sidebar-brand sidebar-brand-sm">
-                        <a href="<?php echo BASE_URL; ?>pages/dashboard.php">SG</a>
+                        <a href="<?php echo BASE_URL; ?>pages/dashboard.php">
+                            <i class="fas fa-money-bill-wave mr-1"></i>SG
+                        </a>
                     </div>
                     <ul class="sidebar-menu">
                         <?php foreach ($menu_items as $key => $item): 

@@ -52,7 +52,7 @@ if ($logo_exists) {
         
         body {
             font-family: Arial, sans-serif;
-            font-size: 10px;
+            font-size: 12px;
             padding: 0;
             margin: 0;
             display: flex;
@@ -97,38 +97,43 @@ if ($logo_exists) {
         }
         
         .header-content h2 {
-            font-size: 11px;
+            font-size: 16px;
             margin: 0 0 1mm 0;
             font-weight: bold;
             line-height: 1.2;
         }
         
         .header-content p {
-            font-size: 9px;
+            font-size: 12px;
             margin: 0;
             line-height: 1.2;
         }
         
         .info-table {
-            margin: 2mm 0;
+            margin: 1mm 0 0 0;
             border: none;
             width: 100%;
             table-layout: fixed;
-            font-size: 8px;
+            font-size: 12px;
             flex-shrink: 0;
+            border-collapse: collapse;
+            border-spacing: 0;
         }
         .info-table tr {
             border: none;
+            margin: 0;
+            padding: 0;
+            line-height: 1;
         }
         .info-table td {
             border: none;
-            padding: 1mm 0;
+            padding: 0.1mm 0;
             vertical-align: top;
-            font-size: 8px;
-            line-height: 1.2;
+            font-size: 12px;
+            line-height: 0.8;
         }
         .info-table td:first-child {
-            width: 100px;
+            width: 120px;
             white-space: nowrap;
             padding-right: 2mm;
         }
@@ -145,7 +150,7 @@ if ($logo_exists) {
             width: 100%;
             border-collapse: collapse;
             margin: 2mm 0;
-            font-size: 7px;
+            font-size: 12px;
             flex: 1;
             min-height: 0;
             display: table;
@@ -162,7 +167,7 @@ if ($logo_exists) {
         th {
             background-color: #f0f0f0;
             font-weight: bold;
-            font-size: 7px;
+            font-size: 12px;
         }
         
         .text-right {
@@ -177,7 +182,7 @@ if ($logo_exists) {
             margin-top: auto;
             padding-top: 2mm;
             border-top: 1px solid #000;
-            font-size: 7px;
+            font-size: 12px;
             flex-shrink: 0;
             display: table;
             width: 100%;
@@ -206,7 +211,7 @@ if ($logo_exists) {
         .tempat-tanggal {
             margin-top: 1mm;
             text-align: right;
-            font-size: 6px;
+            font-size: 12px;
             padding-right: 2mm;
             flex-shrink: 0;
         }

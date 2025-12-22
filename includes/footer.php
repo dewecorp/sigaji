@@ -93,6 +93,7 @@
         <?php unset($_SESSION['error']); ?>
     <?php endif; ?>
     
+    
     <!-- Footer -->
     <footer class="main-footer" style="background-color: #f7f7f7; padding: 25px 0; margin-top: 50px; border-top: 1px solid #e0e0e0;">
         <div class="container">

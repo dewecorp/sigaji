@@ -140,14 +140,14 @@ $legger_list = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             line-height: 1.1;
         }
         .info-table td:first-child {
-            width: 70px;
+            width: 120px;
             white-space: nowrap;
-            padding-right: 0.3mm;
+            padding-right: 1mm;
         }
         .info-table td:nth-child(2) {
-            width: 2px;
+            width: 5px;
             text-align: left;
-            padding-right: 0.2mm;
+            padding-right: 1mm;
         }
         .info-table td:last-child {
             width: auto;
