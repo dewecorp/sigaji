@@ -1,0 +1,152 @@
+/* Stisla Components CSS - Simplified Version */
+
+.main-wrapper {
+    width: 100%;
+    position: relative;
+}
+
+.navbar-bg {
+    background-color: #6777ef;
+    height: 70px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 996;
+}
+
+.main-navbar {
+    background-color: #fff;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #e3eaef;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 997;
+    height: 70px;
+}
+
+.main-sidebar {
+    position: fixed;
+    top: 70px;
+    left: 0;
+    width: 260px;
+    height: calc(100vh - 70px);
+    z-index: 998;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    overflow-y: auto;
+}
+
+.sidebar-brand {
+    padding: 1.5rem 1rem;
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: 0.5px;
+}
+
+.sidebar-brand-sm {
+    display: none;
+}
+
+.sidebar-menu {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.sidebar-menu li {
+    position: relative;
+}
+
+.sidebar-menu li a {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    color: rgba(255, 255, 255, 0.9);
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.sidebar-menu li a i {
+    width: 20px;
+    margin-right: 10px;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.sidebar-menu li.active > a,
+.sidebar-menu li.active a.nav-link,
+.sidebar-menu a.nav-link.active {
+    background-color: rgba(255, 255, 255, 0.25) !important;
+    color: #ffffff !important;
+    font-weight: 600 !important;
+    border-left: 4px solid #ffffff !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+    transform: translateX(5px);
+    transition: all 0.3s ease;
+}
+
+.sidebar-menu li.active > a i,
+.sidebar-menu li.active a.nav-link i,
+.sidebar-menu a.nav-link.active i {
+    color: #ffffff !important;
+    transform: scale(1.1);
+}
+
+.sidebar-menu li a:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+}
+
+.sidebar-menu li.active > a:hover {
+    background-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+.main-content {
+    margin-left: 260px;
+    margin-top: 70px;
+    padding: 2rem;
+    min-height: calc(100vh - 70px);
+}
+
+.section {
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,.08);
+}
+
+.section-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    color: #191d21;
+}
+
+@media (max-width: 768px) {
+    .main-sidebar {
+        transform: translateX(-260px);
+        transition: transform 0.3s;
+    }
+    
+    .main-sidebar.show {
+        transform: translateX(0);
+    }
+    
+    .main-content {
+        margin-left: 0;
+    }
+    
+    .sidebar-brand {
+        display: none;
+    }
+    
+    .sidebar-brand-sm {
+        display: block;
+    }
+}
+
+

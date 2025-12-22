@@ -1,0 +1,212 @@
+/* Custom Styles for SIGaji */
+:root {
+    --primary-color: #6777ef;
+    --secondary-color: #63ed7a;
+    --danger-color: #fc544b;
+    --warning-color: #ffa426;
+    --info-color: #3abaf4;
+    --dark-color: #191d21;
+    --light-color: #e3eaef;
+}
+
+body {
+    font-family: 'Nunito', sans-serif;
+    background-color: #f4f6f9;
+}
+
+.sidebar-brand {
+    font-weight: 700;
+    font-size: 1.5rem;
+    color: #fff;
+}
+
+.main-sidebar,
+.main-sidebar.sidebar-style-2 {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+}
+
+.main-sidebar .sidebar-brand a {
+    color: #ffffff !important;
+}
+
+.main-sidebar .sidebar-menu li.active > a {
+    background-color: rgba(255, 255, 255, 0.2) !important;
+    color: #ffffff !important;
+    font-weight: 600;
+    border-left: 4px solid #ffffff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    transform: translateX(5px);
+    transition: all 0.3s ease;
+}
+
+.main-sidebar .sidebar-menu li.active > a i {
+    color: #ffffff !important;
+    transform: scale(1.1);
+}
+
+.main-sidebar .sidebar-menu a:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+.main-sidebar .sidebar-menu li.active > a:hover {
+    background-color: rgba(255, 255, 255, 0.25) !important;
+}
+
+.main-header {
+    background: #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,.08);
+}
+
+.user-img {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.widget-card {
+    border-radius: 10px;
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,.08);
+    transition: transform 0.2s;
+}
+
+.widget-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0,0,0,.12);
+}
+
+.widget-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    color: #fff;
+}
+
+.timeline-item {
+    position: relative;
+    padding-left: 40px;
+    padding-bottom: 30px;
+}
+
+.timeline-item::before {
+    content: '';
+    position: absolute;
+    left: 8px;
+    top: 0;
+    bottom: -30px;
+    width: 2px;
+    background: #e3eaef;
+}
+
+.timeline-item:last-child::before {
+    display: none;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 3px solid #fff;
+    z-index: 1;
+}
+
+.timeline-content {
+    background: #fff;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,.08);
+}
+
+.login-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.login-card {
+    border-radius: 15px;
+    box-shadow: 0 10px 40px rgba(0,0,0,.2);
+    overflow: hidden;
+}
+
+.login-image {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+}
+
+.login-image img {
+    max-width: 100%;
+    height: auto;
+}
+
+.table-responsive {
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.btn-action {
+    padding: 5px 10px;
+    margin: 2px;
+    font-size: 12px;
+}
+
+.modal-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #fff;
+    border-bottom: none;
+}
+
+.modal-header .close {
+    color: #fff;
+    opacity: 0.8;
+}
+
+.modal-header .close:hover {
+    opacity: 1;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(103, 119, 239, 0.25);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #5568d3 0%, #653a8f 100%);
+}
+
+.card {
+    border-radius: 10px;
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,.08);
+}
+
+.card-header {
+    background: #fff;
+    border-bottom: 1px solid #e3eaef;
+    font-weight: 600;
+}
+
+#toast-container {
+    top: 70px;
+}
+
+

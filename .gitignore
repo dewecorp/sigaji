@@ -1,0 +1,64 @@
+# Laragon / PHP Project
+# =====================
+
+# Dependencies
+/vendor/
+/node_modules/
+
+# Configuration files with sensitive data
+config/database.php
+config/config.php
+*.env
+.env.local
+
+# Logs
+*.log
+debug_post.log
+error_log
+*.log.*
+
+# Temporary files
+*.tmp
+*.temp
+*.cache
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE files
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+*.code-workspace
+
+# Backup files
+*.bak
+*.backup
+*.sql.gz
+*.zip
+backup/*.sql
+backup/*.zip
+
+# Uploaded files (user content)
+assets/img/users/*
+!assets/img/users/.gitkeep
+assets/img/logo/*
+!assets/img/logo/.gitkeep
+
+# Session files
+sessions/
+
+# PHP specific
+composer.phar
+
+# Keep directory structure
+!assets/img/users/.gitkeep
+!assets/img/logo/.gitkeep
+
+

@@ -1,0 +1,218 @@
+/* Additional Custom Styles */
+
+.main-content {
+    margin-left: 260px;
+    margin-top: 70px;
+    padding: 2rem;
+    min-height: calc(100vh - 70px);
+}
+
+.section {
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,.08);
+}
+
+.section-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    color: #191d21;
+}
+
+.card {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,.08);
+    margin-bottom: 1.5rem;
+}
+
+.card-header {
+    background: #fff;
+    border-bottom: 1px solid #e3eaef;
+    padding: 1rem 1.5rem;
+    font-weight: 600;
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+.btn {
+    border-radius: 6px;
+    padding: 0.5rem 1rem;
+    font-weight: 500;
+    transition: all 0.3s;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,.15);
+}
+
+.form-control, .form-select {
+    border-radius: 6px;
+    border: 1px solid #e3eaef;
+    padding: 0.5rem 0.75rem;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #6777ef;
+    box-shadow: 0 0 0 0.2rem rgba(103, 119, 239, 0.25);
+}
+
+.table {
+    margin-bottom: 0;
+}
+
+.table thead th {
+    background-color: #f8f9fa;
+    border-bottom: 2px solid #e3eaef;
+    font-weight: 600;
+    color: #191d21;
+}
+
+.modal-content {
+    border-radius: 10px;
+    border: none;
+    box-shadow: 0 10px 40px rgba(0,0,0,.2);
+}
+
+.modal-header {
+    border-bottom: 1px solid #e3eaef;
+    padding: 1.25rem 1.5rem;
+}
+
+.modal-body {
+    padding: 1.5rem;
+}
+
+.modal-footer {
+    border-top: 1px solid #e3eaef;
+    padding: 1rem 1.5rem;
+}
+
+.badge {
+    padding: 0.35em 0.65em;
+    font-weight: 500;
+    border-radius: 4px;
+}
+
+.alert {
+    border-radius: 8px;
+    border: none;
+    padding: 1rem 1.25rem;
+}
+
+/* Section Header & Breadcrumb Styles */
+.section-header {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e3eaef;
+}
+
+.section-header h1 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #191d21;
+    margin-bottom: 0.5rem;
+    line-height: 1.2;
+}
+
+.section-header-breadcrumb {
+    display: flex;
+    align-items: center;
+    flex-wrap: nowrap;
+    font-size: 0.875rem;
+    margin-top: 0.75rem;
+    margin-bottom: 0;
+    padding: 0;
+    gap: 0;
+    list-style: none;
+    line-height: 1.5;
+}
+
+.section-header-breadcrumb > *,
+.section-header-breadcrumb > div,
+.section-header-breadcrumb > span {
+    margin: 0 !important;
+    padding: 0 !important;
+    display: inline-block !important;
+    vertical-align: middle;
+    line-height: 1.5;
+}
+
+.breadcrumb-item {
+    display: inline-block !important;
+    color: #6c757d;
+    line-height: 1.5;
+    white-space: nowrap;
+    margin: 0 !important;
+    padding: 0 !important;
+    vertical-align: middle;
+    border: none;
+    background: none;
+}
+
+/* Prevent double separators - remove any ::before separators */
+.breadcrumb-item::before {
+    display: none !important;
+    content: none !important;
+}
+
+/* Add single separator after non-last items */
+.breadcrumb-item:not(:last-child)::after {
+    content: '/' !important;
+    margin: 0 0.5rem;
+    color: #adb5bd;
+    font-weight: normal;
+    font-size: 0.875rem;
+    display: inline-block;
+    vertical-align: middle;
+    padding: 0;
+}
+
+/* Ensure last item has no separator */
+.breadcrumb-item:last-child::after {
+    content: none !important;
+    display: none !important;
+}
+
+/* Override Bootstrap breadcrumb separators if any */
+.section-header-breadcrumb .breadcrumb-item + .breadcrumb-item::before {
+    display: none !important;
+    content: none !important;
+    padding: 0 !important;
+}
+
+.breadcrumb-item a {
+    color: #667eea;
+    text-decoration: none;
+    transition: color 0.2s ease;
+    font-weight: 400;
+    display: inline-block;
+    white-space: nowrap;
+}
+
+.breadcrumb-item a:hover {
+    color: #5568d3;
+    text-decoration: none;
+}
+
+.breadcrumb-item.active {
+    color: #495057;
+    font-weight: 500;
+    display: inline-block;
+    white-space: nowrap;
+}
+
+.breadcrumb-item.active a {
+    color: #495057;
+    pointer-events: none;
+    cursor: default;
+    font-weight: 500;
+}
+
+
