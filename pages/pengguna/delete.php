@@ -10,7 +10,7 @@ if ($id == $_SESSION['user_id']) {
     exit();
 }
 
-$sql = "SELECT username FROM users WHERE id = ?";
+$sql = "SELECT username, role FROM users WHERE id = ?";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $id);
 $stmt->execute();
@@ -18,6 +18,13 @@ $result = $stmt->get_result();
 $user = $result->fetch_assoc();
 
 if ($user) {
+    // Cek apakah user adalah administrator
+    if ($user['role'] == 'admin') {
+        $_SESSION['error'] = "Akun administrator tidak dapat dihapus";
+        header('Location: ' . BASE_URL . 'pages/pengguna/index.php');
+        exit();
+    }
+    
     $sql = "DELETE FROM users WHERE id = ?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("i", $id);
@@ -34,6 +41,7 @@ if ($user) {
 header('Location: ' . BASE_URL . 'pages/pengguna/index.php');
 exit();
 ?>
+
 
 
 

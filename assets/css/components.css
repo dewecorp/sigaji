@@ -27,15 +27,106 @@
     height: 70px;
 }
 
+/* Ensure hamburger menu icon is always visible - Highest priority */
+/* Icon harus selalu terlihat, baik sidebar terbuka maupun tertutup */
+body .main-navbar [data-toggle="sidebar"],
+body .main-navbar a[data-toggle="sidebar"],
+body .navbar-nav [data-toggle="sidebar"],
+body .navbar-nav a[data-toggle="sidebar"],
+body .navbar-nav li [data-toggle="sidebar"],
+body .navbar-nav li a[data-toggle="sidebar"] {
+    display: inline-block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    color: #6777ef !important;
+    font-size: 1.25rem !important;
+    padding: 0.5rem !important;
+    transition: color 0.3s ease !important;
+    cursor: pointer !important;
+    text-decoration: none !important;
+    position: relative !important;
+    z-index: 999 !important;
+    min-width: 40px !important;
+    min-height: 40px !important;
+    line-height: 1 !important;
+    pointer-events: auto !important;
+}
+
+.main-navbar [data-toggle="sidebar"]:hover,
+.main-navbar a[data-toggle="sidebar"]:hover,
+.navbar-nav [data-toggle="sidebar"]:hover,
+.navbar-nav a[data-toggle="sidebar"]:hover {
+    color: #5568d3 !important;
+}
+
+body .main-navbar [data-toggle="sidebar"] i,
+body .main-navbar a[data-toggle="sidebar"] i,
+body .navbar-nav [data-toggle="sidebar"] i,
+body .navbar-nav a[data-toggle="sidebar"] i,
+body .navbar-nav li [data-toggle="sidebar"] i,
+body .navbar-nav li a[data-toggle="sidebar"] i {
+    display: inline-block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    color: #6777ef !important;
+    font-size: 1.25rem !important;
+    width: auto !important;
+    height: auto !important;
+}
+
+/* Responsive navbar adjustments - Ensure icon always visible */
+@media (max-width: 768px) {
+    .main-navbar [data-toggle="sidebar"],
+    .main-navbar a[data-toggle="sidebar"],
+    .navbar-nav [data-toggle="sidebar"],
+    .navbar-nav a[data-toggle="sidebar"] {
+        display: inline-block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        font-size: 1.125rem !important;
+        padding: 0.4375rem !important;
+        color: #6777ef !important;
+    }
+    
+    .main-navbar [data-toggle="sidebar"] i,
+    .main-navbar a[data-toggle="sidebar"] i {
+        display: inline-block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .main-navbar [data-toggle="sidebar"],
+    .main-navbar a[data-toggle="sidebar"],
+    .navbar-nav [data-toggle="sidebar"],
+    .navbar-nav a[data-toggle="sidebar"] {
+        display: inline-block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        font-size: 1rem !important;
+        padding: 0.375rem !important;
+        color: #6777ef !important;
+    }
+    
+    .main-navbar [data-toggle="sidebar"] i,
+    .main-navbar a[data-toggle="sidebar"] i {
+        display: inline-block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+}
+
 .main-sidebar {
     position: fixed;
     top: 70px;
     left: 0;
-    width: 260px;
+    width: 300px;
     height: calc(100vh - 70px);
     z-index: 998;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     overflow-y: auto;
+    transition: transform 0.3s ease;
 }
 
 .sidebar-brand {
@@ -108,10 +199,13 @@
 }
 
 .main-content {
-    margin-left: 260px;
+    margin-left: 300px;
     margin-top: 70px;
     padding: 2rem;
     min-height: calc(100vh - 70px);
+    transition: margin-left 0.3s ease, padding 0.3s ease;
+    width: calc(100% - 300px);
+    box-sizing: border-box;
 }
 
 .section {
@@ -129,26 +223,285 @@
     color: #191d21;
 }
 
-@media (max-width: 768px) {
-    .main-sidebar {
-        transform: translateX(-260px);
-        transition: transform 0.3s;
+/* Sidebar toggle for desktop (screens larger than 768px) */
+@media (min-width: 769px) {
+    .main-sidebar.sidebar-hidden {
+        transform: translateX(-100%) !important;
     }
     
-    .main-sidebar.show {
-        transform: translateX(0);
+    .main-content.sidebar-hidden {
+        margin-left: 0 !important;
+    }
+    
+    /* Ensure sidebar is visible by default on desktop */
+    .main-sidebar:not(.sidebar-hidden) {
+        transform: translateX(0) !important;
+    }
+    
+    /* Pastikan icon menu selalu terlihat ketika sidebar tertutup di desktop */
+    .main-navbar [data-toggle="sidebar"],
+    .main-navbar a[data-toggle="sidebar"],
+    body .main-navbar .navbar-nav [data-toggle="sidebar"],
+    body .main-navbar .navbar-nav a[data-toggle="sidebar"] {
+        display: inline-block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        color: #6777ef !important;
+    }
+    
+    .main-navbar [data-toggle="sidebar"] i,
+    .main-navbar a[data-toggle="sidebar"] i {
+        display: inline-block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        color: #6777ef !important;
+    }
+}
+
+/* Tablet styles (768px - 991px) */
+@media (min-width: 769px) and (max-width: 991px) {
+    .main-sidebar {
+        width: 280px;
     }
     
     .main-content {
-        margin-left: 0;
+        margin-left: 280px !important;
+        padding: 1.5rem !important;
+        width: calc(100% - 280px) !important;
+        box-sizing: border-box;
+    }
+    
+    .section {
+        padding: 1.25rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .section-title {
+        font-size: 1.125rem;
+    }
+    
+    .card-body {
+        padding: 1.25rem;
+    }
+    
+    .card-header {
+        padding: 0.875rem 1.25rem;
+        font-size: 1rem;
+    }
+}
+
+/* Mobile and small tablet styles (768px and smaller) */
+@media (max-width: 768px) {
+    .main-sidebar {
+        width: 280px;
+        transform: translateX(-100%) !important;
+        z-index: 998;
+    }
+    
+    .main-sidebar.show {
+        transform: translateX(0) !important;
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+    }
+    
+    .main-content {
+        margin-left: 0 !important;
+        padding: 1rem !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box;
     }
     
     .sidebar-brand {
         display: none;
+        padding: 1rem 0.75rem;
+        font-size: 1.5rem;
     }
     
     .sidebar-brand-sm {
         display: block;
+        padding: 1rem 0.75rem;
+        font-size: 1.25rem;
+        text-align: center;
+    }
+    
+    .sidebar-menu li a {
+        padding: 0.625rem 1rem;
+        font-size: 14px;
+    }
+    
+    .sidebar-menu li a i {
+        font-size: 16px;
+        width: 18px;
+    }
+    
+    .main-navbar {
+        padding: 0.75rem 1rem;
+    }
+    
+    .navbar-bg {
+        height: 60px;
+    }
+    
+    .main-navbar {
+        height: 60px;
+    }
+    
+    .main-sidebar {
+        top: 60px;
+        height: calc(100vh - 60px);
+    }
+    
+    .section {
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border-radius: 6px;
+    }
+    
+    .section-title {
+        font-size: 1.125rem;
+        margin-bottom: 1rem;
+    }
+    
+    .section-header h1 {
+        font-size: 1.375rem;
+    }
+    
+    .card {
+        margin-bottom: 1rem;
+    }
+    
+    .card-body {
+        padding: 1rem;
+    }
+    
+    .card-header {
+        padding: 0.75rem 1rem;
+        font-size: 0.95rem;
+    }
+    
+    .btn {
+        padding: 0.5rem 0.875rem;
+        font-size: 0.875rem;
+    }
+    
+    .form-control,
+    .form-select {
+        font-size: 0.875rem;
+        padding: 0.5rem 0.625rem;
+    }
+    
+    .table {
+        font-size: 0.875rem;
+    }
+    
+    .table thead th {
+        padding: 0.5rem 0.375rem;
+        font-size: 0.813rem;
+    }
+    
+    .table tbody td {
+        padding: 0.5rem 0.375rem;
+    }
+    
+    .modal-content {
+        margin: 0.5rem;
+    }
+    
+    .modal-header {
+        padding: 1rem;
+    }
+    
+    .modal-body {
+        padding: 1rem;
+    }
+    
+    .modal-footer {
+        padding: 0.75rem 1rem;
+    }
+}
+
+/* Small mobile styles (480px and smaller) */
+@media (max-width: 480px) {
+    .main-content {
+        padding: 0.75rem !important;
+        margin-left: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+    
+    .section {
+        padding: 0.875rem;
+        width: 100%;
+        box-sizing: border-box;
+    }
+    
+    .section-title {
+        font-size: 1rem;
+    }
+    
+    .section-header h1 {
+        font-size: 1.25rem;
+    }
+    
+    .card-body {
+        padding: 0.875rem;
+    }
+    
+    .card-header {
+        padding: 0.625rem 0.875rem;
+        font-size: 0.9rem;
+    }
+    
+    .btn {
+        padding: 0.4375rem 0.75rem;
+        font-size: 0.813rem;
+    }
+    
+    .table {
+        font-size: 0.813rem;
+    }
+    
+    .table thead th {
+        padding: 0.4375rem 0.25rem;
+        font-size: 0.75rem;
+    }
+    
+    .table tbody td {
+        padding: 0.4375rem 0.25rem;
+    }
+    
+    .sidebar-menu li a {
+        padding: 0.5rem 0.875rem;
+        font-size: 13px;
+    }
+    
+    .sidebar-brand-sm {
+        padding: 0.875rem 0.5rem;
+        font-size: 1.125rem;
+    }
+    
+    .navbar-nav {
+        flex-direction: row;
+        align-items: center;
+    }
+    
+    .main-navbar {
+        padding: 0.5rem 0.75rem;
+        height: 60px;
+    }
+    
+    .navbar-bg {
+        height: 60px;
+    }
+    
+    .main-sidebar {
+        top: 60px;
+        height: calc(100vh - 60px);
+    }
+    
+    .main-content {
+        margin-top: 60px;
+        min-height: calc(100vh - 60px);
     }
 }
 

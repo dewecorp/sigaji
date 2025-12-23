@@ -6,3 +6,4 @@ ADD COLUMN IF NOT EXISTS insentif_masa_bakti DECIMAL(15,2) DEFAULT 0 AFTER jumla
 ADD COLUMN IF NOT EXISTS honor_per_jam DECIMAL(15,2) DEFAULT 0 AFTER insentif_masa_bakti;
 
 
+

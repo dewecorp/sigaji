@@ -101,8 +101,8 @@ $activities = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
 
                     <div class="section-body">
                         <!-- Statistics Widgets -->
-                        <div class="row">
-                            <div class="col-lg-3 col-md-6 col-sm-6 col-12 mb-4">
+                        <div class="row g-3">
+                            <div class="col-lg-3 col-md-6 col-sm-6 col-12">
                                 <div class="card stat-card stat-card-primary">
                                     <div class="card-body">
                                         <div class="stat-icon-wrapper">
@@ -118,7 +118,7 @@ $activities = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
                                 </div>
                             </div>
 
-                            <div class="col-lg-3 col-md-6 col-sm-6 col-12 mb-4">
+                            <div class="col-lg-3 col-md-6 col-sm-6 col-12">
                                 <div class="card stat-card stat-card-success">
                                     <div class="card-body">
                                         <div class="stat-icon-wrapper">
@@ -134,7 +134,7 @@ $activities = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
                                 </div>
                             </div>
 
-                            <div class="col-lg-3 col-md-6 col-sm-6 col-12 mb-4">
+                            <div class="col-lg-3 col-md-6 col-sm-6 col-12">
                                 <div class="card stat-card stat-card-info">
                                     <div class="card-body">
                                         <div class="stat-icon-wrapper">
@@ -150,7 +150,7 @@ $activities = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
                                 </div>
                             </div>
 
-                            <div class="col-lg-3 col-md-6 col-sm-6 col-12 mb-4">
+                            <div class="col-lg-3 col-md-6 col-sm-6 col-12">
                                 <div class="card stat-card stat-card-warning">
                                     <div class="card-body">
                                         <div class="stat-icon-wrapper">
@@ -167,8 +167,8 @@ $activities = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
                             </div>
                         </div>
 
-                        <div class="row">
-                            <div class="col-lg-12 col-md-12 col-sm-12 col-12 mb-4">
+                        <div class="row g-3">
+                            <div class="col-lg-12 col-md-12 col-sm-12 col-12">
                                 <div class="card stat-card stat-card-danger stat-card-large">
                                     <div class="card-body">
                                         <div class="stat-icon-wrapper">
@@ -275,6 +275,8 @@ $activities = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
     gap: 20px;
     flex: 1;
     min-height: 120px;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .stat-card-large .card-body {
@@ -313,6 +315,8 @@ $activities = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
 .stat-content {
     flex: 1;
     min-width: 0;
+    width: 100%;
+    overflow: hidden;
 }
 
 .stat-value {
@@ -322,6 +326,8 @@ $activities = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
     color: #2d3748;
     line-height: 1.2;
     word-break: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
 }
 
 .stat-card-large .stat-value {
@@ -468,25 +474,66 @@ $activities = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
 }
 
 /* Ensure equal height for widgets in row */
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    margin-left: -15px;
+    margin-right: -15px;
+}
+
 .row > [class*='col-'] {
     display: flex;
     flex-direction: column;
+    padding-left: 15px;
+    padding-right: 15px;
 }
 
 .row > [class*='col-'] > .stat-card {
     flex: 1;
+    display: flex;
+    flex-direction: column;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
+/* Ensure widgets have consistent spacing and height */
+.stat-card {
+    margin-bottom: 0;
+}
+
+.row {
+    margin-left: -15px;
+    margin-right: -15px;
+}
+
+/* Custom gap utility for consistent spacing */
+.row.g-3 {
+    margin-left: -12px;
+    margin-right: -12px;
+}
+
+.row.g-3 > [class*='col-'] {
+    padding-left: 12px;
+    padding-right: 12px;
+    margin-bottom: 24px;
+}
+
+/* Ensure all widgets in a row have same height */
+.row:not(.g-3) > [class*='col-'] {
+    margin-bottom: 24px;
+}
+
+/* Make sure all stat cards have consistent appearance */
+.stat-card .card-body {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+/* Responsive - Tablet */
+@media (max-width: 991px) and (min-width: 769px) {
     .stat-card .card-body {
         padding: 20px;
         gap: 15px;
         min-height: 110px;
-    }
-    
-    .stat-card-large .card-body {
-        min-height: 130px;
     }
     
     .stat-icon {
@@ -500,17 +547,135 @@ $activities = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
     }
     
     .stat-card-large .stat-icon {
-        width: 70px;
-        height: 70px;
-        font-size: 28px;
+        width: 80px;
+        height: 80px;
+        font-size: 32px;
     }
     
     .stat-card-large .stat-value {
-        font-size: 1.75rem;
+        font-size: 2rem;
+    }
+}
+
+/* Responsive - Mobile */
+@media (max-width: 768px) {
+    /* Ensure proper spacing between widgets */
+    .row {
+        margin-left: -10px;
+        margin-right: -10px;
+    }
+    
+    .row > [class*='col-'] {
+        padding-left: 10px;
+        padding-right: 10px;
+        margin-bottom: 15px;
+    }
+    
+    .stat-card {
+        height: 100%;
+        min-height: 110px;
+    }
+    
+    .stat-card .card-body {
+        padding: 18px;
+        gap: 12px;
+        min-height: 110px;
+        flex-wrap: nowrap;
+    }
+    
+    .stat-card-large .card-body {
+        padding: 25px 18px;
+        min-height: 120px;
+    }
+    
+    .stat-icon {
+        width: 55px;
+        height: 55px;
+        font-size: 22px;
+        flex-shrink: 0;
+    }
+    
+    .stat-card-large .stat-icon {
+        width: 65px;
+        height: 65px;
+        font-size: 26px;
+    }
+    
+    .stat-value {
+        font-size: 1.35rem;
+        line-height: 1.2;
+        word-break: break-word;
+        overflow-wrap: break-word;
+    }
+    
+    .stat-card-large .stat-value {
+        font-size: 1.6rem;
+    }
+    
+    .stat-label {
+        font-size: 0.85rem;
+        line-height: 1.3;
+    }
+    
+    .stat-card-large .stat-label {
+        font-size: 0.9rem;
     }
     
     .timeline-scrollable {
         max-height: 400px;
+    }
+}
+
+/* Responsive - Small Mobile */
+@media (max-width: 480px) {
+    .row {
+        margin-left: -8px;
+        margin-right: -8px;
+    }
+    
+    .row > [class*='col-'] {
+        padding-left: 8px;
+        padding-right: 8px;
+        margin-bottom: 12px;
+    }
+    
+    .stat-card .card-body {
+        padding: 15px;
+        gap: 10px;
+        min-height: 100px;
+    }
+    
+    .stat-card-large .card-body {
+        padding: 20px 15px;
+        min-height: 110px;
+    }
+    
+    .stat-icon {
+        width: 50px;
+        height: 50px;
+        font-size: 20px;
+    }
+    
+    .stat-card-large .stat-icon {
+        width: 60px;
+        height: 60px;
+        font-size: 24px;
+    }
+    
+    .stat-value {
+        font-size: 1.2rem;
+    }
+    
+    .stat-card-large .stat-value {
+        font-size: 1.4rem;
+    }
+    
+    .stat-label {
+        font-size: 0.8rem;
+    }
+    
+    .stat-card-large .stat-label {
+        font-size: 0.85rem;
     }
 }
 

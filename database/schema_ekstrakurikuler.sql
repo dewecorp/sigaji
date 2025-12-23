@@ -50,3 +50,4 @@ CREATE TABLE IF NOT EXISTS legger_honor (
     UNIQUE KEY unique_pembina_ekstra_periode (pembina_id, ekstrakurikuler_id, periode)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+

@@ -71,7 +71,13 @@ $users = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
                                                         <button class="btn btn-sm btn-info" onclick="editPengguna(<?php echo $u['id']; ?>)" data-toggle="tooltip" title="Edit">
                                                             <i class="fas fa-edit"></i>
                                                         </button>
-                                                        <?php if ($u['id'] != $_SESSION['user_id']): ?>
+                                                        <?php 
+                                                        // Tampilkan tombol hapus jika:
+                                                        // 1. Bukan akun sendiri (tidak bisa hapus diri sendiri)
+                                                        // 2. Bukan administrator (admin tidak bisa dihapus)
+                                                        // Bendahara bisa dihapus oleh admin atau user lain
+                                                        if ($u['id'] != $_SESSION['user_id'] && $u['role'] != 'admin'): 
+                                                        ?>
                                                             <button class="btn btn-sm btn-danger" onclick="confirmDelete('<?php echo BASE_URL; ?>pages/pengguna/delete.php?id=<?php echo $u['id']; ?>')" data-toggle="tooltip" title="Hapus">
                                                                 <i class="fas fa-trash"></i>
                                                             </button>

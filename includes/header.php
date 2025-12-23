@@ -56,9 +56,36 @@ cleanupOldActivities($conn);
     <link rel="stylesheet" href="<?php echo BASE_URL; ?>assets/css/style.css">
     <link rel="stylesheet" href="<?php echo BASE_URL; ?>assets/css/components.css">
     <link rel="stylesheet" href="<?php echo BASE_URL; ?>assets/css/custom.css">
+    <link rel="stylesheet" href="<?php echo BASE_URL; ?>assets/css/responsive-fix.css">
+    <link rel="stylesheet" href="<?php echo BASE_URL; ?>assets/css/responsive-all.css">
     
     <!-- Sidebar Active Menu Styles -->
     <style>
+        /* Pastikan icon hamburger menu selalu terlihat, bahkan ketika sidebar tertutup */
+        /* Icon harus selalu terlihat di navbar, tidak peduli status sidebar */
+        body .main-navbar [data-toggle="sidebar"],
+        body .main-navbar a[data-toggle="sidebar"],
+        body .navbar-nav [data-toggle="sidebar"],
+        body .navbar-nav a[data-toggle="sidebar"],
+        body .navbar-nav li [data-toggle="sidebar"],
+        body .navbar-nav li a[data-toggle="sidebar"] {
+            display: inline-block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            color: #6777ef !important;
+            z-index: 999 !important;
+            pointer-events: auto !important;
+        }
+        
+        body .main-navbar [data-toggle="sidebar"] i,
+        body .main-navbar a[data-toggle="sidebar"] i,
+        body .navbar-nav [data-toggle="sidebar"] i,
+        body .navbar-nav a[data-toggle="sidebar"] i {
+            display: inline-block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            color: #6777ef !important;
+        }
         .main-sidebar,
         .main-sidebar.sidebar-style-2 {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
@@ -247,6 +274,7 @@ cleanupOldActivities($conn);
             .datetime-display {
                 padding: 6px 12px;
                 gap: 10px;
+                margin-right: 10px;
             }
             
             .datetime-display .date-part {
@@ -260,6 +288,62 @@ cleanupOldActivities($conn);
             .datetime-display .date-part::before,
             .datetime-display .time-part::before {
                 display: none;
+            }
+            
+            /* Responsive navbar user dropdown */
+            .navbar-nav.navbar-right {
+                gap: 10px;
+            }
+            
+            .nav-link-user {
+                padding: 0.5rem 0.75rem;
+            }
+            
+            .nav-link-user .d-sm-none.d-lg-inline-block {
+                display: none !important;
+            }
+            
+            .user-img {
+                width: 32px;
+                height: 32px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .datetime-display {
+                padding: 4px 8px;
+                gap: 8px;
+                margin-right: 5px;
+            }
+            
+            .datetime-display .date-part {
+                font-size: 11px;
+            }
+            
+            .datetime-display .time-part {
+                font-size: 14px;
+            }
+            
+            .main-navbar {
+                padding: 0.5rem 0.75rem;
+            }
+            
+            .main-navbar [data-toggle="sidebar"],
+            .main-navbar a[data-toggle="sidebar"] {
+                display: inline-block !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+                font-size: 1.125rem !important;
+                padding: 0.375rem !important;
+                color: #6777ef !important;
+                z-index: 999 !important;
+            }
+            
+            .main-navbar [data-toggle="sidebar"] i,
+            .main-navbar a[data-toggle="sidebar"] i {
+                display: inline-block !important;
+                visibility: visible !important;
+                opacity: 1 !important;
             }
         }
     </style>

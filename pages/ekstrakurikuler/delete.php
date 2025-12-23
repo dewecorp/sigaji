@@ -31,3 +31,4 @@ header('Location: ' . BASE_URL . 'pages/ekstrakurikuler/index.php');
 exit();
 ?>
 
+

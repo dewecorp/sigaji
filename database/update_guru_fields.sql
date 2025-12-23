@@ -15,3 +15,4 @@ ALTER TABLE guru ADD COLUMN IF NOT EXISTS masa_bakti INT AFTER tmt;
 ALTER TABLE guru ADD COLUMN IF NOT EXISTS jumlah_jam_mengajar INT DEFAULT 0 AFTER masa_bakti;
 
 
+

@@ -139,7 +139,8 @@ try {
                     $jumlah = $jumlah_per_bulan * $jumlah_periode;
                 } else {
                     // For other tunjangan, get from tunjangan_detail
-                    // Priority: current period first, if none, get from latest period that has data
+                    // Hanya ambil data dari periode aktif, jangan copy dari periode sebelumnya
+                    // Jika tidak ada data di periode aktif, berarti jumlah = 0 (guru tidak menerima tunjangan)
                     $sql = "SELECT jumlah FROM tunjangan_detail WHERE guru_id = ? AND tunjangan_id = ? AND periode = ?";
                     $stmt = $conn->prepare($sql);
                     if (!$stmt) {
@@ -151,54 +152,6 @@ try {
                     $row = $result->fetch_assoc();
                     $jumlah = isset($row['jumlah']) ? floatval($row['jumlah']) : 0;
                     $stmt->close();
-                    
-                    // If no data in current period, get from latest period
-                    if ($jumlah == 0) {
-                        $sql_latest = "SELECT jumlah, periode FROM tunjangan_detail 
-                                      WHERE guru_id = ? AND tunjangan_id = ? 
-                                      ORDER BY periode DESC LIMIT 1";
-                        $stmt_latest = $conn->prepare($sql_latest);
-                        if ($stmt_latest) {
-                            $stmt_latest->bind_param("ii", $g['id'], $t['id']);
-                            $stmt_latest->execute();
-                            $result_latest = $stmt_latest->get_result();
-                            $row_latest = $result_latest->fetch_assoc();
-                            if ($row_latest) {
-                                $jumlah = floatval($row_latest['jumlah']);
-                                // Copy to current period - check if exists first
-                                $sql_check_copy = "SELECT id FROM tunjangan_detail WHERE guru_id = ? AND tunjangan_id = ? AND periode = ?";
-                                $stmt_check_copy = $conn->prepare($sql_check_copy);
-                                if ($stmt_check_copy) {
-                                    $stmt_check_copy->bind_param("iis", $g['id'], $t['id'], $periode);
-                                    $stmt_check_copy->execute();
-                                    $result_check_copy = $stmt_check_copy->get_result();
-                                    $existing_copy = $result_check_copy->fetch_assoc();
-                                    $stmt_check_copy->close();
-                                    
-                                    if ($existing_copy) {
-                                        // Update existing
-                                        $sql_update_copy = "UPDATE tunjangan_detail SET jumlah = ? WHERE id = ?";
-                                        $stmt_update_copy = $conn->prepare($sql_update_copy);
-                                        if ($stmt_update_copy) {
-                                            $stmt_update_copy->bind_param("di", $jumlah, $existing_copy['id']);
-                                            $stmt_update_copy->execute();
-                                            $stmt_update_copy->close();
-                                        }
-                                    } else {
-                                        // Insert new
-                                        $sql_insert_copy = "INSERT INTO tunjangan_detail (guru_id, tunjangan_id, periode, jumlah) VALUES (?, ?, ?, ?)";
-                                        $stmt_insert_copy = $conn->prepare($sql_insert_copy);
-                                        if ($stmt_insert_copy) {
-                                            $stmt_insert_copy->bind_param("iisd", $g['id'], $t['id'], $periode, $jumlah);
-                                            $stmt_insert_copy->execute();
-                                            $stmt_insert_copy->close();
-                                        }
-                                    }
-                                }
-                            }
-                            $stmt_latest->close();
-                        }
-                    }
                     
                     // Kalikan dengan jumlah_periode
                     $jumlah = $jumlah * $jumlah_periode;
@@ -220,6 +173,8 @@ try {
             foreach ($potongan as $p) {
                 // Debug: log potongan yang sedang diproses
                 error_log("Processing potongan: {$p['nama_potongan']} (ID: {$p['id']}) for guru: {$g['nama_lengkap']}");
+                // Hanya ambil data dari periode aktif, jangan copy dari periode sebelumnya
+                // Jika tidak ada data di periode aktif, berarti jumlah = 0 (guru tidak menerima potongan)
                 $sql = "SELECT jumlah FROM potongan_detail WHERE guru_id = ? AND potongan_id = ? AND periode = ?";
                 $stmt = $conn->prepare($sql);
                 if (!$stmt) {
@@ -231,54 +186,6 @@ try {
                 $row = $result->fetch_assoc();
                 $jumlah = isset($row['jumlah']) ? floatval($row['jumlah']) : 0;
                 $stmt->close();
-                
-                // If no data in current period, get from latest period
-                if ($jumlah == 0) {
-                    $sql_latest = "SELECT jumlah, periode FROM potongan_detail 
-                                  WHERE guru_id = ? AND potongan_id = ? 
-                                  ORDER BY periode DESC LIMIT 1";
-                    $stmt_latest = $conn->prepare($sql_latest);
-                    if ($stmt_latest) {
-                        $stmt_latest->bind_param("ii", $g['id'], $p['id']);
-                        $stmt_latest->execute();
-                        $result_latest = $stmt_latest->get_result();
-                        $row_latest = $result_latest->fetch_assoc();
-                        if ($row_latest) {
-                            $jumlah = floatval($row_latest['jumlah']);
-                            // Copy to current period - check if exists first
-                            $sql_check_copy = "SELECT id FROM potongan_detail WHERE guru_id = ? AND potongan_id = ? AND periode = ?";
-                            $stmt_check_copy = $conn->prepare($sql_check_copy);
-                            if ($stmt_check_copy) {
-                                $stmt_check_copy->bind_param("iis", $g['id'], $p['id'], $periode);
-                                $stmt_check_copy->execute();
-                                $result_check_copy = $stmt_check_copy->get_result();
-                                $existing_copy = $result_check_copy->fetch_assoc();
-                                $stmt_check_copy->close();
-                                
-                                if ($existing_copy) {
-                                    // Update existing
-                                    $sql_update_copy = "UPDATE potongan_detail SET jumlah = ? WHERE id = ?";
-                                    $stmt_update_copy = $conn->prepare($sql_update_copy);
-                                    if ($stmt_update_copy) {
-                                        $stmt_update_copy->bind_param("di", $jumlah, $existing_copy['id']);
-                                        $stmt_update_copy->execute();
-                                        $stmt_update_copy->close();
-                                    }
-                                } else {
-                                    // Insert new
-                                    $sql_insert_copy = "INSERT INTO potongan_detail (guru_id, potongan_id, periode, jumlah) VALUES (?, ?, ?, ?)";
-                                    $stmt_insert_copy = $conn->prepare($sql_insert_copy);
-                                    if ($stmt_insert_copy) {
-                                        $stmt_insert_copy->bind_param("iisd", $g['id'], $p['id'], $periode, $jumlah);
-                                        $stmt_insert_copy->execute();
-                                        $stmt_insert_copy->close();
-                                    }
-                                }
-                            }
-                        }
-                        $stmt_latest->close();
-                    }
-                }
                 
                 // Kalikan dengan jumlah_periode
                 $jumlah = $jumlah * $jumlah_periode;
@@ -354,26 +261,34 @@ try {
                 }
                 
                 // Insert tunjangan details (jumlah sudah dikalikan dengan jumlah_periode)
+                // Hanya insert tunjangan yang jumlahnya > 0 (guru benar-benar menerima tunjangan)
                 foreach ($tunjangan as $t) {
                     $jumlah = isset($tunjangan_details[$t['id']]) ? $tunjangan_details[$t['id']] : 0;
-                    $sql = "INSERT INTO legger_detail (legger_id, jenis, item_id, nama_item, jumlah) VALUES (?, 'tunjangan', ?, ?, ?)";
-                    $stmt = $conn->prepare($sql);
-                    if ($stmt) {
-                        $stmt->bind_param("iisd", $legger_id, $t['id'], $t['nama_tunjangan'], $jumlah);
-                        $stmt->execute();
-                        $stmt->close();
+                    // Hanya insert jika jumlah > 0
+                    if ($jumlah > 0) {
+                        $sql = "INSERT INTO legger_detail (legger_id, jenis, item_id, nama_item, jumlah) VALUES (?, 'tunjangan', ?, ?, ?)";
+                        $stmt = $conn->prepare($sql);
+                        if ($stmt) {
+                            $stmt->bind_param("iisd", $legger_id, $t['id'], $t['nama_tunjangan'], $jumlah);
+                            $stmt->execute();
+                            $stmt->close();
+                        }
                     }
                 }
                 
                 // Insert potongan details (jumlah sudah dikalikan dengan jumlah_periode)
+                // Hanya insert potongan yang jumlahnya > 0 (guru benar-benar menerima potongan)
                 foreach ($potongan as $p) {
                     $jumlah = isset($potongan_details[$p['id']]) ? $potongan_details[$p['id']] : 0;
-                    $sql = "INSERT INTO legger_detail (legger_id, jenis, item_id, nama_item, jumlah) VALUES (?, 'potongan', ?, ?, ?)";
-                    $stmt = $conn->prepare($sql);
-                    if ($stmt) {
-                        $stmt->bind_param("iisd", $legger_id, $p['id'], $p['nama_potongan'], $jumlah);
-                        $stmt->execute();
-                        $stmt->close();
+                    // Hanya insert jika jumlah > 0
+                    if ($jumlah > 0) {
+                        $sql = "INSERT INTO legger_detail (legger_id, jenis, item_id, nama_item, jumlah) VALUES (?, 'potongan', ?, ?, ?)";
+                        $stmt = $conn->prepare($sql);
+                        if ($stmt) {
+                            $stmt->bind_param("iisd", $legger_id, $p['id'], $p['nama_potongan'], $jumlah);
+                            $stmt->execute();
+                            $stmt->close();
+                        }
                     }
                 }
             }

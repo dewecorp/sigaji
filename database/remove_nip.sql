@@ -10,3 +10,4 @@ ALTER TABLE guru DROP INDEX nip;
 ALTER TABLE guru DROP COLUMN nip;
 
 
+
