@@ -351,6 +351,29 @@ $legger_list = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         endif;
     endforeach;
     ?>
-    <script>window.print();</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script>
+        window.onload = function() {
+            const element = document.body;
+            const opt = {
+                margin: [2, 2, 2, 2],
+                filename: 'Slip_Honor_Semua_<?php echo $periode; ?>.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true, letterRendering: true },
+                jsPDF: { unit: 'mm', format: [210, 330], orientation: 'portrait' },
+                pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+            };
+            
+            html2pdf().set(opt).from(element).save().then(function() {
+                // Close window after download
+                setTimeout(function() {
+                    window.close();
+                }, 1000);
+            }).catch(function(error) {
+                console.error('Error generating PDF:', error);
+                alert('Terjadi kesalahan saat membuat PDF. Silakan coba lagi.');
+            });
+        };
+    </script>
 </body>
 </html>

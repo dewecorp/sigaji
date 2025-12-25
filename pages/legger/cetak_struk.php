@@ -49,24 +49,25 @@ $details = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         body {
             font-family: Arial, sans-serif;
             font-size: 10px;
-            padding: 0;
+            padding: 5mm;
             margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
+            background: white;
         }
         
         .slip {
             width: calc((210mm - 8mm * 2 - 4mm * 2 - 3mm) / 2);
-            height: calc((330mm - 8mm * 2 - 4mm * 2 - 3mm) / 2);
+            max-width: 96mm;
+            min-height: calc((330mm - 8mm * 2 - 4mm * 2 - 3mm) / 2);
+            max-height: calc((330mm - 8mm * 2 - 4mm * 2 - 3mm) / 2);
             border: 1px solid #000;
             padding: 4mm;
             display: flex;
             flex-direction: column;
-            page-break-inside: avoid;
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
             overflow: hidden;
             box-sizing: border-box;
+            margin: 0 auto;
         }
         
         .header {
@@ -76,6 +77,8 @@ $details = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             border-bottom: 1px solid #000;
             padding-bottom: 2mm;
             flex-shrink: 0;
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
         }
         
         .header-logo {
@@ -122,6 +125,13 @@ $details = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             flex: 1;
             min-height: 0;
             display: table;
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+        }
+        
+        table tr {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
         }
         
         th, td {
@@ -154,6 +164,8 @@ $details = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             flex-shrink: 0;
             display: table;
             width: 100%;
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
         }
         
         .signature-col {
@@ -186,21 +198,19 @@ $details = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         @media print {
             body {
                 margin: 0;
-                padding: 0;
-                display: flex;
-                justify-content: center;
-                align-items: center;
+                padding: 5mm;
             }
             
             .slip {
                 width: calc((210mm - 8mm * 2 - 4mm * 2 - 3mm) / 2);
-                height: calc((330mm - 8mm * 2 - 4mm * 2 - 3mm) / 2);
-                page-break-inside: avoid;
-                break-inside: avoid;
+                max-width: 96mm;
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
             }
             
             .header {
-                page-break-inside: avoid;
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
             }
         }
     </style>
@@ -312,7 +322,41 @@ $details = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             </div>
         </div>
     </div>
-    <script>window.print();</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script>
+        window.onload = function() {
+            // Use the slip div instead of body to avoid margin issues
+            const element = document.querySelector('.slip');
+            const opt = {
+                margin: [5, 5, 5, 5],
+                filename: 'Slip_Gaji_<?php echo htmlspecialchars($legger['nama_lengkap'], ENT_QUOTES); ?>_<?php echo $legger['periode']; ?>.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { 
+                    scale: 2, 
+                    useCORS: true, 
+                    letterRendering: true,
+                    logging: false,
+                    windowWidth: element.scrollWidth,
+                    windowHeight: element.scrollHeight
+                },
+                jsPDF: { unit: 'mm', format: [210, 330], orientation: 'portrait' },
+                pagebreak: { 
+                    mode: ['avoid-all', 'css', 'legacy'],
+                    avoid: ['.slip', '.header', 'table', '.signature-row']
+                }
+            };
+            
+            html2pdf().set(opt).from(element).save().then(function() {
+                // Close window after download
+                setTimeout(function() {
+                    window.close();
+                }, 1000);
+            }).catch(function(error) {
+                console.error('Error generating PDF:', error);
+                alert('Terjadi kesalahan saat membuat PDF. Silakan coba lagi.');
+            });
+        };
+    </script>
 </body>
 </html>
 

@@ -89,8 +89,8 @@ foreach ($legger_list as $l) {
             flex-direction: column;
             width: 100%;
             height: 100%;
-            page-break-inside: avoid;
-            break-inside: avoid;
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
             overflow: hidden;
             box-sizing: border-box;
         }
@@ -102,6 +102,23 @@ foreach ($legger_list as $l) {
             border-bottom: 1px solid #000;
             padding-bottom: 0.5mm;
             flex-shrink: 0;
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+        }
+        
+        table {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+        }
+        
+        table tr {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+        }
+        
+        .signature-row {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
         }
         
         .header-logo {
@@ -241,8 +258,23 @@ foreach ($legger_list as $l) {
             .slip {
                 width: 100%;
                 height: 100%;
-                page-break-inside: avoid;
-                break-inside: avoid;
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+            }
+            
+            .header {
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+            }
+            
+            table {
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+            }
+            
+            .signature-row {
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
             }
         }
     </style>
@@ -378,9 +410,31 @@ foreach ($legger_list as $l) {
         endif;
     endforeach;
     ?>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script>
         window.onload = function() {
-            window.print();
+            const element = document.body;
+            const opt = {
+                margin: [2, 2, 2, 2],
+                filename: 'Slip_Gaji_Semua_<?php echo $periode; ?>.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true, letterRendering: true },
+                jsPDF: { unit: 'mm', format: [210, 330], orientation: 'portrait' },
+                pagebreak: { 
+                    mode: ['avoid-all', 'css', 'legacy'],
+                    avoid: ['.slip', '.header', 'table', '.signature-row']
+                }
+            };
+            
+            html2pdf().set(opt).from(element).save().then(function() {
+                // Close window after download
+                setTimeout(function() {
+                    window.close();
+                }, 1000);
+            }).catch(function(error) {
+                console.error('Error generating PDF:', error);
+                alert('Terjadi kesalahan saat membuat PDF. Silakan coba lagi.');
+            });
         };
     </script>
 </body>

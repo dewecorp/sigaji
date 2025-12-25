@@ -60,8 +60,19 @@ $legger = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         body {
             font-family: Arial, sans-serif;
             font-size: 13px;
-            padding: 10mm;
+            padding: 0;
             margin: 0;
+            background: white;
+        }
+        
+        .content-wrapper {
+            width: 310mm;
+            max-width: 310mm;
+            padding: 10mm;
+            box-sizing: border-box;
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+            background: white;
         }
         
         .header {
@@ -71,6 +82,13 @@ $legger = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             border-bottom: 2px solid #000;
             padding-bottom: 10px;
             padding-left: 5px;
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+        }
+        
+        .period-info {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
         }
         
         .header-logo {
@@ -340,6 +358,8 @@ $legger = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             display: table;
             width: 100%;
             font-size: 9px;
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
         }
         
         .footer-left,
@@ -364,8 +384,19 @@ $legger = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             }
             
             .header {
-                page-break-inside: avoid;
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
                 padding-left: 5px;
+            }
+            
+            .period-info {
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+            }
+            
+            .footer {
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
             }
             
             .header-logo {
@@ -417,6 +448,7 @@ $legger = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     </style>
 </head>
 <body>
+    <div class="content-wrapper">
     <div class="header">
         <?php if ($logo_exists): ?>
         <img src="<?php echo $logo_base64; ?>" alt="Logo Madrasah" class="header-logo" onerror="this.src='<?php echo $logo_path; ?>'">
@@ -541,10 +573,45 @@ $legger = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             <p><?php echo htmlspecialchars($settings['nama_bendahara'] ?? ''); ?></p>
         </div>
     </div>
+    </div>
     
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script>
         window.onload = function() {
-            window.print();
+            // Use content-wrapper instead of body for better control
+            const element = document.querySelector('.content-wrapper') || document.body;
+            const opt = {
+                margin: [5, 5, 5, 5],
+                filename: 'Legger_Gaji_<?php echo $periode; ?>.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { 
+                    scale: 1, 
+                    useCORS: true, 
+                    letterRendering: true,
+                    logging: false,
+                    windowWidth: 310,
+                    windowHeight: window.innerHeight,
+                    allowTaint: true
+                },
+                jsPDF: { unit: 'mm', format: [330, 210], orientation: 'landscape' },
+                pagebreak: { 
+                    mode: ['avoid-all', 'css', 'legacy'],
+                    avoid: ['.header', '.period-info', '.footer', 'table thead', '.content-wrapper']
+                }
+            };
+            
+            // Wait a bit for images to load
+            setTimeout(function() {
+                html2pdf().set(opt).from(element).save().then(function() {
+                    // Close window after download
+                    setTimeout(function() {
+                        window.close();
+                    }, 1500);
+                }).catch(function(error) {
+                    console.error('Error generating PDF:', error);
+                    alert('Terjadi kesalahan saat membuat PDF. Silakan coba lagi.');
+                });
+            }, 500);
         };
     </script>
 </body>

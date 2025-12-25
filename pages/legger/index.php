@@ -121,6 +121,9 @@ $legger = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                                         <tbody>
                                             <?php $no = 1; foreach ($legger as $l): ?>
                                                 <?php
+                                                // Semua data di legger_gaji dan legger_detail sudah dikalikan dengan jumlah_periode saat generate (di generate_ajax.php)
+                                                // Jadi langsung gunakan nilai dari database tanpa dikalikan lagi
+                                                
                                                 // Get legger details - data sudah dikalikan dengan jumlah_periode saat generate
                                                 $sql_detail = "SELECT * FROM legger_detail WHERE legger_id = ?";
                                                 $stmt_detail = $conn->prepare($sql_detail);
@@ -144,67 +147,8 @@ $legger = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                                                     $stmt_detail->close();
                                                 }
                                                 
-                                                // Selalu ambil data dari tunjangan_detail/potongan_detail untuk memastikan semua data tampil
-                                                // Data dari legger_detail sudah dikalikan jumlah_periode, jadi jika ada gunakan itu
-                                                // Tapi jika tidak ada atau tidak lengkap, ambil dari tunjangan_detail
-                                                
-                                                // Get tunjangan data from tunjangan_detail untuk semua tunjangan
-                                                // Selalu ambil dari tunjangan_detail untuk memastikan data terbaru ditampilkan
-                                                foreach ($tunjangan as $t) {
-                                                    $sql_td = "SELECT jumlah FROM tunjangan_detail WHERE guru_id = ? AND tunjangan_id = ? AND periode = ?";
-                                                    $stmt_td = $conn->prepare($sql_td);
-                                                    if ($stmt_td) {
-                                                        $stmt_td->bind_param("iis", $l['guru_id'], $t['id'], $periode_aktif);
-                                                        $stmt_td->execute();
-                                                        $result_td = $stmt_td->get_result();
-                                                        $row_td = $result_td->fetch_assoc();
-                                                        $jumlah_td = isset($row_td['jumlah']) ? floatval($row_td['jumlah']) : 0;
-                                                        
-                                                        // Kalikan dengan jumlah_periode jika ada
-                                                        if ($jumlah_periode > 1) {
-                                                            $jumlah_td = $jumlah_td * $jumlah_periode;
-                                                        }
-                                                        
-                                                        // Overwrite dengan data dari tunjangan_detail (data terbaru)
-                                                        $tunjangan_data[$t['id']] = $jumlah_td;
-                                                        $stmt_td->close();
-                                                    } else {
-                                                        // Jika tidak ada di tunjangan_detail, gunakan 0 atau dari legger_detail
-                                                        if (!isset($tunjangan_data[$t['id']])) {
-                                                            $tunjangan_data[$t['id']] = 0;
-                                                        }
-                                                    }
-                                                }
-                                                
-                                                // Get potongan data from potongan_detail untuk semua potongan
-                                                // Selalu ambil dari potongan_detail untuk memastikan data terbaru ditampilkan
-                                                foreach ($potongan as $p) {
-                                                    $sql_pd = "SELECT jumlah FROM potongan_detail WHERE guru_id = ? AND potongan_id = ? AND periode = ?";
-                                                    $stmt_pd = $conn->prepare($sql_pd);
-                                                    if ($stmt_pd) {
-                                                        $stmt_pd->bind_param("iis", $l['guru_id'], $p['id'], $periode_aktif);
-                                                        $stmt_pd->execute();
-                                                        $result_pd = $stmt_pd->get_result();
-                                                        $row_pd = $result_pd->fetch_assoc();
-                                                        $jumlah_pd = isset($row_pd['jumlah']) ? floatval($row_pd['jumlah']) : 0;
-                                                        
-                                                        // Kalikan dengan jumlah_periode jika ada
-                                                        if ($jumlah_periode > 1) {
-                                                            $jumlah_pd = $jumlah_pd * $jumlah_periode;
-                                                        }
-                                                        
-                                                        // Overwrite dengan data dari potongan_detail (data terbaru)
-                                                        $potongan_data[$p['id']] = $jumlah_pd;
-                                                        $stmt_pd->close();
-                                                    } else {
-                                                        // Jika tidak ada di potongan_detail, gunakan 0 atau dari legger_detail
-                                                        if (!isset($potongan_data[$p['id']])) {
-                                                            $potongan_data[$p['id']] = 0;
-                                                        }
-                                                    }
-                                                }
-                                                
                                                 // Pastikan semua tunjangan dan potongan ada di array (walaupun 0)
+                                                // Data dari legger_detail sudah dikalikan jumlah_periode, jadi gunakan itu
                                                 foreach ($tunjangan as $t) {
                                                     if (!isset($tunjangan_data[$t['id']])) {
                                                         $tunjangan_data[$t['id']] = 0;
@@ -215,13 +159,18 @@ $legger = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                                                         $potongan_data[$p['id']] = 0;
                                                     }
                                                 }
-                                                ?>
-                                                <?php
-                                                // Hitung gaji pokok dikalikan jumlah_periode
-                                                $gaji_pokok_display = $l['gaji_pokok'];
-                                                if ($jumlah_periode > 1) {
-                                                    $gaji_pokok_display = $l['gaji_pokok'] * $jumlah_periode;
-                                                }
+                                                
+                                                // Gaji pokok sudah dikalikan jumlah_periode saat generate
+                                                $gaji_pokok_display = floatval($l['gaji_pokok']);
+                                                
+                                                // Total tunjangan sudah dikalikan jumlah_periode saat generate
+                                                $total_tunjangan_display = floatval($l['total_tunjangan']);
+                                                
+                                                // Total potongan sudah dikalikan jumlah_periode saat generate
+                                                $total_potongan_display = floatval($l['total_potongan']);
+                                                
+                                                // Gaji bersih sudah dikalikan jumlah_periode saat generate
+                                                $gaji_bersih_display = floatval($l['gaji_bersih']);
                                                 ?>
                                                 <tr>
                                                     <td style="text-align: center;"><?php echo $no++; ?></td>
@@ -230,20 +179,10 @@ $legger = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                                                     <?php foreach ($tunjangan as $t): ?>
                                                         <td style="text-align: right; width: 160px !important; min-width: 160px !important; white-space: nowrap !important;"><?php echo formatRupiahTanpaRp($tunjangan_data[$t['id']] ?? 0); ?></td>
                                                     <?php endforeach; ?>
-                                                    <?php
-                                                    // Hitung total tunjangan dari data yang sudah dikalikan
-                                                    $total_tunjangan_display = array_sum($tunjangan_data);
-                                                    ?>
                                                     <td style="text-align: right; font-weight: bold;"><?php echo formatRupiahTanpaRp($total_tunjangan_display); ?></td>
                                                     <?php foreach ($potongan as $p): ?>
                                                         <td style="text-align: right; width: 160px !important; min-width: 160px !important; white-space: nowrap !important;"><?php echo formatRupiahTanpaRp($potongan_data[$p['id']] ?? 0); ?></td>
                                                     <?php endforeach; ?>
-                                                    <?php
-                                                    // Hitung total potongan dari data yang sudah dikalikan
-                                                    $total_potongan_display = array_sum($potongan_data);
-                                                    // Hitung gaji bersih
-                                                    $gaji_bersih_display = $gaji_pokok_display + $total_tunjangan_display - $total_potongan_display;
-                                                    ?>
                                                     <td style="text-align: right; font-weight: bold;"><?php echo formatRupiahTanpaRp($total_potongan_display); ?></td>
                                                     <td style="text-align: right; font-weight: bold;"><?php echo formatRupiahTanpaRp($gaji_bersih_display); ?></td>
                                                     <td>

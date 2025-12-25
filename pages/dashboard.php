@@ -33,7 +33,18 @@ $stmt->execute();
 $result = $stmt->get_result();
 $legger_stats = $result->fetch_assoc();
 
-if ($legger_stats && ($legger_stats['total_gaji_pokok'] > 0 || $legger_stats['total_tunjangan'] > 0 || $legger_stats['total_potongan'] > 0)) {
+// Check if legger_gaji has data for this period (even if all values are 0)
+// If exists, use it as source of truth (already multiplied by jumlah_periode)
+// This ensures consistency with the legger display
+$sql_check = "SELECT COUNT(*) as count FROM legger_gaji WHERE periode = ?";
+$stmt_check = $conn->prepare($sql_check);
+$stmt_check->bind_param("s", $periode_aktif);
+$stmt_check->execute();
+$check_result = $stmt_check->get_result();
+$legger_exists = ($check_result->fetch_assoc()['count'] ?? 0) > 0;
+$stmt_check->close();
+
+if ($legger_exists && $legger_stats) {
     // Use data from legger_gaji (already multiplied by jumlah_periode)
     // This is the source of truth and ensures consistency with legger display
     $stats['total_gaji_pokok'] = floatval($legger_stats['total_gaji_pokok'] ?? 0);
