@@ -11,6 +11,28 @@ $jumlah_periode = isset($settings['jumlah_periode']) ? intval($settings['jumlah_
 $periode_mulai = $settings['periode_mulai'] ?? '';
 $periode_akhir = $settings['periode_akhir'] ?? '';
 
+// Function to get list of months from periode_mulai to periode_akhir
+function getMonthList($periode_mulai, $periode_akhir, $jumlah_periode) {
+    $months = [];
+    if (!empty($periode_mulai) && !empty($periode_akhir) && $jumlah_periode > 1) {
+        $start = new DateTime($periode_mulai . '-01');
+        $end = new DateTime($periode_akhir . '-01');
+        $current = clone $start;
+        
+        while ($current <= $end) {
+            $months[] = $current->format('Y-m');
+            $current->modify('+1 month');
+        }
+    } else {
+        // If jumlah_periode = 1, use periode_aktif
+        $months[] = $periode_mulai ?: date('Y-m');
+    }
+    return $months;
+}
+
+// Get list of months
+$month_list = getMonthList($periode_mulai, $periode_akhir, $jumlah_periode);
+
 // Get logo path - use base64 for better print compatibility
 $logo_file = __DIR__ . '/../../assets/img/' . ($settings['logo'] ?? '');
 $logo_exists = !empty($settings['logo']) && file_exists($logo_file);
@@ -23,14 +45,7 @@ if ($logo_exists) {
     $logo_base64 = 'data:' . mime_content_type($logo_file) . ';base64,' . base64_encode($image_data);
 }
 
-// Get active tunjangan and potongan
-$sql = "SELECT * FROM tunjangan WHERE aktif = 1 ORDER BY nama_tunjangan";
-$tunjangan = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
-
-$sql = "SELECT * FROM potongan WHERE aktif = 1 ORDER BY nama_potongan";
-$potongan = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
-
-// Get legger data
+// Get legger data first to get legger IDs
 $sql = "SELECT lg.*, g.nama_lengkap 
         FROM legger_gaji lg 
         JOIN guru g ON lg.guru_id = g.id 
@@ -40,6 +55,48 @@ $stmt = $conn->prepare($sql);
 $stmt->bind_param("s", $periode);
 $stmt->execute();
 $legger = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+
+// Get tunjangan: ambil yang aktif, PLUS yang ada datanya di legger_detail untuk periode ini
+// Ini memastikan tunjangan yang ada datanya tetap ditampilkan meskipun tidak aktif
+$sql = "SELECT DISTINCT t.* FROM tunjangan t 
+        WHERE t.aktif = 1 
+        OR EXISTS (
+            SELECT 1 FROM legger_detail ld 
+            INNER JOIN legger_gaji lg ON ld.legger_id = lg.id 
+            WHERE lg.periode = ? 
+            AND ld.jenis = 'tunjangan' 
+            AND ld.item_id = t.id
+        )
+        ORDER BY t.nama_tunjangan";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("s", $periode);
+$stmt->execute();
+$tunjangan = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+$stmt->close();
+
+// Get potongan: ambil SEMUA potongan aktif, PLUS yang ada datanya di legger_detail untuk periode ini
+// PLUS yang ada datanya di potongan_detail untuk periode ini (untuk memastikan inpassing muncul)
+// Ini memastikan semua potongan yang ada datanya muncul, termasuk inpassing yang tidak aktif
+$sql = "SELECT DISTINCT p.* FROM potongan p 
+        WHERE p.aktif = 1 
+        OR EXISTS (
+            SELECT 1 FROM legger_detail ld 
+            INNER JOIN legger_gaji lg ON ld.legger_id = lg.id 
+            WHERE lg.periode = ? 
+            AND ld.jenis = 'potongan' 
+            AND ld.item_id = p.id
+        )
+        OR EXISTS (
+            SELECT 1 FROM potongan_detail pd 
+            WHERE pd.potongan_id = p.id 
+            AND pd.periode = ?
+        )
+        ORDER BY p.nama_potongan";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("ss", $periode, $periode);
+$stmt->execute();
+$potongan = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+$stmt->close();
 ?>
 <!DOCTYPE html>
 <html>
@@ -47,8 +104,15 @@ $legger = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     <title>Legger Gaji - <?php echo getPeriodLabel($periode); ?></title>
     <style>
         @page {
-            size: 330mm 210mm;
-            margin: 10mm 5mm;
+            size: F4 landscape;
+            margin: 10mm 5mm 10mm 5mm; /* top: 1cm, right: 0.5cm, bottom: 1cm, left: 0.5cm */
+        }
+        
+        @media print {
+            @page {
+                size: 330mm 210mm;
+                margin: 10mm 5mm 10mm 5mm; /* top: 1cm, right: 0.5cm, bottom: 1cm, left: 0.5cm */
+            }
         }
         
         * {
@@ -66,35 +130,48 @@ $legger = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         }
         
         .content-wrapper {
-            width: 310mm;
-            max-width: 310mm;
-            padding: 10mm;
+            width: 100%;
+            max-width: 100%;
+            padding: 5mm 3mm;
             box-sizing: border-box;
             page-break-inside: avoid !important;
             break-inside: avoid !important;
             background: white;
+            overflow-x: visible;
+            display: flex;
+            flex-direction: column;
         }
         
         .header {
             display: flex;
             align-items: center;
-            margin-bottom: 15px;
-            border-bottom: 2px solid #000;
-            padding-bottom: 10px;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
             padding-left: 5px;
+            padding-top: 5px;
+            border-bottom: 1px solid #000;
             page-break-inside: avoid !important;
             break-inside: avoid !important;
+            position: relative;
+            z-index: 1;
         }
         
         .period-info {
             page-break-inside: avoid !important;
             break-inside: avoid !important;
+            text-align: center;
+            margin-bottom: 15px;
+            margin-top: 5px;
+            font-size: 13px;
+            font-weight: normal;
+            position: relative;
+            z-index: 1;
         }
         
         .header-logo {
             max-width: 60px;
             max-height: 60px;
-            margin-right: 0px !important;
+            margin-right: 10px;
             object-fit: contain;
             flex-shrink: 0;
         }
@@ -107,244 +184,199 @@ $legger = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         .header-content h2 {
             font-size: 18px;
             margin: 5px 0;
-            font-weight: bold;
+            font-weight: normal;
+            text-transform: uppercase;
         }
         
         .header-content p {
             font-size: 14px;
             margin: 3px 0;
-        }
-        
-        .period-info {
-            text-align: center;
-            margin-bottom: 10px;
-            font-size: 13px;
-            font-weight: bold;
+            font-weight: normal;
         }
         
         table {
             width: 100%;
+            max-width: 100%;
             border-collapse: collapse;
             margin: 0;
-            font-size: 12px;
+            margin-top: 10px;
+            font-size: 13px;
             table-layout: fixed;
+            page-break-inside: auto;
+            position: relative;
+            box-sizing: border-box;
         }
         
         table th,
         table td {
-            border: 1px solid #000;
-            padding: 10px 7px;
+            border: 0.5px solid #000;
+            padding: 10px 4px;
             text-align: left;
             vertical-align: middle;
+            white-space: nowrap;
+            overflow: hidden !important;
+            text-overflow: ellipsis;
+            box-sizing: border-box;
         }
         
         table td {
-            height: 45px;
+            height: auto;
+            min-height: 50px;
         }
         
         table th {
             height: auto;
-            min-height: 45px;
-        }
-        
-        table th {
+            min-height: 50px;
             background-color: #f0f0f0;
-            font-weight: bold;
+            font-weight: normal;
             text-align: center;
             font-size: 12px;
-            white-space: normal !important;
-            word-wrap: break-word !important;
-            overflow-wrap: break-word !important;
-            line-height: 1.3 !important;
-            overflow: visible !important;
-            text-overflow: clip !important;
+            white-space: normal;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            line-height: 1.4;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            box-sizing: border-box;
         }
         
         table th[colspan] {
             background-color: #e0e0e0;
-            font-weight: bold;
-            white-space: normal !important;
-            word-wrap: break-word !important;
-            overflow-wrap: break-word !important;
-            overflow: visible !important;
-            text-overflow: clip !important;
-        }
-        
-        /* Kolom No - width tetap kecil */
-        table th:first-child {
-            width: 35px !important;
-            min-width: 35px !important;
-            max-width: 35px !important;
-            text-align: center !important;
-            padding: 10px 5px !important;
-            white-space: normal !important;
-            word-wrap: break-word !important;
-            overflow-wrap: break-word !important;
-            overflow: visible !important;
-            text-overflow: clip !important;
-            box-sizing: border-box !important;
-        }
-        table td:first-child {
-            width: 35px !important;
-            min-width: 35px !important;
-            max-width: 35px !important;
-            text-align: center !important;
-            padding: 10px 5px !important;
-            box-sizing: border-box !important;
-        }
-        
-        /* Kolom Nama - width lebih besar */
-        table th:nth-child(2) {
-            width: 140px !important;
-            min-width: 140px !important;
-            max-width: 140px !important;
-            padding: 10px 7px !important;
-            white-space: normal !important;
-            word-wrap: break-word !important;
-            overflow-wrap: break-word !important;
-            overflow: visible !important;
-            text-overflow: clip !important;
-            box-sizing: border-box !important;
-        }
-        table td:nth-child(2) {
-            width: 140px !important;
-            min-width: 140px !important;
-            max-width: 140px !important;
-            padding: 10px 7px !important;
-            box-sizing: border-box !important;
-        }
-        
-        /* Kolom dengan angka - align right */
-        table td:nth-child(n+3):not(:last-child) {
-            text-align: right;
-            font-family: 'Courier New', monospace;
-            font-size: 10px;
-            white-space: nowrap;
+            font-weight: normal;
+            white-space: normal;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
             overflow: hidden;
             text-overflow: ellipsis;
+            font-size: 13px;
+            box-sizing: border-box;
+        }
+        
+        /* Kolom No */
+        table th:first-child,
+        table td:first-child {
+            width: 50px;
+            min-width: 50px;
+            max-width: 50px;
+            text-align: center;
+            padding: 10px 5px;
+            font-size: 12px;
+            overflow: hidden;
+            box-sizing: border-box;
+        }
+        
+        /* Kolom Nama */
+        table th:nth-child(2),
+        table td:nth-child(2) {
+            width: 190px;
+            min-width: 190px;
+            max-width: 190px;
+            text-align: left;
+            padding: 10px 6px;
+            white-space: normal;
+            word-wrap: break-word;
+            font-size: 12px;
+            overflow: hidden;
+            box-sizing: border-box;
         }
         
         /* Kolom Gaji Pokok */
         table th:nth-child(3),
-        table thead th:nth-child(3) {
-            width: 70px !important;
-            min-width: 70px !important;
-            max-width: 70px !important;
-            text-align: center !important;
-            font-size: 11px !important;
-            padding: 8px 4px !important;
-            white-space: normal !important;
-            word-wrap: break-word !important;
-            overflow-wrap: break-word !important;
-            overflow: visible !important;
-            text-overflow: clip !important;
-            line-height: 1.3 !important;
-            box-sizing: border-box !important;
+        table td:nth-child(3) {
+            width: 75px;
+            min-width: 75px;
+            max-width: 75px;
+            text-align: center;
+            padding: 10px 3px;
+            font-size: 11px;
+            overflow: hidden;
+            box-sizing: border-box;
         }
-        table td:nth-child(3),
-        table tbody td:nth-child(3) {
-            width: 70px !important;
-            min-width: 70px !important;
-            max-width: 70px !important;
-            text-align: right !important;
-            font-size: 10px !important;
-            padding: 8px 4px !important;
-            white-space: nowrap !important;
+        table td:nth-child(3) {
+            text-align: right;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
             overflow: hidden !important;
-            text-overflow: ellipsis !important;
-            box-sizing: border-box !important;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            box-sizing: border-box;
         }
         
-        /* Kolom Tunjangan individual - ditambah lebar */
+        /* Kolom Tunjangan individual - header */
         table thead tr:last-child th:not([rowspan]):not([colspan]) {
-            width: 105px !important;
-            min-width: 105px !important;
-            max-width: 105px !important;
-            font-size: 11px !important;
-            padding: 8px 4px !important;
-            white-space: normal !important;
-            word-wrap: break-word !important;
-            overflow-wrap: break-word !important;
-            line-height: 1.3 !important;
-            overflow: visible !important;
-            text-overflow: clip !important;
-            box-sizing: border-box !important;
+            width: 100px;
+            min-width: 100px;
+            max-width: 100px;
+            font-size: 10px;
+            padding: 8px 4px;
+            white-space: normal;
+            word-wrap: break-word;
+            line-height: 1.3;
+            overflow: hidden;
+            box-sizing: border-box;
         }
         
-        /* Kolom Tunjangan dan Potongan individual di tbody - ditambah lebar */
+        /* Kolom Tunjangan dan Potongan individual di tbody */
         table tbody tr td:not(:first-child):not(:nth-child(2)):not(:nth-child(3)):not([colspan]):not(:last-child):not(:nth-last-child(4)):not(:nth-last-child(3)):not(:nth-last-child(2)) {
-            width: 105px !important;
-            min-width: 105px !important;
-            max-width: 105px !important;
-            font-size: 10px !important;
-            padding: 8px 4px !important;
-            white-space: nowrap !important;
+            width: 100px;
+            min-width: 100px;
+            max-width: 100px;
+            font-size: 11px;
+            padding: 10px 4px;
+            text-align: right;
+            font-family: 'Courier New', monospace;
             overflow: hidden !important;
-            text-overflow: ellipsis !important;
-            box-sizing: border-box !important;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            box-sizing: border-box;
         }
         
-        /* Kolom Total Tunjangan, Total Potongan, Gaji Bersih - sama dengan Gaji Pokok */
+        /* Kolom Total Tunjangan, Total Potongan, Gaji Bersih */
         table th[rowspan="2"]:nth-child(n+4):not(:last-child) {
-            width: 70px !important;
-            min-width: 70px !important;
-            max-width: 70px !important;
-            text-align: center !important;
-            font-weight: bold !important;
-            padding: 8px 4px !important;
-            white-space: normal !important;
-            word-wrap: break-word !important;
-            overflow-wrap: break-word !important;
-            overflow: visible !important;
-            text-overflow: clip !important;
-            line-height: 1.3 !important;
-            box-sizing: border-box !important;
+            width: 75px;
+            min-width: 75px;
+            max-width: 75px;
+            text-align: center;
+            font-weight: normal;
+            padding: 10px 3px;
+            font-size: 11px;
+            overflow: hidden;
+            box-sizing: border-box;
         }
         
-        /* Body kolom Total Tunjangan, Total Potongan, Gaji Bersih */
         table td:nth-last-child(4),
         table td:nth-last-child(3),
         table td:nth-last-child(2) {
-            width: 70px !important;
-            min-width: 70px !important;
-            max-width: 70px !important;
-            text-align: right !important;
-            font-weight: bold !important;
-            font-size: 10px !important;
-            padding: 8px 4px !important;
-            white-space: nowrap !important;
+            width: 75px;
+            min-width: 75px;
+            max-width: 75px;
+            text-align: right;
+            font-weight: normal;
+            font-size: 11px;
+            padding: 10px 3px;
+            font-family: 'Courier New', monospace;
             overflow: hidden !important;
-            text-overflow: ellipsis !important;
-            box-sizing: border-box !important;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            box-sizing: border-box;
         }
         
-        /* Kolom Tanda Tangan - sama dengan Gaji Pokok */
-        table th:last-child {
-            text-align: center !important;
-            font-family: Arial, sans-serif !important;
-            min-width: 70px !important;
-            width: 70px !important;
-            max-width: 70px !important;
-            white-space: normal !important;
-            word-wrap: break-word !important;
-            overflow-wrap: break-word !important;
-            overflow: visible !important;
-            text-overflow: clip !important;
-            line-height: 1.3 !important;
-            box-sizing: border-box !important;
-        }
+        /* Kolom Tanda Tangan */
+        table th:last-child,
         table td:last-child {
-            text-align: center !important;
-            font-family: Arial, sans-serif !important;
-            min-width: 70px !important;
-            width: 70px !important;
-            max-width: 70px !important;
-            box-sizing: border-box !important;
+            width: 90px;
+            min-width: 90px;
+            max-width: 90px;
+            text-align: center;
+            padding: 10px 5px;
+            font-size: 12px;
+            overflow: hidden;
+            box-sizing: border-box;
         }
         
-        /* Total columns - bold */
+        /* Total columns */
         .total {
-            font-weight: bold;
+            font-weight: normal;
             background-color: #f9f9f9;
         }
         
@@ -379,30 +411,43 @@ $legger = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         
         @media print {
             body {
-                padding: 5mm;
+                padding: 0;
                 margin: 0;
+            }
+            
+            .content-wrapper {
+                padding: 2mm 0mm;
+                width: 100%;
+                max-width: 100%;
             }
             
             .header {
                 page-break-inside: avoid !important;
                 break-inside: avoid !important;
-                padding-left: 5px;
+                page-break-after: avoid !important;
+                margin-bottom: 20px;
+                padding-bottom: 12px;
+                padding-top: 5px;
             }
             
             .period-info {
                 page-break-inside: avoid !important;
                 break-inside: avoid !important;
+                page-break-after: avoid !important;
+                margin-bottom: 15px;
+                margin-top: 5px;
             }
             
             .footer {
                 page-break-inside: avoid !important;
                 break-inside: avoid !important;
+                page-break-before: avoid !important;
             }
             
             .header-logo {
                 max-width: 60px;
                 max-height: 60px;
-                margin-right: 0px !important;
+                margin-right: 10px;
             }
             
             .header-content h2 {
@@ -418,18 +463,17 @@ $legger = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             }
             
             table {
-                font-size: 12px;
+                font-size: 13px;
+                margin-top: 10px;
+                page-break-inside: auto;
+                width: 100%;
+                max-width: 100%;
             }
             
             table th,
             table td {
-                padding: 10px 7px;
-                height: 45px;
-            }
-            
-            /* Ensure table fits on page */
-            table {
-                page-break-inside: auto;
+                padding: 10px 6px;
+                overflow: visible !important;
             }
             
             tr {
@@ -439,6 +483,7 @@ $legger = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             
             thead {
                 display: table-header-group;
+                page-break-inside: avoid;
             }
             
             tfoot {
@@ -459,38 +504,64 @@ $legger = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         </div>
     </div>
     
-    <div class="period-info">
-        Periode: <?php 
-        if ($jumlah_periode > 1 && !empty($periode_mulai) && !empty($periode_akhir)) {
-            echo getPeriodRangeLabel($periode_mulai, $periode_akhir);
-        } else {
-            echo getPeriodLabel($periode);
-        }
-        ?>
-    </div>
+    <?php 
+    // Get base legger data (from periode_aktif, which contains multiplied data)
+    $sql = "SELECT lg.*, g.nama_lengkap 
+            FROM legger_gaji lg 
+            JOIN guru g ON lg.guru_id = g.id 
+            WHERE lg.periode = ? 
+            ORDER BY g.nama_lengkap";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("s", $periode);
+    $stmt->execute();
+    $legger_base = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    $stmt->close();
     
+    // Loop per bulan
+    foreach ($month_list as $month_index => $current_month): 
+        // Use base legger data and divide by jumlah_periode for each month
+        $legger_month = $legger_base;
+        
+        // Use tunjangan and potongan from base periode (already loaded above)
+        $tunjangan_month = $tunjangan;
+        $potongan_month = $potongan;
+        
+        // If no data, skip
+        if (empty($legger_month)) {
+            continue;
+        }
+        
+        // Add page break for each month except first
+        if ($month_index > 0): ?>
+            <div style="page-break-before: always;"></div>
+        <?php endif; ?>
+        
+        <div class="period-info">
+            Periode: <?php echo getPeriodLabel($current_month); ?>
+        </div>
+        
     <table>
         <thead>
             <tr>
                 <th rowspan="2">No</th>
                 <th rowspan="2">Nama</th>
                 <th rowspan="2">Gaji Pokok</th>
-                <?php if (count($tunjangan) > 0): ?>
-                    <th colspan="<?php echo count($tunjangan); ?>" class="text-center">Tunjangan</th>
+                <?php if (count($tunjangan_month) > 0): ?>
+                    <th colspan="<?php echo count($tunjangan_month); ?>" class="text-center">Tunjangan</th>
                 <?php endif; ?>
                 <th rowspan="2">Total Tunjangan</th>
-                <?php if (count($potongan) > 0): ?>
-                    <th colspan="<?php echo count($potongan); ?>" class="text-center">Potongan</th>
+                <?php if (count($potongan_month) > 0): ?>
+                    <th colspan="<?php echo count($potongan_month); ?>" class="text-center">Potongan</th>
                 <?php endif; ?>
                 <th rowspan="2">Total Potongan</th>
                 <th rowspan="2">Gaji Bersih</th>
                 <th rowspan="2">Tanda Tangan</th>
             </tr>
             <tr>
-                <?php foreach ($tunjangan as $t): ?>
+                <?php foreach ($tunjangan_month as $t): ?>
                     <th><?php echo htmlspecialchars($t['nama_tunjangan']); ?></th>
                 <?php endforeach; ?>
-                <?php foreach ($potongan as $p): ?>
+                <?php foreach ($potongan_month as $p): ?>
                     <th><?php echo htmlspecialchars($p['nama_potongan']); ?></th>
                 <?php endforeach; ?>
             </tr>
@@ -498,11 +569,11 @@ $legger = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         <tbody>
             <?php 
             $no = 1; 
-            $total_gaji_pokok = 0;
-            $total_tunjangan_all = 0;
-            $total_potongan_all = 0;
-            $total_gaji_bersih = 0;
-            foreach ($legger as $l): 
+            $total_gaji_pokok_month = 0;
+            $total_tunjangan_all_month = 0;
+            $total_potongan_all_month = 0;
+            $total_gaji_bersih_month = 0;
+            foreach ($legger_month as $l): 
                 // Get legger details
                 $sql = "SELECT * FROM legger_detail WHERE legger_id = ?";
                 $stmt = $conn->prepare($sql);
@@ -520,97 +591,73 @@ $legger = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                     }
                 }
                 
-                $total_gaji_pokok += $l['gaji_pokok'];
-                $total_tunjangan_all += $l['total_tunjangan'];
-                $total_potongan_all += $l['total_potongan'];
-                $total_gaji_bersih += $l['gaji_bersih'];
+                $gaji_pokok_per_bulan = $l['gaji_pokok'] / $jumlah_periode;
+                $total_tunjangan_per_bulan = $l['total_tunjangan'] / $jumlah_periode;
+                $total_potongan_per_bulan = $l['total_potongan'] / $jumlah_periode;
+                $gaji_bersih_per_bulan = $l['gaji_bersih'] / $jumlah_periode;
+                
+                $total_gaji_pokok_month += $gaji_pokok_per_bulan;
+                $total_tunjangan_all_month += $total_tunjangan_per_bulan;
+                $total_potongan_all_month += $total_potongan_per_bulan;
+                $total_gaji_bersih_month += $gaji_bersih_per_bulan;
             ?>
             <tr>
                 <td><?php echo $no++; ?></td>
                 <td><?php echo htmlspecialchars($l['nama_lengkap']); ?></td>
-                <td><?php echo formatRupiahTanpaRp($l['gaji_pokok']); ?></td>
-                <?php foreach ($tunjangan as $t): ?>
-                    <td><?php echo formatRupiahTanpaRp($tunjangan_data[$t['id']] ?? 0); ?></td>
+                <td><?php echo formatRupiahTanpaRp($gaji_pokok_per_bulan); ?></td>
+                <?php foreach ($tunjangan_month as $t): ?>
+                    <td><?php echo formatRupiahTanpaRp(($tunjangan_data[$t['id']] ?? 0) / $jumlah_periode); ?></td>
                 <?php endforeach; ?>
-                <td class="total"><?php echo formatRupiahTanpaRp($l['total_tunjangan']); ?></td>
-                <?php foreach ($potongan as $p): ?>
-                    <td><?php echo formatRupiahTanpaRp($potongan_data[$p['id']] ?? 0); ?></td>
+                <td class="total"><?php echo formatRupiahTanpaRp($total_tunjangan_per_bulan); ?></td>
+                <?php foreach ($potongan_month as $p): ?>
+                    <td><?php echo formatRupiahTanpaRp(($potongan_data[$p['id']] ?? 0) / $jumlah_periode); ?></td>
                 <?php endforeach; ?>
-                <td class="total"><?php echo formatRupiahTanpaRp($l['total_potongan']); ?></td>
-                <td class="total"><?php echo formatRupiahTanpaRp($l['gaji_bersih']); ?></td>
+                <td class="total"><?php echo formatRupiahTanpaRp($total_potongan_per_bulan); ?></td>
+                <td class="total"><?php echo formatRupiahTanpaRp($gaji_bersih_per_bulan); ?></td>
                 <td></td>
             </tr>
             <?php endforeach; ?>
             
             <!-- Total row -->
-            <tr style="background-color: #e0e0e0; font-weight: bold;">
-                <td colspan="2" style="text-align: center; font-weight: bold;">TOTAL</td>
-                <td><?php echo formatRupiahTanpaRp($total_gaji_pokok); ?></td>
-                <?php foreach ($tunjangan as $t): ?>
+            <tr style="background-color: #e0e0e0; font-weight: normal;">
+                <td colspan="2" style="text-align: center; font-weight: normal;">TOTAL</td>
+                <td><?php echo formatRupiahTanpaRp($total_gaji_pokok_month); ?></td>
+                <?php foreach ($tunjangan_month as $t): ?>
                     <td>-</td>
                 <?php endforeach; ?>
-                <td><?php echo formatRupiahTanpaRp($total_tunjangan_all); ?></td>
-                <?php foreach ($potongan as $p): ?>
+                <td><?php echo formatRupiahTanpaRp($total_tunjangan_all_month); ?></td>
+                <?php foreach ($potongan_month as $p): ?>
                     <td>-</td>
                 <?php endforeach; ?>
-                <td><?php echo formatRupiahTanpaRp($total_potongan_all); ?></td>
-                <td><?php echo formatRupiahTanpaRp($total_gaji_bersih); ?></td>
+                <td><?php echo formatRupiahTanpaRp($total_potongan_all_month); ?></td>
+                <td><?php echo formatRupiahTanpaRp($total_gaji_bersih_month); ?></td>
                 <td>-</td>
             </tr>
         </tbody>
     </table>
     
+    <?php endforeach; ?>
+    
     <div class="footer">
         <div class="footer-left">
-            <p><strong>Mengetahui,</strong></p>
-            <p><strong>Kepala Madrasah</strong></p>
+            <p>Mengetahui,</p>
+            <p>Kepala Madrasah</p>
             <div class="signature-line"></div>
             <p><?php echo htmlspecialchars($settings['nama_kepala'] ?? ''); ?></p>
         </div>
         <div class="footer-right">
-            <p><strong>Bendahara</strong></p>
+            <p>Bendahara</p>
             <div class="signature-line"></div>
             <p><?php echo htmlspecialchars($settings['nama_bendahara'] ?? ''); ?></p>
         </div>
     </div>
     </div>
     
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script>
         window.onload = function() {
-            // Use content-wrapper instead of body for better control
-            const element = document.querySelector('.content-wrapper') || document.body;
-            const opt = {
-                margin: [5, 5, 5, 5],
-                filename: 'Legger_Gaji_<?php echo $periode; ?>.pdf',
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { 
-                    scale: 1, 
-                    useCORS: true, 
-                    letterRendering: true,
-                    logging: false,
-                    windowWidth: 310,
-                    windowHeight: window.innerHeight,
-                    allowTaint: true
-                },
-                jsPDF: { unit: 'mm', format: [330, 210], orientation: 'landscape' },
-                pagebreak: { 
-                    mode: ['avoid-all', 'css', 'legacy'],
-                    avoid: ['.header', '.period-info', '.footer', 'table thead', '.content-wrapper']
-                }
-            };
-            
-            // Wait a bit for images to load
+            // Auto print when page loads
             setTimeout(function() {
-                html2pdf().set(opt).from(element).save().then(function() {
-                    // Close window after download
-                    setTimeout(function() {
-                        window.close();
-                    }, 1500);
-                }).catch(function(error) {
-                    console.error('Error generating PDF:', error);
-                    alert('Terjadi kesalahan saat membuat PDF. Silakan coba lagi.');
-                });
+                window.print();
             }, 500);
         };
     </script>

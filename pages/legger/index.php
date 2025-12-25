@@ -480,7 +480,13 @@ var tableLegger;
             tableLegger = $('#tableLeggerData').DataTable({
                 dom: 'Bfrtip',
                 buttons: [
-                    { extend: 'excel', text: '<i class="fas fa-file-excel"></i> Excel', className: 'btn btn-success btn-sm' },
+                    { 
+                        text: '<i class="fas fa-file-excel"></i> Excel', 
+                        className: 'btn btn-success btn-sm',
+                        action: function (e, dt, node, config) {
+                            window.location.href = 'export_excel.php?periode=<?php echo $periode_aktif; ?>';
+                        }
+                    },
                     { 
                         text: '<i class="fas fa-file-pdf"></i> PDF',
                         className: 'btn btn-danger btn-sm',

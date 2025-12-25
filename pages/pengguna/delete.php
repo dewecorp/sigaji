@@ -2,7 +2,13 @@
 require_once __DIR__ . '/../../config/config.php';
 requireLogin();
 
-$id = $_GET['id'] ?? 0;
+$id = isset($_GET['id']) ? intval($_GET['id']) : 0;
+
+if ($id <= 0) {
+    $_SESSION['error'] = "ID tidak valid";
+    header('Location: ' . BASE_URL . 'pages/pengguna/index.php');
+    exit();
+}
 
 if ($id == $_SESSION['user_id']) {
     $_SESSION['error'] = "Tidak dapat menghapus akun sendiri";

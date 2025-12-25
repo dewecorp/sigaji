@@ -37,7 +37,7 @@ $details = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     <style>
         @page {
             size: F4;
-            margin: 8mm;
+            margin: 10mm 8mm 8mm 8mm; /* top: 1cm, right: 8mm, bottom: 8mm, left: 8mm */
         }
         
         * {
@@ -322,39 +322,9 @@ $details = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             </div>
         </div>
     </div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script>
         window.onload = function() {
-            // Use the slip div instead of body to avoid margin issues
-            const element = document.querySelector('.slip');
-            const opt = {
-                margin: [5, 5, 5, 5],
-                filename: 'Slip_Gaji_<?php echo htmlspecialchars($legger['nama_lengkap'], ENT_QUOTES); ?>_<?php echo $legger['periode']; ?>.pdf',
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { 
-                    scale: 2, 
-                    useCORS: true, 
-                    letterRendering: true,
-                    logging: false,
-                    windowWidth: element.scrollWidth,
-                    windowHeight: element.scrollHeight
-                },
-                jsPDF: { unit: 'mm', format: [210, 330], orientation: 'portrait' },
-                pagebreak: { 
-                    mode: ['avoid-all', 'css', 'legacy'],
-                    avoid: ['.slip', '.header', 'table', '.signature-row']
-                }
-            };
-            
-            html2pdf().set(opt).from(element).save().then(function() {
-                // Close window after download
-                setTimeout(function() {
-                    window.close();
-                }, 1000);
-            }).catch(function(error) {
-                console.error('Error generating PDF:', error);
-                alert('Terjadi kesalahan saat membuat PDF. Silakan coba lagi.');
-            });
+            window.print();
         };
     </script>
 </body>

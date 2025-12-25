@@ -349,24 +349,45 @@ $legger = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     <script>
         window.onload = function() {
             const element = document.body;
-            const opt = {
-                margin: [5, 5, 5, 5],
-                filename: 'Legger_Honor_<?php echo $periode; ?>.pdf',
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, useCORS: true, letterRendering: true },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' },
-                pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
-            };
             
-            html2pdf().set(opt).from(element).save().then(function() {
-                // Close window after download
-                setTimeout(function() {
-                    window.close();
-                }, 1000);
-            }).catch(function(error) {
-                console.error('Error generating PDF:', error);
-                alert('Terjadi kesalahan saat membuat PDF. Silakan coba lagi.');
-            });
+            // Wait for content to fully render
+            setTimeout(function() {
+                // Calculate proper dimensions
+                const elementWidth = element.scrollWidth || window.innerWidth;
+                const elementHeight = element.scrollHeight || window.innerHeight;
+                
+                const opt = {
+                    margin: [3, 3, 3, 3],
+                    filename: 'Legger_Honor_<?php echo $periode; ?>.pdf',
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { 
+                        scale: 2, 
+                        useCORS: true, 
+                        letterRendering: true,
+                        logging: false,
+                        windowWidth: elementWidth,
+                        windowHeight: elementHeight,
+                        scrollX: 0,
+                        scrollY: 0,
+                        allowTaint: true
+                    },
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' },
+                    pagebreak: { 
+                        mode: ['avoid-all', 'css', 'legacy'],
+                        avoid: ['.header', '.period-info', '.footer', 'table thead']
+                    }
+                };
+                
+                html2pdf().set(opt).from(element).save().then(function() {
+                    // Close window after download
+                    setTimeout(function() {
+                        window.close();
+                    }, 1000);
+                }).catch(function(error) {
+                    console.error('Error generating PDF:', error);
+                    alert('Terjadi kesalahan saat membuat PDF. Silakan coba lagi.');
+                });
+            }, 500);
         };
     </script>
 </body>

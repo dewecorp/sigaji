@@ -35,20 +35,33 @@ try {
     }
     $tunjangan = $result_tunjangan->fetch_all(MYSQLI_ASSOC);
     
-    // Get potongan: ambil yang aktif, PLUS yang pernah ada datanya di potongan_detail (dari periode manapun)
-    // Ini memastikan potongan yang pernah punya data tetap di-generate meskipun tidak aktif atau tidak ada di periode aktif
+    // Get potongan: ambil yang aktif, PLUS yang ada datanya di potongan_detail untuk periode ini, 
+    // PLUS yang pernah ada datanya di potongan_detail (dari periode manapun)
+    // Ini memastikan potongan yang baru ditambahkan atau pernah punya data tetap di-generate meskipun tidak aktif
     $sql = "SELECT DISTINCT p.* FROM potongan p 
             WHERE p.aktif = 1 
+            OR EXISTS (
+                SELECT 1 FROM potongan_detail pd 
+                WHERE pd.potongan_id = p.id 
+                AND pd.periode = ?
+            )
             OR EXISTS (
                 SELECT 1 FROM potongan_detail pd 
                 WHERE pd.potongan_id = p.id
             )
             ORDER BY p.nama_potongan";
-    $result_potongan = $conn->query($sql);
+    $stmt_potongan = $conn->prepare($sql);
+    if (!$stmt_potongan) {
+        throw new Exception('Gagal prepare query potongan: ' . $conn->error);
+    }
+    $stmt_potongan->bind_param("s", $periode);
+    $stmt_potongan->execute();
+    $result_potongan = $stmt_potongan->get_result();
     if (!$result_potongan) {
         throw new Exception('Gagal mengambil data potongan: ' . $conn->error);
     }
     $potongan = $result_potongan->fetch_all(MYSQLI_ASSOC);
+    $stmt_potongan->close();
     
     // Get all teachers with masa_bakti
     $sql = "SELECT id, nama_lengkap, masa_bakti FROM guru ORDER BY nama_lengkap";
@@ -250,47 +263,131 @@ try {
                 $stmt->close();
             }
             
-            // Delete old details
+            // Simpan data lama dari legger_detail (untuk mempertahankan data potongan yang tidak ada di potongan_detail)
+            $old_legger_details = [];
+            $existing_detail_ids = []; // Untuk tracking item yang akan di-update/insert
             if ($legger_id) {
-                $sql = "DELETE FROM legger_detail WHERE legger_id = ?";
+                $sql = "SELECT * FROM legger_detail WHERE legger_id = ?";
                 $stmt = $conn->prepare($sql);
                 if ($stmt) {
                     $stmt->bind_param("i", $legger_id);
                     $stmt->execute();
+                    $result = $stmt->get_result();
+                    while ($row = $result->fetch_assoc()) {
+                        $old_legger_details[$row['jenis']][$row['item_id']] = $row;
+                    }
                     $stmt->close();
                 }
-                
-                // Insert tunjangan details (jumlah sudah dikalikan dengan jumlah_periode)
-                // Hanya insert tunjangan yang jumlahnya > 0 (guru benar-benar menerima tunjangan)
+            }
+            
+            // Update atau Insert tunjangan details (jumlah sudah dikalikan dengan jumlah_periode)
+            // Hanya update/insert tunjangan yang jumlahnya > 0 (guru benar-benar menerima tunjangan)
+            if ($legger_id) {
                 foreach ($tunjangan as $t) {
                     $jumlah = isset($tunjangan_details[$t['id']]) ? $tunjangan_details[$t['id']] : 0;
-                    // Hanya insert jika jumlah > 0
+                    // Hanya update/insert jika jumlah > 0
                     if ($jumlah > 0) {
-                        $sql = "INSERT INTO legger_detail (legger_id, jenis, item_id, nama_item, jumlah) VALUES (?, 'tunjangan', ?, ?, ?)";
-                        $stmt = $conn->prepare($sql);
-                        if ($stmt) {
-                            $stmt->bind_param("iisd", $legger_id, $t['id'], $t['nama_tunjangan'], $jumlah);
-                            $stmt->execute();
-                            $stmt->close();
+                        // Cek apakah sudah ada
+                        if (isset($old_legger_details['tunjangan'][$t['id']])) {
+                            // UPDATE data yang sudah ada
+                            $sql = "UPDATE legger_detail SET nama_item = ?, jumlah = ? WHERE legger_id = ? AND jenis = 'tunjangan' AND item_id = ?";
+                            $stmt = $conn->prepare($sql);
+                            if ($stmt) {
+                                $stmt->bind_param("sdii", $t['nama_tunjangan'], $jumlah, $legger_id, $t['id']);
+                                $stmt->execute();
+                                $stmt->close();
+                            }
+                        } else {
+                            // INSERT data baru
+                            $sql = "INSERT INTO legger_detail (legger_id, jenis, item_id, nama_item, jumlah) VALUES (?, 'tunjangan', ?, ?, ?)";
+                            $stmt = $conn->prepare($sql);
+                            if ($stmt) {
+                                $stmt->bind_param("iisd", $legger_id, $t['id'], $t['nama_tunjangan'], $jumlah);
+                                $stmt->execute();
+                                $stmt->close();
+                            }
+                        }
+                        $existing_detail_ids['tunjangan'][$t['id']] = true;
+                    } else {
+                        // Jika jumlah = 0, hapus jika ada (tunjangan tidak perlu dipertahankan jika jumlah = 0)
+                        if (isset($old_legger_details['tunjangan'][$t['id']])) {
+                            $sql = "DELETE FROM legger_detail WHERE legger_id = ? AND jenis = 'tunjangan' AND item_id = ?";
+                            $stmt = $conn->prepare($sql);
+                            if ($stmt) {
+                                $stmt->bind_param("ii", $legger_id, $t['id']);
+                                $stmt->execute();
+                                $stmt->close();
+                            }
                         }
                     }
                 }
                 
-                // Insert potongan details (jumlah sudah dikalikan dengan jumlah_periode)
-                // Hanya insert potongan yang jumlahnya > 0 (guru benar-benar menerima potongan)
+                // Update atau Insert potongan details (jumlah sudah dikalikan dengan jumlah_periode)
+                // Logika:
+                // 1. Jika ada di potongan_detail untuk periode ini → gunakan data baru (UPDATE/INSERT)
+                // 2. Jika TIDAK ada di potongan_detail → HAPUS dari legger_detail (guru sudah di-uncheck)
+                // Logika uncheck adalah hapus, tidak peduli potongan aktif atau tidak aktif
                 foreach ($potongan as $p) {
                     $jumlah = isset($potongan_details[$p['id']]) ? $potongan_details[$p['id']] : 0;
-                    // Hanya insert jika jumlah > 0
-                    if ($jumlah > 0) {
-                        $sql = "INSERT INTO legger_detail (legger_id, jenis, item_id, nama_item, jumlah) VALUES (?, 'potongan', ?, ?, ?)";
-                        $stmt = $conn->prepare($sql);
-                        if ($stmt) {
-                            $stmt->bind_param("iisd", $legger_id, $p['id'], $p['nama_potongan'], $jumlah);
-                            $stmt->execute();
-                            $stmt->close();
+                    
+                    // Cek apakah ada di potongan_detail untuk periode ini
+                    $sql_check = "SELECT COUNT(*) as cnt FROM potongan_detail WHERE guru_id = ? AND potongan_id = ? AND periode = ?";
+                    $stmt_check = $conn->prepare($sql_check);
+                    $ada_di_potongan_detail = false;
+                    if ($stmt_check) {
+                        $stmt_check->bind_param("iis", $g['id'], $p['id'], $periode);
+                        $stmt_check->execute();
+                        $result_check = $stmt_check->get_result();
+                        $row_check = $result_check->fetch_assoc();
+                        $ada_di_potongan_detail = ($row_check['cnt'] > 0);
+                        $stmt_check->close();
+                    }
+                    
+                    // Jika tidak ada di potongan_detail untuk periode ini → HAPUS dari legger_detail (guru sudah di-uncheck)
+                    // Logika uncheck adalah hapus, tidak peduli potongan aktif atau tidak aktif
+                    if (!$ada_di_potongan_detail) {
+                        // HAPUS dari legger_detail jika ada data lama
+                        if (isset($old_legger_details['potongan'][$p['id']])) {
+                            $sql = "DELETE FROM legger_detail WHERE legger_id = ? AND jenis = 'potongan' AND item_id = ?";
+                            $stmt = $conn->prepare($sql);
+                            if ($stmt) {
+                                $stmt->bind_param("ii", $legger_id, $p['id']);
+                                $stmt->execute();
+                                $stmt->close();
+                            }
                         }
+                        // Skip, tidak perlu insert/update
+                        continue;
+                    }
+                    
+                    // Update atau Insert potongan jika ada datanya
+                    if ($jumlah > 0 || $ada_di_potongan_detail) {
+                        // Cek apakah sudah ada
+                        if (isset($old_legger_details['potongan'][$p['id']])) {
+                            // UPDATE data yang sudah ada
+                            $sql = "UPDATE legger_detail SET nama_item = ?, jumlah = ? WHERE legger_id = ? AND jenis = 'potongan' AND item_id = ?";
+                            $stmt = $conn->prepare($sql);
+                            if ($stmt) {
+                                $stmt->bind_param("sdii", $p['nama_potongan'], $jumlah, $legger_id, $p['id']);
+                                $stmt->execute();
+                                $stmt->close();
+                            }
+                        } else {
+                            // INSERT data baru
+                            $sql = "INSERT INTO legger_detail (legger_id, jenis, item_id, nama_item, jumlah) VALUES (?, 'potongan', ?, ?, ?)";
+                            $stmt = $conn->prepare($sql);
+                            if ($stmt) {
+                                $stmt->bind_param("iisd", $legger_id, $p['id'], $p['nama_potongan'], $jumlah);
+                                $stmt->execute();
+                                $stmt->close();
+                            }
+                        }
+                        $existing_detail_ids['potongan'][$p['id']] = true;
                     }
                 }
+                
+                // Hapus tunjangan yang tidak ada lagi di list baru (sudah dihandle di loop di atas)
+                // Tidak perlu hapus lagi karena sudah dihandle saat jumlah = 0
             }
             
             // Commit transaction for this guru

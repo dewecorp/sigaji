@@ -49,12 +49,16 @@ foreach ($legger_list as $l) {
     <style>
         @page {
             size: F4;
-            margin: 0.5mm 5mm 0 5mm;
+            margin: 10mm 5mm 5mm 5mm; /* top: 1cm, right: 5mm, bottom: 5mm, left: 5mm */
         }
         
         * {
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
+        }
+        
+        table, table *, table th, table td {
             box-sizing: border-box;
         }
         
@@ -66,16 +70,14 @@ foreach ($legger_list as $l) {
         }
         
         .page {
-            width: 210mm;
-            height: 330mm;
+            width: 200mm; /* 210mm - 5mm left - 5mm right */
+            height: 315mm; /* 330mm - 10mm top - 5mm bottom */
             page-break-after: always;
-            padding: 0.5mm 0.5mm 0 0.5mm;
+            display: flex;
+            flex-direction: row;
+            gap: 3mm;
             margin: 0 auto;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            grid-template-rows: 1fr 1fr;
-            gap: 5mm;
-            box-sizing: border-box;
+            align-items: flex-start;
         }
         
         .page:last-child {
@@ -83,48 +85,33 @@ foreach ($legger_list as $l) {
         }
         
         .slip {
+            width: calc((200mm - 3mm) / 2); /* Setengah lebar halaman dikurangi gap */
+            height: 170mm; /* Setengah tinggi kertas F4 dengan sedikit tambahan untuk memastikan cukup tinggi */
+            min-height: 170mm;
+            max-height: 170mm;
+            page-break-inside: avoid;
+            break-inside: avoid;
             border: 1px solid #000;
-            padding: 2mm 0.8mm 0.3mm 0.3mm;
+            padding: 5mm;
             display: flex;
             flex-direction: column;
-            width: 100%;
-            height: 100%;
-            page-break-inside: avoid !important;
-            break-inside: avoid !important;
-            overflow: hidden;
             box-sizing: border-box;
+            overflow: hidden;
         }
         
         .header {
             display: flex;
             align-items: center;
-            margin-bottom: 3.5mm;
+            margin-bottom: 1mm;
             border-bottom: 1px solid #000;
-            padding-bottom: 0.5mm;
+            padding-bottom: 3mm;
             flex-shrink: 0;
-            page-break-inside: avoid !important;
-            break-inside: avoid !important;
-        }
-        
-        table {
-            page-break-inside: avoid !important;
-            break-inside: avoid !important;
-        }
-        
-        table tr {
-            page-break-inside: avoid !important;
-            break-inside: avoid !important;
-        }
-        
-        .signature-row {
-            page-break-inside: avoid !important;
-            break-inside: avoid !important;
         }
         
         .header-logo {
-            max-width: 20px;
-            max-height: 20px;
-            margin-right: 0.3mm;
+            max-width: 35px;
+            max-height: 35px;
+            margin-right: 5mm;
             object-fit: contain;
             flex-shrink: 0;
         }
@@ -138,17 +125,18 @@ foreach ($legger_list as $l) {
             font-size: 16px;
             margin: 0;
             font-weight: bold;
-            line-height: 1.1;
+            line-height: 1.3;
+            letter-spacing: 0.5px;
         }
         
         .header-content p {
             font-size: 12px;
-            margin: 0;
-            line-height: 1.1;
+            margin: 3px 0 0 0;
+            line-height: 1.3;
         }
         
         .info {
-            margin: 1mm 0 0 0;
+            margin: 2mm 0;
             font-size: 12px;
             flex-shrink: 0;
         }
@@ -160,28 +148,53 @@ foreach ($legger_list as $l) {
         table {
             width: 100%;
             border-collapse: collapse;
-            margin: 2mm 0 0 0;
+            border-spacing: 0;
+            margin: 2mm 0 2mm 0;
             font-size: 12px;
-            flex-shrink: 0;
+            flex: 1;
+            min-height: 0;
+            table-layout: fixed;
+        }
+        
+        table tbody tr,
+        table thead tr {
+            height: 4mm;
+            display: table-row;
         }
         
         table th,
         table td {
             border: 1px solid #000;
-            padding: 1mm 0.5mm;
+            padding: 0;
             text-align: left;
-            line-height: 1.3;
-            word-wrap: break-word;
+            line-height: 1;
+            vertical-align: middle;
+            height: 4mm;
+            overflow: hidden;
         }
         
         table th {
             background-color: #f0f0f0;
             font-weight: bold;
             font-size: 12px;
+            text-align: center;
+            text-transform: uppercase;
+            padding: 0;
+            height: 4mm;
+        }
+        
+        table th,
+        table td {
+            padding-left: 2mm;
+            padding-right: 2mm;
         }
         
         .text-right {
             text-align: right;
+        }
+        
+        .text-center {
+            text-align: center;
         }
         
         .total {
@@ -189,10 +202,10 @@ foreach ($legger_list as $l) {
         }
         
         .signature-row {
-            margin-top: 15mm;
-            padding-top: 0.5mm;
+            margin-top: 3mm;
+            padding-top: 2mm;
             border-top: 1px solid #000;
-            font-size: 12px;
+            font-size: 11px;
             flex-shrink: 0;
             display: table;
             width: 100%;
@@ -203,12 +216,12 @@ foreach ($legger_list as $l) {
             width: 50%;
             text-align: center;
             vertical-align: top;
-            padding: 0 0.1mm;
+            padding: 0 5mm;
         }
         
         .signature-col p {
             margin: 0;
-            line-height: 1.1;
+            line-height: 1.4;
         }
         
         .signature-col p:last-child {
@@ -219,22 +232,15 @@ foreach ($legger_list as $l) {
             width: 55%;
             margin: 3px auto 0 auto;
             min-height: 5px;
+            border-top: none;
         }
         
         .tempat-tanggal {
-            margin-top: 4mm;
-            margin-bottom: 6mm;
+            margin-top: 0;
+            margin-bottom: 5mm;
             text-align: right;
-            font-size: 12px;
-            padding-right: 0.1mm;
-            flex-shrink: 0;
-        }
-        
-        .info {
-            flex-shrink: 0;
-        }
-        
-        .header {
+            font-size: 11px;
+            padding-right: 2mm;
             flex-shrink: 0;
         }
         
@@ -245,36 +251,57 @@ foreach ($legger_list as $l) {
             }
             
             .page {
-                margin: 0;
-                padding: 0.5mm 0.5mm 0 0.5mm !important;
-                width: 210mm;
-                height: 330mm;
-                display: grid !important;
-                grid-template-columns: 1fr 1fr !important;
-                grid-template-rows: 1fr 1fr !important;
-                gap: 5mm !important;
+                width: 200mm !important;
+                height: 315mm !important;
+                display: flex !important;
+                flex-direction: row !important;
+                gap: 3mm !important;
+                align-items: flex-start !important;
             }
             
             .slip {
-                width: 100%;
-                height: 100%;
+                width: calc((200mm - 3mm) / 2) !important;
+                height: 170mm !important;
+                min-height: 170mm !important;
+                max-height: 170mm !important;
                 page-break-inside: avoid !important;
                 break-inside: avoid !important;
+                overflow: hidden !important;
             }
             
             .header {
-                page-break-inside: avoid !important;
-                break-inside: avoid !important;
+                page-break-inside: avoid;
+                break-inside: avoid;
             }
             
             table {
-                page-break-inside: avoid !important;
-                break-inside: avoid !important;
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+            
+            table tbody tr,
+            table thead tr {
+                height: 4mm !important;
+                display: table-row !important;
+            }
+            
+            table th,
+            table td {
+                padding: 0 !important;
+                padding-left: 2mm !important;
+                padding-right: 2mm !important;
+                line-height: 1 !important;
+                height: 4mm !important;
+                overflow: hidden !important;
+            }
+            
+            table th {
+                height: 4mm !important;
             }
             
             .signature-row {
-                page-break-inside: avoid !important;
-                break-inside: avoid !important;
+                page-break-inside: avoid;
+                break-inside: avoid;
             }
         }
     </style>
@@ -287,8 +314,8 @@ foreach ($legger_list as $l) {
     foreach ($legger_list as $index => $legger):
         $details = $all_details[$legger['id']];
         
-        // Start new page every 4 slips (2x2 grid)
-        if ($count % 4 == 0):
+        // Start new page every 2 slips
+        if ($count % 2 == 0):
             if ($count > 0):
                 echo '</div>'; // Close previous page
             endif;
@@ -323,12 +350,12 @@ foreach ($legger_list as $l) {
             <table>
                 <tr>
                     <th>Keterangan</th>
-                    <th class="text-right">Jumlah</th>
+                    <th class="text-center">Jumlah</th>
                 </tr>
                 <?php if ($legger['gaji_pokok'] > 0): ?>
                 <tr>
                     <td>Gaji Pokok</td>
-                    <td class="text-right"><?php echo formatRupiah($legger['gaji_pokok']); ?></td>
+                    <td class="text-center"><?php echo formatRupiah($legger['gaji_pokok']); ?></td>
                 </tr>
                 <?php endif; ?>
                 <?php 
@@ -343,13 +370,13 @@ foreach ($legger_list as $l) {
                 ?>
                     <tr>
                         <td>Tunjangan <?php echo htmlspecialchars($d['nama_item']); ?></td>
-                        <td class="text-right"><?php echo formatRupiah($d['jumlah']); ?></td>
+                        <td class="text-center"><?php echo formatRupiah($d['jumlah']); ?></td>
                     </tr>
                 <?php endforeach; ?>
                 <?php if ($legger['total_tunjangan'] > 0): ?>
                 <tr>
                     <td class="total">Total Tunjangan</td>
-                    <td class="text-right total"><?php echo formatRupiah($legger['total_tunjangan']); ?></td>
+                    <td class="text-center total"><?php echo formatRupiah($legger['total_tunjangan']); ?></td>
                 </tr>
                 <?php endif; ?>
                 <?php 
@@ -364,18 +391,18 @@ foreach ($legger_list as $l) {
                 ?>
                     <tr>
                         <td>Potongan <?php echo htmlspecialchars($d['nama_item']); ?></td>
-                        <td class="text-right"><?php echo formatRupiah($d['jumlah']); ?></td>
+                        <td class="text-center"><?php echo formatRupiah($d['jumlah']); ?></td>
                     </tr>
                 <?php endforeach; ?>
                 <?php if ($legger['total_potongan'] > 0): ?>
                 <tr>
                     <td class="total">Total Potongan</td>
-                    <td class="text-right total"><?php echo formatRupiah($legger['total_potongan']); ?></td>
+                    <td class="text-center total"><?php echo formatRupiah($legger['total_potongan']); ?></td>
                 </tr>
                 <?php endif; ?>
                 <tr>
                     <td class="total">Gaji Bersih</td>
-                    <td class="text-right total"><?php echo formatRupiah($legger['gaji_bersih']); ?></td>
+                    <td class="text-center total"><?php echo formatRupiah($legger['gaji_bersih']); ?></td>
                 </tr>
             </table>
             <?php if (!empty($settings['tempat']) || !empty($settings['hari_tanggal'])): ?>
@@ -404,37 +431,15 @@ foreach ($legger_list as $l) {
     <?php
         $count++;
         
-        // Close page after 4 slips or at the end
-        if ($count % 4 == 0 || $count == $total):
+        // Close page after 2 slips or at the end
+        if ($count % 2 == 0 || $count == $total):
             echo '</div>'; // Close page
         endif;
     endforeach;
     ?>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script>
         window.onload = function() {
-            const element = document.body;
-            const opt = {
-                margin: [2, 2, 2, 2],
-                filename: 'Slip_Gaji_Semua_<?php echo $periode; ?>.pdf',
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, useCORS: true, letterRendering: true },
-                jsPDF: { unit: 'mm', format: [210, 330], orientation: 'portrait' },
-                pagebreak: { 
-                    mode: ['avoid-all', 'css', 'legacy'],
-                    avoid: ['.slip', '.header', 'table', '.signature-row']
-                }
-            };
-            
-            html2pdf().set(opt).from(element).save().then(function() {
-                // Close window after download
-                setTimeout(function() {
-                    window.close();
-                }, 1000);
-            }).catch(function(error) {
-                console.error('Error generating PDF:', error);
-                alert('Terjadi kesalahan saat membuat PDF. Silakan coba lagi.');
-            });
+            window.print();
         };
     </script>
 </body>
