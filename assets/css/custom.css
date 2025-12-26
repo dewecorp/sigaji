@@ -29,7 +29,41 @@ body {
     margin-top: 70px;
     padding: 2rem;
     min-height: calc(100vh - 70px);
-    transition: margin-left 0.3s ease, padding 0.3s ease;
+    width: calc(100% - 300px);
+    max-width: calc(100% - 300px);
+    transition: margin-left 0.3s ease, padding 0.3s ease, width 0.3s ease, max-width 0.3s ease;
+    box-sizing: border-box;
+}
+
+/* Desktop - ketika sidebar ditutup */
+@media (min-width: 769px) {
+    body .main-content.sidebar-hidden {
+        margin-left: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        padding-left: 2rem !important;
+        padding-right: 2rem !important;
+    }
+    
+    body .main-content.sidebar-hidden .section,
+    body .main-content.sidebar-hidden .section-body {
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+    }
+    
+    body .main-content.sidebar-hidden .card {
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+    }
+    
+    body .main-content.sidebar-hidden .row {
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+    }
 }
 
 /* Tablet adjustments */
@@ -37,6 +71,22 @@ body {
     .main-content {
         margin-left: 280px !important;
         padding: 1.5rem !important;
+        width: calc(100% - 280px) !important;
+        max-width: calc(100% - 280px) !important;
+        transition: margin-left 0.3s ease, width 0.3s ease, max-width 0.3s ease;
+    }
+    
+    .main-content.sidebar-hidden {
+        margin-left: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+    
+    .main-content.sidebar-hidden .section,
+    .main-content.sidebar-hidden .card {
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box;
     }
 }
 

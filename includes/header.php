@@ -58,6 +58,7 @@ cleanupOldActivities($conn);
     <link rel="stylesheet" href="<?php echo BASE_URL; ?>assets/css/custom.css">
     <link rel="stylesheet" href="<?php echo BASE_URL; ?>assets/css/responsive-fix.css">
     <link rel="stylesheet" href="<?php echo BASE_URL; ?>assets/css/responsive-all.css">
+    <link rel="stylesheet" href="<?php echo BASE_URL; ?>assets/css/sidebar-expand.css">
     
     <!-- Sidebar Active Menu Styles -->
     <style>

@@ -17,6 +17,45 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         exit();
     }
     
+    // Validate input
+    $username = trim($username);
+    $nama_lengkap = trim($nama_lengkap);
+    $email = trim($email);
+    
+    if (empty($username)) {
+        $_SESSION['error'] = "Username tidak boleh kosong";
+        header('Location: ' . BASE_URL . 'pages/pengguna/profile.php');
+        exit();
+    }
+    
+    if (empty($nama_lengkap)) {
+        $_SESSION['error'] = "Nama lengkap tidak boleh kosong";
+        header('Location: ' . BASE_URL . 'pages/pengguna/profile.php');
+        exit();
+    }
+    
+    // Validate email format if provided
+    if (!empty($email) && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $_SESSION['error'] = "Format email tidak valid";
+        header('Location: ' . BASE_URL . 'pages/pengguna/profile.php');
+        exit();
+    }
+    
+    // Check if username already exists (except for current user)
+    $check_username_sql = "SELECT id FROM users WHERE username = ? AND id != ?";
+    $check_username_stmt = $conn->prepare($check_username_sql);
+    $check_username_stmt->bind_param("si", $username, $id);
+    $check_username_stmt->execute();
+    $check_username_result = $check_username_stmt->get_result();
+    
+    if ($check_username_result->num_rows > 0) {
+        $check_username_stmt->close();
+        $_SESSION['error'] = "Username sudah digunakan oleh pengguna lain";
+        header('Location: ' . BASE_URL . 'pages/pengguna/profile.php');
+        exit();
+    }
+    $check_username_stmt->close();
+    
     // Validate password if provided
     if ($password) {
         if (strlen($password) < 6) {
@@ -124,7 +163,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         logActivity($conn, "Mengubah profile sendiri", 'success');
         $_SESSION['success'] = "Profile berhasil diubah";
     } else {
-        $_SESSION['error'] = "Gagal mengubah profile: " . $stmt->error;
+        // Better error handling
+        $error_msg = $stmt->error;
+        if (strpos($error_msg, 'Duplicate entry') !== false && strpos($error_msg, 'username') !== false) {
+            $_SESSION['error'] = "Username sudah digunakan oleh pengguna lain";
+        } else {
+            $_SESSION['error'] = "Gagal mengubah profile: " . $error_msg;
+        }
     }
     
     $stmt->close();

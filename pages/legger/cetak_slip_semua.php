@@ -41,6 +41,16 @@ foreach ($legger_list as $l) {
     $details = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     $all_details[$l['id']] = $details;
 }
+
+// Helper function for table row style
+function getTableRowStyle() {
+    return 'style="height: 4mm !important; min-height: 4mm !important; max-height: 4mm !important;"';
+}
+
+// Helper function for table cell style
+function getTableCellStyle() {
+    return 'style="height: 4mm !important; line-height: 3.5mm !important; font-size: 8px !important; padding: 0 2mm !important; overflow: hidden !important;"';
+}
 ?>
 <!DOCTYPE html>
 <html>
@@ -52,6 +62,28 @@ foreach ($legger_list as $l) {
             margin: 10mm 5mm 5mm 5mm; /* top: 1cm, right: 5mm, bottom: 5mm, left: 5mm */
         }
         
+        /* Force table row height - highest priority */
+        html body table tr,
+        html body .slip table tr {
+            height: 4mm !important;
+            min-height: 4mm !important;
+            max-height: 4mm !important;
+        }
+        
+        html body table td,
+        html body table th,
+        html body .slip table td,
+        html body .slip table th {
+            height: 4mm !important;
+            min-height: 4mm !important;
+            max-height: 4mm !important;
+            line-height: 3.5mm !important;
+            font-size: 8px !important;
+            padding: 0 !important;
+            padding-left: 2mm !important;
+            padding-right: 2mm !important;
+        }
+        
         * {
             margin: 0;
             padding: 0;
@@ -60,6 +92,11 @@ foreach ($legger_list as $l) {
         
         table, table *, table th, table td {
             box-sizing: border-box;
+        }
+        
+        table tbody tr td,
+        table thead tr th {
+            box-sizing: border-box !important;
         }
         
         body {
@@ -150,43 +187,60 @@ foreach ($legger_list as $l) {
             border-collapse: collapse;
             border-spacing: 0;
             margin: 2mm 0 2mm 0;
-            font-size: 12px;
+            font-size: 11px;
             flex: 1;
             min-height: 0;
             table-layout: fixed;
         }
         
-        table tbody tr,
-        table thead tr {
-            height: 4mm;
+        table tr {
+            height: 4mm !important;
+            min-height: 4mm !important;
+            max-height: 4mm !important;
             display: table-row;
         }
         
         table th,
         table td {
             border: 1px solid #000;
-            padding: 0;
+            padding: 0 !important;
+            padding-left: 2mm !important;
+            padding-right: 2mm !important;
             text-align: left;
-            line-height: 1;
-            vertical-align: middle;
-            height: 4mm;
-            overflow: hidden;
+            line-height: 3.5mm !important;
+            vertical-align: middle !important;
+            overflow: hidden !important;
+            font-size: 8px !important;
+            height: 4mm !important;
+            min-height: 4mm !important;
+            max-height: 4mm !important;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            box-sizing: border-box !important;
+            display: table-cell !important;
+            margin: 0 !important;
         }
         
         table th {
             background-color: #f0f0f0;
             font-weight: bold;
-            font-size: 12px;
+            font-size: 8px !important;
             text-align: center;
             text-transform: uppercase;
-            padding: 0;
-            height: 4mm;
+            padding: 0 !important;
+            padding-left: 2mm !important;
+            padding-right: 2mm !important;
+            height: 4mm !important;
+            min-height: 4mm !important;
+            max-height: 4mm !important;
+            line-height: 3.5mm !important;
+            box-sizing: border-box !important;
+            display: table-cell !important;
+            margin: 0 !important;
         }
         
-        table th,
         table td {
-            padding-left: 2mm;
-            padding-right: 2mm;
+            line-height: 3.5mm !important;
         }
         
         .text-right {
@@ -279,9 +333,10 @@ foreach ($legger_list as $l) {
                 break-inside: avoid;
             }
             
-            table tbody tr,
-            table thead tr {
+            table tr {
                 height: 4mm !important;
+                min-height: 4mm !important;
+                max-height: 4mm !important;
                 display: table-row !important;
             }
             
@@ -290,13 +345,25 @@ foreach ($legger_list as $l) {
                 padding: 0 !important;
                 padding-left: 2mm !important;
                 padding-right: 2mm !important;
-                line-height: 1 !important;
+            line-height: 3.5mm !important;
+            overflow: hidden !important;
+            font-size: 8px !important;
                 height: 4mm !important;
-                overflow: hidden !important;
+                min-height: 4mm !important;
+                max-height: 4mm !important;
+                white-space: nowrap !important;
+                text-overflow: ellipsis !important;
+                display: table-cell !important;
+                vertical-align: middle !important;
             }
             
             table th {
+                font-size: 8px !important;
                 height: 4mm !important;
+                min-height: 4mm !important;
+                max-height: 4mm !important;
+                line-height: 3.5mm !important;
+                display: table-cell !important;
             }
             
             .signature-row {
@@ -347,15 +414,15 @@ foreach ($legger_list as $l) {
             <div class="info">
                 <p><strong>Nama:</strong> <?php echo htmlspecialchars($legger['nama_lengkap']); ?></p>
             </div>
-            <table>
-                <tr>
-                    <th>Keterangan</th>
-                    <th class="text-center">Jumlah</th>
+            <table cellpadding="0" cellspacing="0" style="border-collapse: collapse;">
+                <tr <?php echo getTableRowStyle(); ?>>
+                    <th <?php echo getTableCellStyle(); ?>>Keterangan</th>
+                    <th class="text-center" <?php echo getTableCellStyle(); ?>>Jumlah</th>
                 </tr>
                 <?php if ($legger['gaji_pokok'] > 0): ?>
-                <tr>
-                    <td>Gaji Pokok</td>
-                    <td class="text-center"><?php echo formatRupiah($legger['gaji_pokok']); ?></td>
+                <tr <?php echo getTableRowStyle(); ?>>
+                    <td <?php echo getTableCellStyle(); ?>>Gaji Pokok</td>
+                    <td class="text-center" <?php echo getTableCellStyle(); ?>><?php echo formatRupiah($legger['gaji_pokok']); ?></td>
                 </tr>
                 <?php endif; ?>
                 <?php 
@@ -368,15 +435,15 @@ foreach ($legger_list as $l) {
                 
                 foreach ($tunjangan_items as $d):
                 ?>
-                    <tr>
-                        <td>Tunjangan <?php echo htmlspecialchars($d['nama_item']); ?></td>
-                        <td class="text-center"><?php echo formatRupiah($d['jumlah']); ?></td>
+                    <tr <?php echo getTableRowStyle(); ?>>
+                        <td <?php echo getTableCellStyle(); ?>>Tunjangan <?php echo htmlspecialchars($d['nama_item']); ?></td>
+                        <td class="text-center" <?php echo getTableCellStyle(); ?>><?php echo formatRupiah($d['jumlah']); ?></td>
                     </tr>
                 <?php endforeach; ?>
                 <?php if ($legger['total_tunjangan'] > 0): ?>
-                <tr>
-                    <td class="total">Total Tunjangan</td>
-                    <td class="text-center total"><?php echo formatRupiah($legger['total_tunjangan']); ?></td>
+                <tr <?php echo getTableRowStyle(); ?>>
+                    <td class="total" <?php echo getTableCellStyle(); ?>>Total Tunjangan</td>
+                    <td class="text-center total" <?php echo getTableCellStyle(); ?>><?php echo formatRupiah($legger['total_tunjangan']); ?></td>
                 </tr>
                 <?php endif; ?>
                 <?php 
@@ -389,20 +456,20 @@ foreach ($legger_list as $l) {
                 
                 foreach ($potongan_items as $d):
                 ?>
-                    <tr>
-                        <td>Potongan <?php echo htmlspecialchars($d['nama_item']); ?></td>
-                        <td class="text-center"><?php echo formatRupiah($d['jumlah']); ?></td>
+                    <tr <?php echo getTableRowStyle(); ?>>
+                        <td <?php echo getTableCellStyle(); ?>>Potongan <?php echo htmlspecialchars($d['nama_item']); ?></td>
+                        <td class="text-center" <?php echo getTableCellStyle(); ?>><?php echo formatRupiah($d['jumlah']); ?></td>
                     </tr>
                 <?php endforeach; ?>
                 <?php if ($legger['total_potongan'] > 0): ?>
-                <tr>
-                    <td class="total">Total Potongan</td>
-                    <td class="text-center total"><?php echo formatRupiah($legger['total_potongan']); ?></td>
+                <tr <?php echo getTableRowStyle(); ?>>
+                    <td class="total" <?php echo getTableCellStyle(); ?>>Total Potongan</td>
+                    <td class="text-center total" <?php echo getTableCellStyle(); ?>><?php echo formatRupiah($legger['total_potongan']); ?></td>
                 </tr>
                 <?php endif; ?>
-                <tr>
-                    <td class="total">Gaji Bersih</td>
-                    <td class="text-center total"><?php echo formatRupiah($legger['gaji_bersih']); ?></td>
+                <tr <?php echo getTableRowStyle(); ?>>
+                    <td class="total" <?php echo getTableCellStyle(); ?>>Gaji Bersih</td>
+                    <td class="text-center total" <?php echo getTableCellStyle(); ?>><?php echo formatRupiah($legger['gaji_bersih']); ?></td>
                 </tr>
             </table>
             <?php if (!empty($settings['tempat']) || !empty($settings['hari_tanggal'])): ?>

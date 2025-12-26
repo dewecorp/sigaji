@@ -1,0 +1,49 @@
+/* Force sidebar expansion - highest specificity */
+@media (min-width: 769px) {
+    html body .main-wrapper .main-content.sidebar-hidden {
+        margin-left: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+    
+    html body .main-wrapper .main-content.sidebar-hidden .section,
+    html body .main-wrapper .main-content.sidebar-hidden .section-body,
+    html body .main-content.sidebar-hidden .section,
+    html body .main-content.sidebar-hidden .section-body {
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+    }
+    
+    html body .main-wrapper .main-content.sidebar-hidden .card,
+    html body .main-content.sidebar-hidden .card {
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+    }
+}
+
+@media (min-width: 769px) and (max-width: 991px) {
+    html body .main-wrapper .main-content.sidebar-hidden {
+        margin-left: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+    
+    html body .main-wrapper .main-content.sidebar-hidden .section,
+    html body .main-wrapper .main-content.sidebar-hidden .section-body,
+    html body .main-content.sidebar-hidden .section,
+    html body .main-content.sidebar-hidden .section-body {
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+    }
+    
+    html body .main-wrapper .main-content.sidebar-hidden .card,
+    html body .main-content.sidebar-hidden .card {
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+    }
+}
+
