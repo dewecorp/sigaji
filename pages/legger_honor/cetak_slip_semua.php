@@ -40,7 +40,7 @@ $legger_list = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     <style>
         @page {
             size: F4;
-            margin: 0.5mm 5mm 0 5mm;
+            margin: 10mm 5mm 0 5mm; /* top: 1cm (10mm), right: 5mm, bottom: 0, left: 5mm */
         }
         
         * {
@@ -58,19 +58,30 @@ $legger_list = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         
         .page {
             width: 210mm;
-            height: 330mm;
-            page-break-after: always;
+            min-height: 330mm;
+            height: auto;
             padding: 0.5mm 0.5mm 0 0.5mm;
             margin: 0 auto;
+            margin-bottom: 0;
             display: grid;
             grid-template-columns: 1fr 1fr;
-            grid-template-rows: 1fr 1fr;
+            grid-template-rows: auto auto;
             gap: 5mm;
             box-sizing: border-box;
+            align-content: start;
         }
         
-        .page:last-child {
-            page-break-after: auto;
+        .page:not(.page-last) {
+            page-break-after: always;
+        }
+        
+        .page.page-last {
+            page-break-after: auto !important;
+            margin-bottom: 0 !important;
+        }
+        
+        .page:empty {
+            display: none !important;
         }
         
         .slip {
@@ -79,7 +90,9 @@ $legger_list = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             display: flex;
             flex-direction: column;
             width: 100%;
-            height: 100%;
+            height: auto;
+            min-height: auto;
+            max-height: none;
             page-break-inside: avoid;
             break-inside: avoid;
             overflow: hidden;
@@ -234,18 +247,36 @@ $legger_list = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             
             .page {
                 margin: 0;
+                margin-bottom: 0 !important;
                 padding: 0.5mm 0.5mm 0 0.5mm !important;
-                width: 210mm;
-                height: 330mm;
+                width: 210mm !important;
+                min-height: 330mm !important;
+                height: auto !important;
                 display: grid !important;
                 grid-template-columns: 1fr 1fr !important;
-                grid-template-rows: 1fr 1fr !important;
+                grid-template-rows: auto auto !important;
                 gap: 5mm !important;
+                align-content: start !important;
+            }
+            
+            .page:not(.page-last) {
+                page-break-after: always !important;
+            }
+            
+            .page.page-last {
+                page-break-after: auto !important;
+                margin-bottom: 0 !important;
+            }
+            
+            .page:empty {
+                display: none !important;
             }
             
             .slip {
-                width: 100%;
-                height: 100%;
+                width: 100% !important;
+                height: auto !important;
+                min-height: auto !important;
+                max-height: none !important;
                 page-break-inside: avoid;
                 break-inside: avoid;
             }
@@ -264,14 +295,24 @@ $legger_list = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 <body>
     <?php
     $count = 0;
+    $total = count($legger_list);
+    $slips_per_page = 4;
+    $total_pages = ceil($total / $slips_per_page);
+    $current_page = 0;
+    $page_opened = false;
     
     foreach ($legger_list as $index => $legger):
         // Start new page every 4 slips (2x2 grid)
-        if ($count % 4 == 0):
-            if ($count > 0):
+        if ($count % $slips_per_page == 0):
+            if ($page_opened):
                 echo '</div>'; // Close previous page
             endif;
-            echo '<div class="page">';
+            // Determine if this will be the last page
+            $current_page++;
+            $is_last_page = ($current_page == $total_pages);
+            $page_class = $is_last_page ? 'page page-last' : 'page';
+            echo '<div class="' . $page_class . '">';
+            $page_opened = true;
         endif;
     ?>
         <div class="slip">
@@ -287,17 +328,17 @@ $legger_list = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             <table class="info-table">
                 <tr>
                     <td><strong>Bulan Penerimaan</strong></td>
-                    <td><strong>:</strong></td>
+                    <td><strong>: </strong></td>
                     <td><?php echo getPeriodLabel($bulan_aktif); ?></td>
                 </tr>
                 <tr>
                     <td><strong>Nama</strong></td>
-                    <td><strong>:</strong></td>
+                    <td><strong>: </strong></td>
                     <td><?php echo htmlspecialchars($legger['nama_pembina']); ?></td>
                 </tr>
                 <tr>
                     <td><strong>Jabatan</strong></td>
-                    <td><strong>:</strong></td>
+                    <td><strong>: </strong></td>
                     <td><?php echo htmlspecialchars($legger['jabatan']); ?></td>
                 </tr>
             </table>
@@ -344,57 +385,107 @@ $legger_list = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         </div>
     <?php
         $count++;
-        
-        // Close page after 4 slips or at the end
-        if ($count % 4 == 0 || $count == count($legger_list)):
-            echo '</div>'; // Close page
-        endif;
     endforeach;
+    
+    // Always close the last page after loop ends (only if page was opened)
+    if ($page_opened):
+        echo '</div>'; // Close last page
+    endif;
     ?>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script>
-        window.onload = function() {
-            const element = document.body;
-            
-            // Wait for all content to fully render
-            setTimeout(function() {
-                // Calculate proper dimensions
-                const elementWidth = element.scrollWidth || window.innerWidth;
-                const elementHeight = element.scrollHeight || window.innerHeight;
+        (function() {
+            function removeEmptyPages() {
+                var pages = document.querySelectorAll('.page');
+                var removed = 0;
+                var pagesToRemove = [];
                 
-                const opt = {
-                    margin: [3, 3, 3, 3],
-                    filename: 'Slip_Honor_Semua_<?php echo $periode; ?>.pdf',
-                    image: { type: 'jpeg', quality: 0.98 },
-                    html2canvas: { 
-                        scale: 2, 
-                        useCORS: true, 
-                        letterRendering: true,
-                        logging: false,
-                        windowWidth: elementWidth,
-                        windowHeight: elementHeight,
-                        scrollX: 0,
-                        scrollY: 0,
-                        allowTaint: true
-                    },
-                    jsPDF: { unit: 'mm', format: [210, 330], orientation: 'portrait' },
-                    pagebreak: { 
-                        mode: ['avoid-all', 'css', 'legacy'],
-                        avoid: ['.slip', '.header', 'table', '.signature-row', '.page']
+                pages.forEach(function(page) {
+                    var slips = page.querySelectorAll('.slip');
+                    var hasContent = false;
+                    
+                    // Check if page has any visible slips with content
+                    if (slips.length > 0) {
+                        for (var i = 0; i < slips.length; i++) {
+                            var slip = slips[i];
+                            if (slip.offsetHeight > 0 && slip.offsetWidth > 0) {
+                                var slipText = slip.textContent || slip.innerText || '';
+                                if (slipText.replace(/\s+/g, '').trim().length > 0) {
+                                    hasContent = true;
+                                    break;
+                                }
+                            }
+                        }
                     }
-                };
-                
-                html2pdf().set(opt).from(element).save().then(function() {
-                    // Close window after download
-                    setTimeout(function() {
-                        window.close();
-                    }, 1000);
-                }).catch(function(error) {
-                    console.error('Error generating PDF:', error);
-                    alert('Terjadi kesalahan saat membuat PDF. Silakan coba lagi.');
+                    
+                    // Also check page's direct text content
+                    if (!hasContent) {
+                        var pageText = page.textContent || page.innerText || '';
+                        var trimmed = pageText.replace(/\s+/g, '').trim();
+                        if (trimmed.length > 0) {
+                            hasContent = true;
+                        }
+                    }
+                    
+                    // If no content found, mark for removal
+                    if (!hasContent || slips.length === 0) {
+                        pagesToRemove.push(page);
+                    }
                 });
-            }, 1000);
-        };
+                
+                // Remove pages from DOM
+                pagesToRemove.forEach(function(page) {
+                    page.classList.add('no-content');
+                    page.style.display = 'none';
+                    if (page.parentNode) {
+                        try {
+                            page.parentNode.removeChild(page);
+                            removed++;
+                        } catch(e) {
+                            console.error('Error removing page:', e);
+                        }
+                    }
+                });
+                
+                return removed;
+            }
+            
+            // Remove empty pages immediately when DOM is ready
+            function init() {
+                var removed = removeEmptyPages();
+                if (removed > 0) {
+                    console.log('Removed ' + removed + ' empty pages');
+                }
+            }
+            
+            // Run immediately if DOM is ready, otherwise wait
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', function() {
+                    setTimeout(init, 50);
+                });
+            } else {
+                setTimeout(init, 50);
+            }
+            
+            // Also remove before print - multiple passes to be absolutely sure
+            window.onload = function() {
+                setTimeout(function() {
+                    var removed1 = removeEmptyPages();
+                    setTimeout(function() {
+                        var removed2 = removeEmptyPages();
+                        setTimeout(function() {
+                            var removed3 = removeEmptyPages();
+                            var totalRemoved = removed1 + removed2 + removed3;
+                            if (totalRemoved > 0) {
+                                console.log('Removed ' + totalRemoved + ' empty pages before print');
+                            }
+                            setTimeout(function() {
+                                window.print();
+                            }, 100);
+                        }, 30);
+                    }, 30);
+                }, 100);
+            };
+        })();
     </script>
 </body>
 </html>

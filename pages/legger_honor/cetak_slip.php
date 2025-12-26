@@ -41,7 +41,7 @@ if ($logo_exists) {
     <style>
         @page {
             size: F4;
-            margin: 8mm;
+            margin: 10mm 8mm 8mm 8mm; /* top: 1cm (10mm), right: 8mm, bottom: 8mm, left: 8mm */
         }
         
         * {
@@ -59,6 +59,16 @@ if ($logo_exists) {
             justify-content: center;
             align-items: center;
             min-height: 100vh;
+        }
+        
+        @media print {
+            body {
+                margin: 0;
+                padding: 0;
+                display: flex;
+                justify-content: center;
+                align-items: flex-start;
+            }
         }
         
         .slip {
@@ -257,17 +267,17 @@ if ($logo_exists) {
         <table class="info-table">
             <tr>
                 <td><strong>Bulan Penerimaan</strong></td>
-                <td><strong>:</strong></td>
+                <td><strong>: </strong></td>
                 <td><?php echo getPeriodLabel($bulan_aktif); ?></td>
             </tr>
             <tr>
                 <td><strong>Nama</strong></td>
-                <td><strong>:</strong></td>
+                <td><strong>: </strong></td>
                 <td><?php echo htmlspecialchars($legger['nama_pembina']); ?></td>
             </tr>
             <tr>
                 <td><strong>Jabatan</strong></td>
-                <td><strong>:</strong></td>
+                <td><strong>: </strong></td>
                 <td><?php echo htmlspecialchars($legger['jabatan']); ?></td>
             </tr>
         </table>
@@ -312,50 +322,12 @@ if ($logo_exists) {
             </div>
         </div>
     </div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script>
         window.onload = function() {
-            // Use the slip div instead of body for better control
-            const element = document.querySelector('.slip') || document.body;
-            
-            // Wait for content to fully render
+            // Wait for content to fully render, then trigger print
             setTimeout(function() {
-                // Calculate proper dimensions with padding
-                const elementWidth = element.offsetWidth || element.scrollWidth || 400;
-                const elementHeight = element.offsetHeight || element.scrollHeight || 600;
-                
-                const opt = {
-                    margin: [2, 2, 2, 2],
-                    filename: 'Slip_Honor_<?php echo htmlspecialchars($legger['nama_pembina'], ENT_QUOTES); ?>_<?php echo $legger['periode']; ?>.pdf',
-                    image: { type: 'jpeg', quality: 0.98 },
-                    html2canvas: { 
-                        scale: 2, 
-                        useCORS: true, 
-                        letterRendering: true,
-                        logging: false,
-                        windowWidth: elementWidth + 20,
-                        windowHeight: elementHeight + 20,
-                        scrollX: 0,
-                        scrollY: 0,
-                        allowTaint: true
-                    },
-                    jsPDF: { unit: 'mm', format: [210, 330], orientation: 'portrait' },
-                    pagebreak: { 
-                        mode: ['avoid-all', 'css', 'legacy'],
-                        avoid: ['.slip', '.header', 'table', '.signature-row']
-                    }
-                };
-                
-                html2pdf().set(opt).from(element).save().then(function() {
-                    // Close window after download
-                    setTimeout(function() {
-                        window.close();
-                    }, 1000);
-                }).catch(function(error) {
-                    console.error('Error generating PDF:', error);
-                    alert('Terjadi kesalahan saat membuat PDF. Silakan coba lagi.');
-                });
-            }, 500);
+                window.print();
+            }, 200);
         };
     </script>
 </body>

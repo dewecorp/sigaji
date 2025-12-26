@@ -73,38 +73,71 @@ foreach ($legger_list as $l) {
             font-size: 12px;
             padding: 0;
             margin: 0;
+            overflow: visible;
+        }
+        
+        /* Prevent empty pages */
+        body:empty {
+            display: none;
         }
         
         .page {
             width: 200mm; /* 210mm - 5mm left - 5mm right */
-            height: 315mm; /* 330mm - 10mm top - 5mm bottom */
-            page-break-after: auto;
+            min-height: 150mm; /* Minimum height for 1 slip */
+            max-height: 315mm; /* Maximum height for 2 slips */
+            height: auto;
             page-break-inside: avoid;
             break-inside: avoid;
             display: flex;
             flex-direction: row;
             gap: 3mm;
+            padding: 2mm;
             margin: 0 auto;
+            margin-bottom: 0;
+            box-sizing: border-box;
             align-items: flex-start;
         }
         
-        .page:last-child {
-            page-break-after: auto;
+        /* Add page break only between pages with content */
+        .page:not(.page-last) {
+            page-break-after: always;
+            margin-bottom: 0;
+        }
+        
+        .page.page-last {
+            page-break-after: auto !important;
+            margin-bottom: 0 !important;
+        }
+        
+        /* Hide completely empty pages - handled by JavaScript */
+        .page.no-content {
+            display: none !important;
         }
         
         .page:empty {
-            display: none;
+            display: none !important;
+            visibility: hidden !important;
+            height: 0 !important;
+            min-height: 0 !important;
+            max-height: 0 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            overflow: hidden !important;
+        }
+        
+        /* Hide pages with no visible slips - handled by JavaScript */
+        .page.no-slips {
+            display: none !important;
         }
         
         .slip {
-            width: calc((200mm - 3mm) / 2); /* Setengah lebar halaman dikurangi gap */
+            width: calc((200mm - 3mm - 4mm) / 2); /* Setengah lebar halaman dikurangi gap dan padding */
             height: auto;
             min-height: auto;
-            max-height: none;
-            page-break-inside: avoid;
-            break-inside: avoid;
+            max-height: 300mm !important; /* Maksimal tinggi untuk memastikan 2 slip muat */
+            overflow: hidden;
             border: 1px solid #000;
-            padding: 5mm;
+            padding: 3mm;
             display: flex;
             flex-direction: column;
             box-sizing: border-box;
@@ -115,7 +148,7 @@ foreach ($legger_list as $l) {
             align-items: center;
             margin-bottom: 1mm;
             border-bottom: 1px solid #000;
-            padding-bottom: 3mm;
+            padding-bottom: 2mm;
             flex-shrink: 0;
         }
         
@@ -158,7 +191,7 @@ foreach ($legger_list as $l) {
         
         .table-wrapper {
             width: 100%;
-            margin: 2mm 0 2mm 0;
+            margin: 2mm 0;
             flex: 1;
             min-height: 0;
             border: 1px solid #000;
@@ -241,8 +274,8 @@ foreach ($legger_list as $l) {
         }
         
         .signature-row {
-            margin-top: 3mm;
-            padding-top: 2mm;
+            margin-top: 2mm;
+            padding-top: 1mm;
             border-top: 1px solid #000;
             font-size: 11px;
             flex-shrink: 0;
@@ -260,11 +293,11 @@ foreach ($legger_list as $l) {
         
         .signature-col p {
             margin: 0;
-            line-height: 1.4;
+            line-height: 1.2;
         }
         
         .signature-col p:last-child {
-            margin-top: 15mm;
+            margin-top: 10mm;
         }
         
         .signature-line {
@@ -276,7 +309,7 @@ foreach ($legger_list as $l) {
         
         .tempat-tanggal {
             margin-top: 0;
-            margin-bottom: 5mm;
+            margin-bottom: 2mm;
             text-align: right;
             font-size: 11px;
             padding-right: 2mm;
@@ -287,21 +320,61 @@ foreach ($legger_list as $l) {
             body {
                 margin: 0;
                 padding: 0;
+                overflow: visible;
+            }
+            
+            /* Prevent empty pages in print */
+            body:empty {
+                display: none !important;
             }
             
             .page {
                 width: 200mm !important;
-                height: 315mm !important;
-                page-break-after: always !important;
+                min-height: 150mm !important;
+                max-height: 315mm !important;
+                height: auto !important;
                 page-break-inside: avoid !important;
                 break-inside: avoid !important;
                 display: flex !important;
                 flex-direction: row !important;
                 gap: 3mm !important;
+                padding: 2mm !important;
+                margin-bottom: 0 !important;
+                box-sizing: border-box !important;
                 align-items: flex-start !important;
             }
             
+            /* Add page break only between pages with content */
+            .page:not(.page-last) {
+                page-break-after: always !important;
+                margin-bottom: 0 !important;
+            }
+            
+            .page.page-last {
+                page-break-after: auto !important;
+                margin-bottom: 0 !important;
+            }
+            
+            /* Hide completely empty pages in print - handled by JavaScript */
+            .page.no-content {
+                display: none !important;
+            }
+            
             .page:empty {
+                display: none !important;
+                visibility: hidden !important;
+                height: 0 !important;
+                min-height: 0 !important;
+                max-height: 0 !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                overflow: hidden !important;
+                page-break-after: avoid !important;
+                page-break-before: avoid !important;
+            }
+            
+            /* Hide pages with no visible slips in print - handled by JavaScript */
+            .page.no-slips {
                 display: none !important;
             }
             
@@ -310,22 +383,42 @@ foreach ($legger_list as $l) {
             }
             
             .slip {
-                width: calc((200mm - 3mm) / 2) !important;
+                width: calc((200mm - 3mm - 4mm) / 2) !important;
                 height: auto !important;
                 min-height: auto !important;
-                max-height: none !important;
-                page-break-inside: avoid !important;
-                break-inside: avoid !important;
+                max-height: 300mm !important;
+                overflow: hidden !important;
+                padding: 3mm !important;
             }
             
             .header {
-                page-break-inside: avoid;
-                break-inside: avoid;
+                margin-bottom: 1mm !important;
+                padding-bottom: 2mm !important;
+            }
+            
+            .header-logo {
+                max-width: 35px !important;
+                max-height: 35px !important;
+                margin-right: 5mm !important;
+            }
+            
+            .header-content h3 {
+                font-size: 16px !important;
+                line-height: 1.3 !important;
+            }
+            
+            .header-content p {
+                font-size: 12px !important;
+                line-height: 1.3 !important;
+            }
+            
+            .info {
+                margin: 2mm 0 !important;
+                font-size: 14px !important;
             }
             
             .table-wrapper {
-                page-break-inside: avoid;
-                break-inside: avoid;
+                margin: 2mm 0 !important;
             }
             
             .table-row {
@@ -340,6 +433,7 @@ foreach ($legger_list as $l) {
                 max-height: 22px !important;
                 line-height: 22px !important;
                 font-size: 14px !important;
+                padding: 0 5px !important;
                 border-bottom: 1px solid #000 !important;
             }
             
@@ -348,8 +442,21 @@ foreach ($legger_list as $l) {
             }
             
             .signature-row {
-                page-break-inside: avoid;
-                break-inside: avoid;
+                margin-top: 2mm !important;
+                padding-top: 1mm !important;
+                font-size: 11px !important;
+            }
+            
+            .signature-col {
+                padding: 0 5mm !important;
+            }
+            
+            .signature-col p {
+                line-height: 1.2 !important;
+            }
+            
+            .signature-col p:last-child {
+                margin-top: 10mm !important;
             }
         }
     </style>
@@ -358,16 +465,26 @@ foreach ($legger_list as $l) {
     <?php
     $count = 0;
     $total = count($legger_list);
+    $slips_per_page = 2;
+    $total_pages = ceil($total / $slips_per_page);
+    $current_page = 0;
+    $page_opened = false;
     
     foreach ($legger_list as $index => $legger):
         $details = $all_details[$legger['id']];
         
-        // Start new page every 2 slips
-        if ($count % 2 == 0):
-            if ($count > 0):
+        // Start new page every 2 slips (at position 0, 2, 4, etc.)
+        if ($count % $slips_per_page == 0):
+            // Close previous page if exists (except for first page)
+            if ($page_opened):
                 echo '</div>'; // Close previous page
             endif;
-            echo '<div class="page">';
+            // Determine if this will be the last page
+            $current_page++;
+            $is_last_page = ($current_page == $total_pages);
+            $page_class = $is_last_page ? 'page page-last' : 'page';
+            echo '<div class="' . $page_class . '">';
+            $page_opened = true;
         endif;
         
         $count++;
@@ -479,16 +596,121 @@ foreach ($legger_list as $l) {
             </div>
         </div>
     <?php
-        // Close page after 2 slips or at the end
-        if ($count % 2 == 0 || $count == $total):
-            echo '</div>'; // Close page
-        endif;
     endforeach;
+    
+    // Always close the last page after loop ends (only if page was opened)
+    if ($page_opened):
+        echo '</div>'; // Close last page
+    endif;
     ?>
     <script>
-        window.onload = function() {
-            window.print();
-        };
+        (function() {
+            function removeEmptyPages() {
+                var pages = document.querySelectorAll('.page');
+                var removed = 0;
+                var pagesToRemove = [];
+                
+                pages.forEach(function(page) {
+                    var slips = page.querySelectorAll('.slip');
+                    var hasContent = false;
+                    
+                    // Check if page has any visible slips with content
+                    if (slips.length > 0) {
+                        for (var i = 0; i < slips.length; i++) {
+                            var slip = slips[i];
+                            // Check if slip has visible dimensions
+                            if (slip.offsetHeight > 0 && slip.offsetWidth > 0) {
+                                // Check if slip has actual content
+                                var slipText = slip.textContent || slip.innerText || '';
+                                if (slipText.replace(/\s+/g, '').trim().length > 0) {
+                                    hasContent = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    
+                    // Also check page's direct text content (excluding whitespace)
+                    if (!hasContent) {
+                        var pageText = page.textContent || page.innerText || '';
+                        var trimmed = pageText.replace(/\s+/g, '').trim();
+                        if (trimmed.length > 0) {
+                            hasContent = true;
+                        }
+                    }
+                    
+                    // If no content found, mark for removal
+                    if (!hasContent || slips.length === 0) {
+                        pagesToRemove.push(page);
+                    }
+                });
+                
+                // Remove pages from DOM
+                pagesToRemove.forEach(function(page) {
+                    page.classList.add('no-slips', 'no-content');
+                    page.style.display = 'none';
+                    page.style.visibility = 'hidden';
+                    page.style.height = '0';
+                    page.style.margin = '0';
+                    page.style.padding = '0';
+                    if (page.parentNode) {
+                        try {
+                            page.parentNode.removeChild(page);
+                            removed++;
+                        } catch(e) {
+                            console.error('Error removing page:', e);
+                        }
+                    }
+                });
+                
+                return removed;
+            }
+            
+            // Remove empty pages immediately when DOM is ready
+            function init() {
+                var removed = removeEmptyPages();
+                if (removed > 0) {
+                    console.log('Removed ' + removed + ' empty pages');
+                }
+            }
+            
+            // Run immediately if DOM is ready, otherwise wait
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', function() {
+                    setTimeout(init, 50);
+                });
+            } else {
+                setTimeout(init, 50);
+            }
+            
+            // Also remove before print - multiple passes to be absolutely sure
+            window.onload = function() {
+                setTimeout(function() {
+                    var removed1 = removeEmptyPages();
+                    setTimeout(function() {
+                        var removed2 = removeEmptyPages();
+                        setTimeout(function() {
+                            var removed3 = removeEmptyPages();
+                            setTimeout(function() {
+                                var removed4 = removeEmptyPages();
+                                setTimeout(function() {
+                                    var removed5 = removeEmptyPages();
+                                    var totalRemoved = removed1 + removed2 + removed3 + removed4 + removed5;
+                                    if (totalRemoved > 0) {
+                                        console.log('Removed ' + totalRemoved + ' empty pages before print');
+                                    }
+                                    // Final check before print
+                                    setTimeout(function() {
+                                        removeEmptyPages();
+                                        window.print();
+                                    }, 100);
+                                }, 30);
+                            }, 30);
+                        }, 30);
+                    }, 30);
+                }, 100);
+            };
+        })();
     </script>
 </body>
 </html>
