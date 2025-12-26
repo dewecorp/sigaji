@@ -42,15 +42,6 @@ foreach ($legger_list as $l) {
     $all_details[$l['id']] = $details;
 }
 
-// Helper function for table row style
-function getTableRowStyle() {
-    return 'style="height: 4mm !important; min-height: 4mm !important; max-height: 4mm !important;"';
-}
-
-// Helper function for table cell style
-function getTableCellStyle() {
-    return 'style="height: 4mm !important; line-height: 3.5mm !important; font-size: 8px !important; padding: 0 2mm !important; overflow: hidden !important;"';
-}
 ?>
 <!DOCTYPE html>
 <html>
@@ -60,28 +51,6 @@ function getTableCellStyle() {
         @page {
             size: F4;
             margin: 10mm 5mm 5mm 5mm; /* top: 1cm, right: 5mm, bottom: 5mm, left: 5mm */
-        }
-        
-        /* Force table row height - highest priority */
-        html body table tr,
-        html body .slip table tr {
-            height: 4mm !important;
-            min-height: 4mm !important;
-            max-height: 4mm !important;
-        }
-        
-        html body table td,
-        html body table th,
-        html body .slip table td,
-        html body .slip table th {
-            height: 4mm !important;
-            min-height: 4mm !important;
-            max-height: 4mm !important;
-            line-height: 3.5mm !important;
-            font-size: 8px !important;
-            padding: 0 !important;
-            padding-left: 2mm !important;
-            padding-right: 2mm !important;
         }
         
         * {
@@ -109,7 +78,9 @@ function getTableCellStyle() {
         .page {
             width: 200mm; /* 210mm - 5mm left - 5mm right */
             height: 315mm; /* 330mm - 10mm top - 5mm bottom */
-            page-break-after: always;
+            page-break-after: auto;
+            page-break-inside: avoid;
+            break-inside: avoid;
             display: flex;
             flex-direction: row;
             gap: 3mm;
@@ -121,11 +92,15 @@ function getTableCellStyle() {
             page-break-after: auto;
         }
         
+        .page:empty {
+            display: none;
+        }
+        
         .slip {
             width: calc((200mm - 3mm) / 2); /* Setengah lebar halaman dikurangi gap */
-            height: 170mm; /* Setengah tinggi kertas F4 dengan sedikit tambahan untuk memastikan cukup tinggi */
-            min-height: 170mm;
-            max-height: 170mm;
+            height: auto;
+            min-height: auto;
+            max-height: none;
             page-break-inside: avoid;
             break-inside: avoid;
             border: 1px solid #000;
@@ -133,7 +108,6 @@ function getTableCellStyle() {
             display: flex;
             flex-direction: column;
             box-sizing: border-box;
-            overflow: hidden;
         }
         
         .header {
@@ -174,7 +148,7 @@ function getTableCellStyle() {
         
         .info {
             margin: 2mm 0;
-            font-size: 12px;
+            font-size: 14px;
             flex-shrink: 0;
         }
         
@@ -182,65 +156,76 @@ function getTableCellStyle() {
             font-weight: bold;
         }
         
+        .table-wrapper {
+            width: 100%;
+            margin: 2mm 0 2mm 0;
+            flex: 1;
+            min-height: 0;
+            border: 1px solid #000;
+            border-bottom: 1px solid #000;
+            box-sizing: border-box;
+            overflow: visible;
+        }
+        
+        .table-row {
+            display: flex;
+            width: 100%;
+            height: 22px;
+            line-height: 22px;
+            box-sizing: border-box;
+        }
+        
+        .table-cell {
+            flex: 1;
+            height: 22px;
+            line-height: 22px;
+            font-size: 14px;
+            padding: 0 5px;
+            display: flex;
+            align-items: center;
+            border-right: 1px solid #000;
+            border-bottom: 1px solid #000;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            box-sizing: border-box;
+        }
+        
+        .table-cell:last-child {
+            border-right: none;
+        }
+        
+        .table-header {
+            flex: 1;
+            height: 22px;
+            line-height: 22px;
+            font-size: 14px;
+            padding: 0 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-right: 1px solid #000;
+            border-bottom: 1px solid #000;
+            background-color: #f0f0f0;
+            font-weight: bold;
+            text-transform: uppercase;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            box-sizing: border-box;
+        }
+        
+        .table-header:last-child {
+            border-right: none;
+        }
+        
         table {
             width: 100%;
             border-collapse: collapse;
             border-spacing: 0;
             margin: 2mm 0 2mm 0;
-            font-size: 11px;
             flex: 1;
             min-height: 0;
-            table-layout: fixed;
-        }
-        
-        table tr {
-            height: 4mm !important;
-            min-height: 4mm !important;
-            max-height: 4mm !important;
-            display: table-row;
-        }
-        
-        table th,
-        table td {
-            border: 1px solid #000;
-            padding: 0 !important;
-            padding-left: 2mm !important;
-            padding-right: 2mm !important;
-            text-align: left;
-            line-height: 3.5mm !important;
-            vertical-align: middle !important;
-            overflow: hidden !important;
-            font-size: 8px !important;
-            height: 4mm !important;
-            min-height: 4mm !important;
-            max-height: 4mm !important;
-            white-space: nowrap;
-            text-overflow: ellipsis;
-            box-sizing: border-box !important;
-            display: table-cell !important;
-            margin: 0 !important;
-        }
-        
-        table th {
-            background-color: #f0f0f0;
-            font-weight: bold;
-            font-size: 8px !important;
-            text-align: center;
-            text-transform: uppercase;
-            padding: 0 !important;
-            padding-left: 2mm !important;
-            padding-right: 2mm !important;
-            height: 4mm !important;
-            min-height: 4mm !important;
-            max-height: 4mm !important;
-            line-height: 3.5mm !important;
-            box-sizing: border-box !important;
-            display: table-cell !important;
-            margin: 0 !important;
-        }
-        
-        table td {
-            line-height: 3.5mm !important;
         }
         
         .text-right {
@@ -307,20 +292,30 @@ function getTableCellStyle() {
             .page {
                 width: 200mm !important;
                 height: 315mm !important;
+                page-break-after: always !important;
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
                 display: flex !important;
                 flex-direction: row !important;
                 gap: 3mm !important;
                 align-items: flex-start !important;
             }
             
+            .page:empty {
+                display: none !important;
+            }
+            
+            .page:last-child {
+                page-break-after: auto !important;
+            }
+            
             .slip {
                 width: calc((200mm - 3mm) / 2) !important;
-                height: 170mm !important;
-                min-height: 170mm !important;
-                max-height: 170mm !important;
+                height: auto !important;
+                min-height: auto !important;
+                max-height: none !important;
                 page-break-inside: avoid !important;
                 break-inside: avoid !important;
-                overflow: hidden !important;
             }
             
             .header {
@@ -328,42 +323,28 @@ function getTableCellStyle() {
                 break-inside: avoid;
             }
             
-            table {
+            .table-wrapper {
                 page-break-inside: avoid;
                 break-inside: avoid;
             }
             
-            table tr {
-                height: 4mm !important;
-                min-height: 4mm !important;
-                max-height: 4mm !important;
-                display: table-row !important;
+            .table-row {
+                height: 22px !important;
+                min-height: 22px !important;
+                max-height: 22px !important;
             }
             
-            table th,
-            table td {
-                padding: 0 !important;
-                padding-left: 2mm !important;
-                padding-right: 2mm !important;
-            line-height: 3.5mm !important;
-            overflow: hidden !important;
-            font-size: 8px !important;
-                height: 4mm !important;
-                min-height: 4mm !important;
-                max-height: 4mm !important;
-                white-space: nowrap !important;
-                text-overflow: ellipsis !important;
-                display: table-cell !important;
-                vertical-align: middle !important;
+            .table-cell, .table-header {
+                height: 22px !important;
+                min-height: 22px !important;
+                max-height: 22px !important;
+                line-height: 22px !important;
+                font-size: 14px !important;
+                border-bottom: 1px solid #000 !important;
             }
             
-            table th {
-                font-size: 8px !important;
-                height: 4mm !important;
-                min-height: 4mm !important;
-                max-height: 4mm !important;
-                line-height: 3.5mm !important;
-                display: table-cell !important;
+            .table-header {
+                text-transform: uppercase !important;
             }
             
             .signature-row {
@@ -388,6 +369,8 @@ function getTableCellStyle() {
             endif;
             echo '<div class="page">';
         endif;
+        
+        $count++;
     ?>
         <div class="slip">
             <div class="header">
@@ -414,16 +397,16 @@ function getTableCellStyle() {
             <div class="info">
                 <p><strong>Nama:</strong> <?php echo htmlspecialchars($legger['nama_lengkap']); ?></p>
             </div>
-            <table cellpadding="0" cellspacing="0" style="border-collapse: collapse;">
-                <tr <?php echo getTableRowStyle(); ?>>
-                    <th <?php echo getTableCellStyle(); ?>>Keterangan</th>
-                    <th class="text-center" <?php echo getTableCellStyle(); ?>>Jumlah</th>
-                </tr>
+            <div class="table-wrapper">
+                <div class="table-row">
+                    <div class="table-header" style="flex: 2;">Keterangan</div>
+                    <div class="table-header" style="flex: 1;">Jumlah</div>
+                </div>
                 <?php if ($legger['gaji_pokok'] > 0): ?>
-                <tr <?php echo getTableRowStyle(); ?>>
-                    <td <?php echo getTableCellStyle(); ?>>Gaji Pokok</td>
-                    <td class="text-center" <?php echo getTableCellStyle(); ?>><?php echo formatRupiah($legger['gaji_pokok']); ?></td>
-                </tr>
+                <div class="table-row">
+                    <div class="table-cell" style="flex: 2;">Gaji Pokok</div>
+                    <div class="table-cell" style="flex: 1; justify-content: center;"><?php echo formatRupiah($legger['gaji_pokok']); ?></div>
+                </div>
                 <?php endif; ?>
                 <?php 
                 $tunjangan_items = [];
@@ -435,16 +418,16 @@ function getTableCellStyle() {
                 
                 foreach ($tunjangan_items as $d):
                 ?>
-                    <tr <?php echo getTableRowStyle(); ?>>
-                        <td <?php echo getTableCellStyle(); ?>>Tunjangan <?php echo htmlspecialchars($d['nama_item']); ?></td>
-                        <td class="text-center" <?php echo getTableCellStyle(); ?>><?php echo formatRupiah($d['jumlah']); ?></td>
-                    </tr>
+                    <div class="table-row">
+                        <div class="table-cell" style="flex: 2;">Tunjangan <?php echo htmlspecialchars($d['nama_item']); ?></div>
+                        <div class="table-cell" style="flex: 1; justify-content: center;"><?php echo formatRupiah($d['jumlah']); ?></div>
+                    </div>
                 <?php endforeach; ?>
                 <?php if ($legger['total_tunjangan'] > 0): ?>
-                <tr <?php echo getTableRowStyle(); ?>>
-                    <td class="total" <?php echo getTableCellStyle(); ?>>Total Tunjangan</td>
-                    <td class="text-center total" <?php echo getTableCellStyle(); ?>><?php echo formatRupiah($legger['total_tunjangan']); ?></td>
-                </tr>
+                <div class="table-row">
+                    <div class="table-cell" style="flex: 2; font-weight: bold;">Total Tunjangan</div>
+                    <div class="table-cell" style="flex: 1; justify-content: center; font-weight: bold;"><?php echo formatRupiah($legger['total_tunjangan']); ?></div>
+                </div>
                 <?php endif; ?>
                 <?php 
                 $potongan_items = [];
@@ -456,22 +439,22 @@ function getTableCellStyle() {
                 
                 foreach ($potongan_items as $d):
                 ?>
-                    <tr <?php echo getTableRowStyle(); ?>>
-                        <td <?php echo getTableCellStyle(); ?>>Potongan <?php echo htmlspecialchars($d['nama_item']); ?></td>
-                        <td class="text-center" <?php echo getTableCellStyle(); ?>><?php echo formatRupiah($d['jumlah']); ?></td>
-                    </tr>
+                    <div class="table-row">
+                        <div class="table-cell" style="flex: 2;">Potongan <?php echo htmlspecialchars($d['nama_item']); ?></div>
+                        <div class="table-cell" style="flex: 1; justify-content: center;"><?php echo formatRupiah($d['jumlah']); ?></div>
+                    </div>
                 <?php endforeach; ?>
                 <?php if ($legger['total_potongan'] > 0): ?>
-                <tr <?php echo getTableRowStyle(); ?>>
-                    <td class="total" <?php echo getTableCellStyle(); ?>>Total Potongan</td>
-                    <td class="text-center total" <?php echo getTableCellStyle(); ?>><?php echo formatRupiah($legger['total_potongan']); ?></td>
-                </tr>
+                <div class="table-row">
+                    <div class="table-cell" style="flex: 2; font-weight: bold;">Total Potongan</div>
+                    <div class="table-cell" style="flex: 1; justify-content: center; font-weight: bold;"><?php echo formatRupiah($legger['total_potongan']); ?></div>
+                </div>
                 <?php endif; ?>
-                <tr <?php echo getTableRowStyle(); ?>>
-                    <td class="total" <?php echo getTableCellStyle(); ?>>Gaji Bersih</td>
-                    <td class="text-center total" <?php echo getTableCellStyle(); ?>><?php echo formatRupiah($legger['gaji_bersih']); ?></td>
-                </tr>
-            </table>
+                <div class="table-row">
+                    <div class="table-cell" style="flex: 2; font-weight: bold;">Gaji Bersih</div>
+                    <div class="table-cell" style="flex: 1; justify-content: center; font-weight: bold;"><?php echo formatRupiah($legger['gaji_bersih']); ?></div>
+                </div>
+            </div>
             <?php if (!empty($settings['tempat']) || !empty($settings['hari_tanggal'])): ?>
             <div class="tempat-tanggal">
                 <?php if (!empty($settings['tempat'])): ?>
@@ -496,8 +479,6 @@ function getTableCellStyle() {
             </div>
         </div>
     <?php
-        $count++;
-        
         // Close page after 2 slips or at the end
         if ($count % 2 == 0 || $count == $total):
             echo '</div>'; // Close page
