@@ -167,8 +167,15 @@ $tunjangan_list = $result_tunjangan ? $result_tunjangan->fetch_all(MYSQLI_ASSOC)
                                                     <td><strong><?php echo htmlspecialchars($g['nama_lengkap']); ?></strong></td>
                                                     <td style="text-align: center;"><?php echo $g['tmt'] ? $g['tmt'] : '-'; ?></td>
                                                     <td style="text-align: center;"><?php 
-                                                        if ($g['masa_bakti'] !== null) {
-                                                            echo $g['masa_bakti'] . ' tahun';
+                                                        if ($g['tmt'] !== null) {
+                                                            $tahun_sekarang = (int)date('Y');
+                                                            $tahun_tmt = (int)$g['tmt'];
+                                                            $masa_bakti = $tahun_sekarang - $tahun_tmt;
+                                                            if ($masa_bakti >= 0) {
+                                                                echo $masa_bakti . ' tahun';
+                                                            } else {
+                                                                echo '-';
+                                                            }
                                                         } else {
                                                             echo '-';
                                                         }
@@ -243,21 +250,14 @@ $tunjangan_list = $result_tunjangan ? $result_tunjangan->fetch_all(MYSQLI_ASSOC)
                                     </div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-md-4">
+                                    <div class="col-md-6">
                                         <div class="form-group">
                                             <label>TMT (Tahun Mulai Tugas)</label>
                                             <input type="number" class="form-control" name="tmt" id="tmt" min="1950" max="<?php echo date('Y'); ?>" placeholder="Contoh: 2020">
-                                            <small class="text-muted">Masukkan tahun mulai tugas</small>
+                                            <small class="text-muted">Masukkan tahun mulai tugas. Masa bakti akan dihitung otomatis di tabel.</small>
                                         </div>
                                     </div>
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <label>Masa Bakti</label>
-                                            <input type="text" class="form-control" id="masa_bakti" readonly>
-                                            <small class="text-muted">Otomatis dihitung</small>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
+                                    <div class="col-md-6">
                                         <div class="form-group">
                                             <label>Jumlah Jam Mengajar</label>
                                             <input type="number" class="form-control" name="jumlah_jam_mengajar" id="jumlah_jam_mengajar" min="0" value="0">
@@ -451,7 +451,7 @@ $tunjangan_list = $result_tunjangan ? $result_tunjangan->fetch_all(MYSQLI_ASSOC)
                                         <li>File harus berformat Excel (.xlsx atau .xls)</li>
                                         <li>Kolom wajib: Nama Lengkap</li>
                                         <li>Kolom opsional: TMT, Jumlah Jam Mengajar, Jabatan, Status Pegawai</li>
-                                        <li>Masa Bakti akan dihitung otomatis dari TMT</li>
+                                        <li>Masa Bakti akan dihitung otomatis dari TMT di tabel</li>
                                     </ul>
                                 </div>
                             </div>
@@ -543,16 +543,8 @@ var selectedIds = new Set();
                     updateJabatanSelectedText();
                 }
                 
-                // Calculate masa bakti immediately after setting values
-                calculateMasaBakti();
-                
                 $('#modalTitle').text('Edit Guru');
                 $('#modalTambah').modal('show');
-                
-                // Recalculate after modal is fully shown (in case of timing issues)
-                setTimeout(function() {
-                    calculateMasaBakti();
-                }, 100);
             },
             error: function() {
                 Swal.fire('Error', 'Gagal memuat data guru', 'error');
@@ -560,36 +552,6 @@ var selectedIds = new Set();
         });
     };
 
-    // Function to calculate masa bakti - must be global
-    window.calculateMasaBakti = function() {
-        var tmt = $('#tmt').val();
-        var tahunSekarang = new Date().getFullYear();
-        
-        // Remove any non-numeric characters and trim
-        if (tmt) {
-            tmt = tmt.toString().replace(/\D/g, '').trim();
-        }
-        
-        if (tmt && tmt.length >= 4) {
-            var tahunTmt = parseInt(tmt);
-            // Validate year range (1950 to current year)
-            if (!isNaN(tahunTmt) && tahunTmt >= 1950 && tahunTmt <= tahunSekarang) {
-                var masaBakti = tahunSekarang - tahunTmt;
-                if (masaBakti >= 0) {
-                    $('#masa_bakti').val(masaBakti + ' tahun');
-                    return;
-                }
-            }
-        }
-        // Clear if invalid or empty
-        $('#masa_bakti').val('');
-    };
-
-    // Auto calculate masa bakti when TMT changes (real-time calculation)
-    // Use event delegation to work with dynamically loaded modal content
-    $(document).on('input keyup paste change blur', '#tmt', function() {
-        calculateMasaBakti();
-    });
 
     // Also calculate when modal is shown (in case TMT already has value)
     $('#modalTambah').on('shown.bs.modal', function () {
@@ -609,7 +571,6 @@ var selectedIds = new Set();
     $('#modalTambah').on('hidden.bs.modal', function () {
         $('#formGuru')[0].reset();
         $('#guru_id').val('');
-        $('#masa_bakti').val('');
         $('.jabatan-checkbox').prop('checked', false);
         $('#selectAllJabatan').prop('checked', false);
         if (typeof updateJabatanSelectedText === 'function') {

@@ -80,40 +80,31 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     
     $status_pegawai = $_POST['status_pegawai'] ?? 'Honor';
     
-    // Calculate masa bakti (tahun sekarang - tahun TMT)
-    $masa_bakti = null;
-    if ($tmt) {
-        $tahun_sekarang = (int)date('Y');
-        $tahun_tmt = (int)$tmt;
-        $masa_bakti = $tahun_sekarang - $tahun_tmt;
-    }
-    
     // Convert empty strings to null for optional fields
     $tmt = ($tmt === '' || $tmt === null) ? null : (int)$tmt;
-    $masa_bakti = ($masa_bakti === null) ? null : (int)$masa_bakti;
     $jumlah_jam_mengajar = (int)$jumlah_jam_mengajar;
     
     if ($id) {
         // Update
-        $sql = "UPDATE guru SET nama_lengkap=?, tmt=?, masa_bakti=?, jumlah_jam_mengajar=?, jabatan=?, status_pegawai=? WHERE id=?";
+        $sql = "UPDATE guru SET nama_lengkap=?, tmt=?, jumlah_jam_mengajar=?, jabatan=?, status_pegawai=? WHERE id=?";
         $stmt = $conn->prepare($sql);
         if (!$stmt) {
             $_SESSION['error'] = "Error preparing query: " . $conn->error;
             header('Location: ' . BASE_URL . 'pages/guru/index.php');
             exit();
         }
-        $stmt->bind_param("siiissi", $nama_lengkap, $tmt, $masa_bakti, $jumlah_jam_mengajar, $jabatan, $status_pegawai, $id);
+        $stmt->bind_param("siissi", $nama_lengkap, $tmt, $jumlah_jam_mengajar, $jabatan, $status_pegawai, $id);
         $action = 'mengubah';
     } else {
         // Insert
-        $sql = "INSERT INTO guru (nama_lengkap, tmt, masa_bakti, jumlah_jam_mengajar, jabatan, status_pegawai) VALUES (?, ?, ?, ?, ?, ?)";
+        $sql = "INSERT INTO guru (nama_lengkap, tmt, jumlah_jam_mengajar, jabatan, status_pegawai) VALUES (?, ?, ?, ?, ?)";
         $stmt = $conn->prepare($sql);
         if (!$stmt) {
             $_SESSION['error'] = "Error preparing query: " . $conn->error;
             header('Location: ' . BASE_URL . 'pages/guru/index.php');
             exit();
         }
-        $stmt->bind_param("siiiss", $nama_lengkap, $tmt, $masa_bakti, $jumlah_jam_mengajar, $jabatan, $status_pegawai);
+        $stmt->bind_param("siiss", $nama_lengkap, $tmt, $jumlah_jam_mengajar, $jabatan, $status_pegawai);
         $action = 'menambah';
     }
     

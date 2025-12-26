@@ -53,21 +53,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
         
         // TMT
-        $masa_bakti = null;
         if (isset($tmt[$id]) && trim($tmt[$id]) !== '') {
             $tmt_value = (int)$tmt[$id];
             if ($tmt_value >= 1950 && $tmt_value <= $tahun_sekarang) {
                 $update_fields[] = "tmt = ?";
                 $params[] = $tmt_value;
                 $types .= 'i';
-                
-                // Calculate masa bakti
-                $masa_bakti = $tahun_sekarang - $tmt_value;
-                if ($masa_bakti >= 0) {
-                    $update_fields[] = "masa_bakti = ?";
-                    $params[] = $masa_bakti;
-                    $types .= 'i';
-                }
             }
         }
         

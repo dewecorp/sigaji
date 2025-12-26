@@ -79,23 +79,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['excel_file'])) {
                         $status_pegawai = 'Honor';
                     }
                     
-                    // Calculate masa bakti
-                    $masa_bakti = null;
-                    if ($tmt) {
-                        $tahun_sekarang = (int)date('Y');
-                        $tahun_tmt = (int)$tmt;
-                        if ($tahun_tmt >= 1950 && $tahun_tmt <= $tahun_sekarang) {
-                            $masa_bakti = $tahun_sekarang - $tahun_tmt;
-                        }
-                    }
-                    
                     // Insert data
-                    $sql = "INSERT INTO guru (nama_lengkap, tmt, masa_bakti, jumlah_jam_mengajar, jabatan, status_pegawai) 
-                            VALUES (?, ?, ?, ?, ?, ?)";
+                    $sql = "INSERT INTO guru (nama_lengkap, tmt, jumlah_jam_mengajar, jabatan, status_pegawai) 
+                            VALUES (?, ?, ?, ?, ?)";
                     $stmt = $conn->prepare($sql);
                     
                     if ($stmt) {
-                        $stmt->bind_param("siiiss", $nama_lengkap, $tmt, $masa_bakti, $jumlah_jam_mengajar, $jabatan, $status_pegawai);
+                        $stmt->bind_param("siiss", $nama_lengkap, $tmt, $jumlah_jam_mengajar, $jabatan, $status_pegawai);
                         
                         if ($stmt->execute()) {
                             $success_count++;
