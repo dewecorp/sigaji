@@ -107,7 +107,7 @@ $all_guru = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
                                                         </span>
                                                     </td>
                                                     <td>
-                                                        <button class="btn btn-sm btn-info btn-edit-potongan" data-id="<?php echo $p['id']; ?>" onclick="if(typeof editPotongan==='function'){editPotongan(<?php echo $p['id']; ?>);}else{console.error('editPotongan not defined');}" data-toggle="tooltip" title="Edit">
+                                                        <button class="btn btn-sm btn-info btn-edit-potongan" data-id="<?php echo $p['id']; ?>" onclick="if(typeof editPotongan==='function'){editPotongan(<?php echo $p['id']; ?>);}else{// console.error('editPotongan not defined');}" data-toggle="tooltip" title="Edit">
                                                             <i class="fas fa-edit"></i>
                                                         </button>
                                                         <button class="btn btn-sm btn-danger" onclick="confirmDelete('<?php echo BASE_URL; ?>pages/potongan/delete.php?id=<?php echo $p['id']; ?>')" data-toggle="tooltip" title="Hapus">
@@ -310,11 +310,11 @@ function unformatRupiah(rupiah) {
 
 // Define editPotongan function immediately (will be available globally)
 function editPotongan(id) {
-    console.log('editPotongan function called with ID:', id);
+    // console.log('editPotongan function called with ID:', id);
     
     // Wait for jQuery if not ready
     if (typeof jQuery === 'undefined') {
-        console.error('jQuery not loaded yet, retrying...');
+        // console.error('jQuery not loaded yet, retrying...');
         setTimeout(function() {
             editPotongan(id);
         }, 100);
@@ -323,14 +323,14 @@ function editPotongan(id) {
     
     var $ = jQuery;
     
-    console.log('editPotongan executing with ID:', id);
+    // console.log('editPotongan executing with ID:', id);
     
     $.ajax({
         url: 'get.php?id=' + id,
         type: 'GET',
         dataType: 'json',
         success: function(data) {
-            console.log('Data received from get.php:', data);
+            // console.log('Data received from get.php:', data);
             
             if (data.error) {
                 Swal.fire('Error', data.error, 'error');
@@ -339,7 +339,7 @@ function editPotongan(id) {
             
             // Validate data exists
             if (!data || !data.id) {
-                console.error('Invalid data received:', data);
+                // console.error('Invalid data received:', data);
                 Swal.fire('Error', 'Data tidak valid', 'error');
                 return;
             }
@@ -355,10 +355,10 @@ function editPotongan(id) {
             var potonganId = data.id ? parseInt(data.id) : '';
             if (potonganId && potonganId > 0) {
                 $('#potongan_id').val(potonganId.toString());
-                console.log('Setting potongan_id to:', potonganId, '(type:', typeof potonganId, ')');
+                // console.log('Setting potongan_id to:', potonganId, '(type:', typeof potonganId, ')');
             } else {
                 $('#potongan_id').val('');
-                console.warn('Invalid potongan ID:', data.id);
+                // console.warn('Invalid potongan ID:', data.id);
             }
             $('#nama_potongan').val(data.nama_potongan || '');
             
@@ -380,7 +380,7 @@ function editPotongan(id) {
             var aktif = data.aktif == 1 || data.aktif == '1' || data.aktif === 1;
             $('#aktif').prop('checked', aktif);
             
-            console.log('Form filled - ID:', data.id, 'Nama:', data.nama_potongan, 'Jumlah:', jumlah, 'Aktif:', aktif);
+            // console.log('Form filled - ID:', data.id, 'Nama:', data.nama_potongan, 'Jumlah:', jumlah, 'Aktif:', aktif);
             
             // Load selected gurus for this potongan
             $.ajax({
@@ -388,7 +388,7 @@ function editPotongan(id) {
                 type: 'GET',
                 dataType: 'json',
                 success: function(guruData) {
-                    console.log('Guru data received:', guruData);
+                    // console.log('Guru data received:', guruData);
                     
                     // Make sure all guru items are visible first (clear any previous search)
                     $('.guru-item').show();
@@ -401,14 +401,14 @@ function editPotongan(id) {
                     
                     // Check selected gurus
                     if (guruData && guruData.guru_ids && guruData.guru_ids.length > 0) {
-                        console.log('Checking guru IDs:', guruData.guru_ids);
+                        // console.log('Checking guru IDs:', guruData.guru_ids);
                         guruData.guru_ids.forEach(function(guruId) {
                             var checkbox = $('#guru_' + guruId);
                             if (checkbox.length > 0) {
                                 checkbox.prop('checked', true);
-                                console.log('Checked guru ID:', guruId);
+                                // console.log('Checked guru ID:', guruId);
                             } else {
-                                console.warn('Guru checkbox not found for ID:', guruId);
+                                // console.warn('Guru checkbox not found for ID:', guruId);
                             }
                         });
                         
@@ -416,9 +416,9 @@ function editPotongan(id) {
                         var total = $('.guru-checkbox').length;
                         var checked = $('.guru-checkbox:checked').length;
                         $('#selectAllGuru').prop('checked', total > 0 && checked === total);
-                        console.log('Total checkboxes:', total, 'Checked:', checked);
+                        // console.log('Total checkboxes:', total, 'Checked:', checked);
                     } else {
-                        console.log('No guru IDs found, leaving all unchecked');
+                        // console.log('No guru IDs found, leaving all unchecked');
                     }
                     
                     if (typeof updateGuruSelectedText === 'function') {
@@ -432,7 +432,7 @@ function editPotongan(id) {
                                 var checkbox = $('#guru_' + guruId);
                                 if (checkbox.length > 0 && !checkbox.is(':checked')) {
                                     checkbox.prop('checked', true);
-                                    console.log('Re-checked guru ID:', guruId);
+                                    // console.log('Re-checked guru ID:', guruId);
                                 }
                             });
                             if (typeof updateGuruSelectedText === 'function') {
@@ -446,7 +446,7 @@ function editPotongan(id) {
                     $('#modalTambah').modal('show');
                 },
                 error: function(xhr, status, error) {
-                    console.error('Error loading guru data:', error, xhr.responseText);
+                    // console.error('Error loading guru data:', error, xhr.responseText);
                     // Make sure all guru items are visible
                     $('.guru-item').show();
                     $('#guruSearchInput').val('');
@@ -464,7 +464,7 @@ function editPotongan(id) {
             });
         },
         error: function(xhr, status, error) {
-            console.error('Error loading potongan:', error, xhr.responseText);
+            // console.error('Error loading potongan:', error, xhr.responseText);
             Swal.fire('Error', 'Gagal memuat data potongan: ' + error, 'error');
         }
     });
@@ -481,7 +481,7 @@ function editPotongan(id) {
             if (retryCount < maxRetries) {
                 setTimeout(initPotonganForm, 50);
             } else {
-                console.error('jQuery failed to load for form handlers after ' + maxRetries + ' retries');
+                // console.error('jQuery failed to load for form handlers after ' + maxRetries + ' retries');
             }
             return;
         }
@@ -495,11 +495,11 @@ function editPotongan(id) {
             // Event delegation for edit buttons (works with DataTable pagination)
             $(document).on('click', '.btn-edit-potongan', function() {
                 var id = $(this).data('id');
-                console.log('Edit button clicked via delegation, ID:', id);
+                // console.log('Edit button clicked via delegation, ID:', id);
                 if (id) {
                     editPotongan(id);
                 } else {
-                    console.error('No ID found on edit button');
+                    // console.error('No ID found on edit button');
                 }
             });
             
@@ -682,7 +682,7 @@ function editPotongan(id) {
                 e.preventDefault();
                 e.stopPropagation();
                 
-                console.log('Form submit triggered!');
+                // console.log('Form submit triggered!');
                 
                 // Ensure hidden input is updated before submission
                 var formatted = $('#jumlah_potongan').val();
@@ -702,10 +702,10 @@ function editPotongan(id) {
                     }
                 });
                 
-                console.log('Form submission - Selected guru IDs:', guruIds);
-                console.log('Form submission - Total checkboxes:', $('.guru-checkbox').length);
-                console.log('Form submission - Checked checkboxes:', $('.guru-checkbox:checked').length);
-                console.log('Form submission - Visible checked:', $('.guru-item:visible .guru-checkbox:checked').length);
+                // console.log('Form submission - Selected guru IDs:', guruIds);
+                // console.log('Form submission - Total checkboxes:', $('.guru-checkbox').length);
+                // console.log('Form submission - Checked checkboxes:', $('.guru-checkbox:checked').length);
+                // console.log('Form submission - Visible checked:', $('.guru-item:visible .guru-checkbox:checked').length);
                 
                 // Validate: at least one guru must be selected
                 if (guruIds.length === 0) {
@@ -739,14 +739,14 @@ function editPotongan(id) {
                 });
                 
                 // Debug: log values before submission
-                console.log('=== FORM SUBMISSION DEBUG ===');
-                console.log('Potongan ID:', potonganId);
-                console.log('Is Edit Mode:', potonganId && potonganId !== '');
-                console.log('Nama Potongan:', formData.nama_potongan);
-                console.log('Jumlah Potongan Hidden:', formData.jumlah_potongan_hidden);
-                console.log('Aktif:', formData.aktif);
-                console.log('Guru IDs:', guruIds);
-                console.log('Guru IDs Count:', guruIds.length);
+                // console.log('=== FORM SUBMISSION DEBUG ===');
+                // console.log('Potongan ID:', potonganId);
+                // console.log('Is Edit Mode:', potonganId && potonganId !== '');
+                // console.log('Nama Potongan:', formData.nama_potongan);
+                // console.log('Jumlah Potongan Hidden:', formData.jumlah_potongan_hidden);
+                // console.log('Aktif:', formData.aktif);
+                // console.log('Guru IDs:', guruIds);
+                // console.log('Guru IDs Count:', guruIds.length);
                 
                 // Validate
                 if (!formData.nama_potongan || formData.nama_potongan.trim() === '') {
@@ -776,13 +776,13 @@ function editPotongan(id) {
                     contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
                     dataType: 'json',
                     beforeSend: function() {
-                        console.log('Sending AJAX request');
-                        console.log('Form Data:', formData);
-                        console.log('Guru IDs being sent:', guruIds);
-                        console.log('Data String:', dataString);
+                        // console.log('Sending AJAX request');
+                        // console.log('Form Data:', formData);
+                        // console.log('Guru IDs being sent:', guruIds);
+                        // console.log('Data String:', dataString);
                     },
                     success: function(response) {
-                        console.log('Response received:', response);
+                        // console.log('Response received:', response);
                         Swal.close();
                         if (response && response.success) {
                             Swal.fire({
@@ -803,7 +803,7 @@ function editPotongan(id) {
                         }
                     },
                     error: function(xhr, status, error) {
-                        console.error('AJAX Error:', error, xhr.responseText);
+                        // console.error('AJAX Error:', error, xhr.responseText);
                         Swal.close();
                         var errorMsg = 'Gagal menyimpan data: ' + error;
                         try {
@@ -848,7 +848,7 @@ function editPotongan(id) {
             if (retryCount < maxRetries) {
                 setTimeout(initPotonganPage, 50);
             } else {
-                console.error('jQuery failed to load after ' + maxRetries + ' retries');
+                // console.error('jQuery failed to load after ' + maxRetries + ' retries');
             }
             return;
         }
@@ -863,7 +863,7 @@ function editPotongan(id) {
                         initPotonganPage();
                     }, 200);
                 } else {
-                    console.error('DataTable failed to load after ' + maxRetries + ' retries');
+                    // console.error('DataTable failed to load after ' + maxRetries + ' retries');
                 }
                 return;
             }

@@ -26,9 +26,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $honor_per_jam = 0;
     $post_honor = $_POST['honor_per_jam'] ?? '';
     
-    // Debug: log all POST data
-    file_put_contents(__DIR__ . '/../../debug_post.log', date('Y-m-d H:i:s') . " - POST data: " . print_r($_POST, true) . "\n", FILE_APPEND);
-    
     // Clean and convert honor_per_jam to float
     if (!empty($post_honor) && $post_honor !== '' && $post_honor !== null) {
         // Remove any non-numeric characters except decimal point
@@ -37,9 +34,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $honor_per_jam = floatval($cleaned);
         }
     }
-    
-    // Debug log
-    file_put_contents(__DIR__ . '/../../debug_post.log', date('Y-m-d H:i:s') . " - Processed: tahun_ajaran=" . $tahun_ajaran . ", honor=" . $honor_per_jam . "\n", FILE_APPEND);
     
     // Get current logo from database (to keep it if no new logo uploaded)
     $current_logo = null;
@@ -136,15 +130,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Parameter types: s=string, i=integer, d=double, s=string (logo), s=string (tempat), s=string (hari_tanggal)
     $stmt->bind_param("ssssisssdsss", $nama_madrasah, $nama_kepala, $nama_bendahara, $periode_aktif, $jumlah_periode, $periode_mulai, $periode_akhir, $tahun_ajaran, $honor_per_jam, $logo, $tempat, $hari_tanggal);
     
-    $debug_file = __DIR__ . '/../../debug_post.log';
-    
     if ($stmt->execute()) {
         logActivity($conn, "Mengubah pengaturan sistem", 'success');
         $_SESSION['success'] = "Pengaturan berhasil disimpan";
-        file_put_contents($debug_file, date('Y-m-d H:i:s') . " - SUCCESS: Saved tahun_ajaran=" . $tahun_ajaran . ", honor=" . $honor_per_jam . "\n", FILE_APPEND);
     } else {
         $_SESSION['error'] = "Gagal menyimpan pengaturan: " . $stmt->error;
-        file_put_contents($debug_file, date('Y-m-d H:i:s') . " - ERROR: " . $stmt->error . "\n", FILE_APPEND);
     }
 }
 

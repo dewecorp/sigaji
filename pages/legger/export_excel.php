@@ -404,7 +404,6 @@ try {
         $writer = new Xlsx($spreadsheet);
         $writer->save('php://output');
     } catch (Exception $write_error) {
-        error_log('Error writing Excel file: ' . $write_error->getMessage());
         throw $write_error;
     }
     exit();
@@ -412,10 +411,6 @@ try {
 } catch (Exception $e) {
     // Clear output buffer
     ob_end_clean();
-    
-    // Log error for debugging
-    error_log('Excel export error: ' . $e->getMessage());
-    error_log('Stack trace: ' . $e->getTraceAsString());
     
     // Fallback: redirect with error
     $_SESSION['error'] = 'Gagal export Excel: ' . $e->getMessage();

@@ -478,10 +478,7 @@ var selectedIds = new Set();
         if (typeof jQuery === 'undefined' || typeof $ === 'undefined') {
             retryCount++;
             if (retryCount < maxRetries) {
-                console.error('jQuery belum ter-load! Retry ' + retryCount);
                 setTimeout(initGuruPage, 100);
-            } else {
-                console.error('jQuery failed to load after ' + maxRetries + ' retries');
             }
             return;
         }
@@ -716,7 +713,6 @@ var selectedIds = new Set();
     
     // Check if DataTables Buttons is loaded
     if (typeof $.fn.dataTable.Buttons === 'undefined') {
-        console.error('DataTables Buttons library tidak ditemukan!');
         alert('DataTables Buttons library tidak ditemukan! Pastikan library ter-load dengan benar.');
     }
     
@@ -862,7 +858,6 @@ var selectedIds = new Set();
         var btnDelete = $('#btnBulkDelete');
         
         if (btnEdit.length === 0 || btnDelete.length === 0) {
-            console.error('Tombol edit/hapus tidak ditemukan!');
             return;
         }
         
@@ -878,7 +873,6 @@ var selectedIds = new Set();
                      .removeAttr('disabled')
                      .css({'opacity': '1', 'pointer-events': 'auto'})
                      .show();
-            console.log('Buttons enabled, selected:', selected);
         } else {
             // Disable tapi tetap visible
             btnEdit.prop('disabled', true)
@@ -889,7 +883,6 @@ var selectedIds = new Set();
                      .addClass('disabled')
                      .css({'opacity': '0.6', 'pointer-events': 'none'})
                      .show();
-            console.log('Buttons disabled');
         }
     };
     
@@ -901,12 +894,9 @@ var selectedIds = new Set();
         // Gunakan is(':checked') untuk mendapatkan state setelah change
         var isChecked = checkbox.is(':checked');
         
-        console.log('Select All changed:', isChecked);
-        
         // Clear all selected IDs first if unchecking
         if (!isChecked) {
             selectedIds.clear();
-            console.log('Cleared all selected IDs');
         }
         
         // Handle all rows in DataTable (including filtered and all pages)
@@ -951,7 +941,6 @@ var selectedIds = new Set();
             }
         });
         
-        console.log('Selected IDs after select all:', Array.from(selectedIds), 'Size:', selectedIds.size);
         updateBulkActions();
     });
     
@@ -963,8 +952,6 @@ var selectedIds = new Set();
         // Gunakan is(':checked') setelah event, bukan prop('checked') karena prop mungkin belum update
         var isChecked = checkbox.is(':checked');
         
-        console.log('Row checkbox changed:', id, isChecked);
-        
         if (id) {
             if (isChecked) {
                 selectedIds.add(id);
@@ -973,7 +960,6 @@ var selectedIds = new Set();
             }
         }
         
-        console.log('Selected IDs:', Array.from(selectedIds));
         updateBulkActions();
         
         // Update select all checkbox state for current page
@@ -1007,7 +993,6 @@ var selectedIds = new Set();
         e.preventDefault();
         e.stopPropagation();
         var idsArray = Array.from(selectedIds);
-        console.log('Bulk delete clicked, selected:', idsArray);
         
         if (idsArray.length > 0) {
             Swal.fire({
@@ -1038,7 +1023,6 @@ var selectedIds = new Set();
         e.preventDefault();
         e.stopPropagation();
         var idsArray = Array.from(selectedIds);
-        console.log('Bulk edit clicked, selected:', idsArray);
         
         if (idsArray.length > 0) {
             // Set IDs to hidden input
@@ -1290,7 +1274,6 @@ var selectedIds = new Set();
     // Force update on page load
     setTimeout(function() {
         updateBulkActions();
-        console.log('Initial updateBulkActions called');
     }, 1000);
     
     // Ensure buttons are visible and properly styled
@@ -1325,8 +1308,6 @@ var selectedIds = new Set();
                 'gap': '5px'
             });
         }
-        
-        console.log('Export buttons initialized');
     }, 500);
     
     // Initialize bulk actions on page load

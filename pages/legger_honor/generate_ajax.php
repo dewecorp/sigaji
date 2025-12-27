@@ -141,7 +141,6 @@ try {
             
         } catch (Exception $e) {
             $errors[] = $p['nama_pembina'] . ': ' . $e->getMessage();
-            error_log('Error processing pembina ' . $p['nama_pembina'] . ': ' . $e->getMessage());
         }
     }
     
@@ -179,7 +178,6 @@ try {
     ]);
     
 } catch (Exception $e) {
-    error_log('Error in generate_ajax.php: ' . $e->getMessage());
     echo json_encode([
         'success' => false,
         'message' => 'Error: ' . $e->getMessage()

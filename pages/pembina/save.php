@@ -61,7 +61,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
         $stmt->close();
     } catch (Exception $e) {
-        error_log('Error in pembina/save.php: ' . $e->getMessage());
         echo json_encode(['success' => false, 'message' => $e->getMessage()]);
     }
 } else {

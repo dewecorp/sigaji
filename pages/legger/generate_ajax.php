@@ -110,9 +110,6 @@ try {
                 $nama_tunjangan_lower = strtolower(trim($t['nama_tunjangan']));
                 $is_masa_bakti = (strpos($nama_tunjangan_lower, 'masa') !== false && strpos($nama_tunjangan_lower, 'bakti') !== false);
                 
-                // Debug: log tunjangan yang sedang diproses
-                error_log("Processing tunjangan: {$t['nama_tunjangan']} (ID: {$t['id']}) for guru: {$g['nama_lengkap']}");
-                
                 if ($is_masa_bakti) {
                     // Calculate: masa_bakti × jumlah_tunjangan_per_tahun (per bulan)
                     $jumlah_tunjangan_per_tahun = isset($t['jumlah_tunjangan']) ? floatval($t['jumlah_tunjangan']) : 0;
@@ -170,22 +167,14 @@ try {
                     $jumlah = $jumlah * $jumlah_periode;
                 }
                 
-                // Debug: log jumlah tunjangan yang ditemukan
-                error_log("Tunjangan {$t['nama_tunjangan']} untuk {$g['nama_lengkap']}: {$jumlah}");
-                
                 $total_tunjangan += $jumlah;
                 $tunjangan_details[$t['id']] = $jumlah;
             }
-            
-            // Debug: log total tunjangan
-            error_log("Total tunjangan untuk {$g['nama_lengkap']}: {$total_tunjangan}");
             
             // Calculate total potongan dari potongan_detail
             $total_potongan = 0;
             $potongan_details = [];
             foreach ($potongan as $p) {
-                // Debug: log potongan yang sedang diproses
-                error_log("Processing potongan: {$p['nama_potongan']} (ID: {$p['id']}) for guru: {$g['nama_lengkap']}");
                 // Hanya ambil data dari periode aktif, jangan copy dari periode sebelumnya
                 // Jika tidak ada data di periode aktif, berarti jumlah = 0 (guru tidak menerima potongan)
                 $sql = "SELECT jumlah FROM potongan_detail WHERE guru_id = ? AND potongan_id = ? AND periode = ?";
@@ -203,15 +192,9 @@ try {
                 // Kalikan dengan jumlah_periode
                 $jumlah = $jumlah * $jumlah_periode;
                 
-                // Debug: log jumlah potongan yang ditemukan
-                error_log("Potongan {$p['nama_potongan']} untuk {$g['nama_lengkap']}: {$jumlah}");
-                
                 $total_potongan += $jumlah;
                 $potongan_details[$p['id']] = $jumlah;
             }
-            
-            // Debug: log total potongan
-            error_log("Total potongan untuk {$g['nama_lengkap']}: {$total_potongan}");
             
             // PERHITUNGAN GAJI BERSIH:
             // Formula: Gaji Bersih = Gaji Pokok + Total Tunjangan - Total Potongan
@@ -221,11 +204,6 @@ try {
             // 3. Jumlahkan semua Potongan dari potongan_detail
             // 4. Hitung: Gaji Pokok + Total Tunjangan - Total Potongan
             $gaji_bersih = $gaji_pokok_jumlah + $total_tunjangan - $total_potongan;
-            
-            // Log perhitungan untuk debugging (hanya jika ada nilai)
-            if ($gaji_pokok_jumlah > 0 || $total_tunjangan > 0 || $total_potongan > 0) {
-                error_log("Guru: {$g['nama_lengkap']} | Jumlah Periode: {$jumlah_periode} | Gaji Pokok: {$gaji_pokok_jumlah} | Tunjangan: {$total_tunjangan} | Potongan: {$total_potongan} | Gaji Bersih: {$gaji_bersih}");
-            }
             
             // Insert or update legger
             $sql = "INSERT INTO legger_gaji (guru_id, periode, gaji_pokok, total_tunjangan, total_potongan, gaji_bersih) 
@@ -400,7 +378,6 @@ try {
                 $conn->rollback();
             }
             $errors[] = $g['nama_lengkap'] . ': ' . $e->getMessage();
-            error_log('Error processing guru ' . $g['nama_lengkap'] . ': ' . $e->getMessage());
             // Continue processing other gurus
         }
     }
@@ -440,8 +417,6 @@ try {
     if ($conn->in_transaction) {
         $conn->rollback();
     }
-    error_log('Generate legger error: ' . $e->getMessage());
-    error_log('Stack trace: ' . $e->getTraceAsString());
     
     // Return error with more details
     $error_message = 'Gagal generate legger: ' . $e->getMessage();

@@ -26,7 +26,6 @@ if ($stmt) {
     $stmt->close();
 } else {
     $legger = [];
-    error_log('Error preparing query in legger_honor/index.php: ' . $conn->error);
 }
 ?>
 

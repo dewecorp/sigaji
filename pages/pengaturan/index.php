@@ -27,9 +27,6 @@ $settings['jumlah_periode'] = isset($settings['jumlah_periode']) ? intval($setti
 $settings['periode_aktif'] = isset($settings['periode_aktif']) ? $settings['periode_aktif'] : date('Y-m');
 $settings['periode_mulai'] = isset($settings['periode_mulai']) ? $settings['periode_mulai'] : date('Y-m');
 $settings['periode_akhir'] = isset($settings['periode_akhir']) ? $settings['periode_akhir'] : date('Y-m');
-
-// Debug: log settings values
-error_log("Settings loaded - tahun_ajaran: " . $settings['tahun_ajaran'] . ", honor_per_jam: " . $settings['honor_per_jam']);
 ?>
 
             <div class="main-content">
@@ -293,13 +290,6 @@ error_log("Settings loaded - tahun_ajaran: " . $settings['tahun_ajaran'] . ", ho
             var honorValue = (!isNaN(honorDataValue) && honorDataValue !== null) ? honorDataValue : 
                              (!isNaN(honorHiddenValue) && honorHiddenValue !== null) ? honorHiddenValue : 0;
             
-            console.log('=== INITIALIZATION DEBUG ===');
-            console.log('Honor values:', {
-                honorData: honorDataValue,
-                honorHidden: honorHiddenValue,
-                honorFinal: honorValue
-            });
-            
             // Format and display honor_per_jam, and update hidden inputs
             // Always format, even if 0
             var honorFormatted = formatRupiah(honorValue.toString());
@@ -308,8 +298,6 @@ error_log("Settings loaded - tahun_ajaran: " . $settings['tahun_ajaran'] . ", ho
             $('#honor_per_jam_hidden').val(honorValue);
             $('input[name="honor_per_jam"]').val(honorValue);
             
-            console.log('Displayed values:', {
-                honor_display: $('#honor_per_jam').val(),
                 honor_formatted: honorFormatted
             });
             
@@ -361,7 +349,6 @@ error_log("Settings loaded - tahun_ajaran: " . $settings['tahun_ajaran'] . ", ho
                 $('input[name="' + fieldName + '"]').val(numericValue);
                 $('#' + fieldName + '_hidden').val(numericValue);
                 
-                console.log('Input updated:', fieldName, '=', numericValue, 'hidden:', $('input[name="' + fieldName + '"]').val());
             });
             
             // Format on blur - final update
@@ -383,7 +370,6 @@ error_log("Settings loaded - tahun_ajaran: " . $settings['tahun_ajaran'] . ", ho
                 $('input[name="' + fieldName + '"]').val(numericValue);
                 $('#' + fieldName + '_hidden').val(numericValue);
                 
-                console.log('Blur updated:', fieldName, '=', numericValue, 'hidden:', $('input[name="' + fieldName + '"]').val());
             });
             
             // Prevent non-numeric input (except backspace, delete, arrow keys)
@@ -436,15 +422,7 @@ error_log("Settings loaded - tahun_ajaran: " . $settings['tahun_ajaran'] . ", ho
                 
                 // Verify values are set - create a small delay to ensure DOM is updated
                 setTimeout(function() {
-                    console.log('=== FORM SUBMIT (after delay) ===');
-                    console.log('Values to submit:', {
-                        jumlah_periode: jumlahPeriode,
-                        periode_aktif: $('#periode_aktif_hidden').val(),
-                        periode_mulai: $('#periode_mulai').val(),
-                        periode_akhir: $('#periode_akhir').val(),
-                        tahun_ajaran: $('#tahun_ajaran').val(),
-                        honor_per_jam: honorValue
-                    });
+                    // Values are ready for submission
                 }, 50);
             });
         });

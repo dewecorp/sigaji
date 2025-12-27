@@ -6,11 +6,6 @@ requireLogin();
 header('Content-Type: application/json');
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    // Debug: log all POST data
-    error_log("=== POTONGAN SAVE DEBUG ===");
-    error_log("POST data: " . json_encode($_POST));
-    error_log("POST guru_ids: " . (isset($_POST['guru_ids']) ? json_encode($_POST['guru_ids']) : 'NOT SET'));
-    
     // Parse ID - handle both string and integer
     $id_raw = $_POST['id'] ?? null;
     $id = null;
@@ -23,11 +18,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     
     $nama_potongan = trim($_POST['nama_potongan'] ?? '');
     
-    error_log("=== ID PARSING ===");
-    error_log("ID Raw: " . var_export($id_raw, true));
-    error_log("ID Parsed: " . var_export($id, true));
-    error_log("Is Edit Mode: " . ($id !== null ? 'YES' : 'NO'));
-    
     // Get jumlah_potongan from hidden input first, fallback to regular input
     $jumlah_potongan_raw = $_POST['jumlah_potongan_hidden'] ?? $_POST['jumlah_potongan'] ?? '0';
     
@@ -39,8 +29,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Convert to float
     $jumlah_potongan = floatval($jumlah_potongan_cleaned);
     
-    // Debug log
-    error_log("Potongan save - ID: " . ($id ?? 'null') . ", Raw: " . $jumlah_potongan_raw . ", Cleaned: " . $jumlah_potongan_cleaned . ", Final: " . $jumlah_potongan);
     $aktif = isset($_POST['aktif']) ? 1 : 0;
     
     // Validation
@@ -61,14 +49,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     
     if ($id && $id > 0) {
         // Update existing record
-        error_log("=== UPDATE MODE ===");
-        error_log("Updating potongan ID: " . $id);
-        error_log("Data - Nama: " . $nama_potongan . ", Jumlah: " . $jumlah_potongan . ", Aktif: " . $aktif);
-        
         $sql = "UPDATE potongan SET nama_potongan=?, jumlah_potongan=?, aktif=? WHERE id=?";
         $stmt = $conn->prepare($sql);
         if (!$stmt) {
-            error_log("Prepare failed: " . $conn->error);
             echo json_encode([
                 'success' => false,
                 'message' => 'Gagal menyiapkan query: ' . $conn->error
@@ -82,7 +65,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $sql = "INSERT INTO potongan (nama_potongan, jumlah_potongan, aktif) VALUES (?, ?, ?)";
         $stmt = $conn->prepare($sql);
         if (!$stmt) {
-            error_log("Prepare failed: " . $conn->error);
             echo json_encode([
                 'success' => false,
                 'message' => 'Gagal menyiapkan query: ' . $conn->error
@@ -93,16 +75,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $action = 'menambah';
     }
     
-    // Log values for debugging
-    error_log("Potongan save - ID: " . ($id ?? 'null') . ", Nama: " . $nama_potongan . ", Jumlah: " . $jumlah_potongan . ", Aktif: " . $aktif);
-    error_log("Action: " . ($action ?? 'unknown'));
-    
     $execute_result = $stmt->execute();
-    error_log("Execute result: " . ($execute_result ? 'SUCCESS' : 'FAILED'));
     
     if (!$execute_result) {
         $error_msg = $stmt->error ? $stmt->error : "Database error";
-        error_log("Potongan save execute error: " . $error_msg);
         echo json_encode([
             'success' => false,
             'message' => 'Gagal ' . ($id ? 'mengubah' : 'menambah') . ' data potongan: ' . $error_msg
@@ -113,7 +89,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     
     if ($execute_result) {
         $potongan_id = $id ? $id : $conn->insert_id;
-        error_log("Potongan ID for detail: " . $potongan_id);
         
         // Get periode_aktif from settings
         $sql = "SELECT periode_aktif FROM settings LIMIT 1";
@@ -128,9 +103,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         if (isset($_POST['guru_ids']) && is_array($_POST['guru_ids'])) {
             $guru_ids = $_POST['guru_ids'];
         }
-        
-        error_log("Raw POST guru_ids: " . var_export($_POST['guru_ids'] ?? 'NOT SET', true));
-        error_log("All POST keys: " . implode(', ', array_keys($_POST)));
         
         // If still empty, try to find any guru_ids keys
         if (empty($guru_ids)) {
@@ -151,13 +123,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         });
         $guru_ids = array_values($guru_ids); // Re-index array
         
-        // Debug log
-        error_log("Potongan save - Received guru_ids: " . json_encode($guru_ids));
-        error_log("Potongan save - guru_ids count: " . count($guru_ids));
-        
         // Validate: at least one guru must be selected
         if (empty($guru_ids)) {
-            error_log("ERROR: No guru_ids provided - cannot save potongan_detail");
             echo json_encode([
                 'success' => false,
                 'message' => 'Pilih minimal satu guru untuk potongan ini'
@@ -185,15 +152,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     $detail_stmt->bind_param("iids", $guru_id, $potongan_id, $jumlah_potongan, $periode_aktif);
                     if ($detail_stmt->execute()) {
                         $inserted_count++;
-                    } else {
-                        error_log("Failed to insert potongan_detail for guru_id: " . $guru_id . ", Error: " . $detail_stmt->error);
                     }
                 }
             }
             $detail_stmt->close();
-            error_log("Inserted " . $inserted_count . " potongan_detail records for potongan_id: " . $potongan_id . ", periode: " . $periode_aktif);
-        } else {
-            error_log("No guru_ids provided for potongan_detail insertion");
         }
         
         logActivity($conn, "{$action} potongan: {$nama_potongan}", 'success');
@@ -203,7 +165,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         ]);
     } else {
         $error_msg = $stmt->error ? $stmt->error : "Database error";
-        error_log("Potongan save error: " . $error_msg);
         echo json_encode([
             'success' => false,
             'message' => 'Gagal ' . ($id ? 'mengubah' : 'menambah') . ' data potongan: ' . $error_msg

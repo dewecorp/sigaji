@@ -91,7 +91,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
         $stmt->close();
     } catch (Exception $e) {
-        error_log('Error in honor/save.php: ' . $e->getMessage());
         echo json_encode(['success' => false, 'message' => $e->getMessage()]);
     }
 } else {

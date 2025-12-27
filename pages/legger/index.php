@@ -456,8 +456,6 @@ var tableLegger;
         var $ = window.jQuery;
         
         $(document).ready(function() {
-            console.log('Legger page initialized');
-            
             // Clear DataTable state
             if (typeof(Storage) !== "undefined") {
                 Object.keys(localStorage).forEach(function(key) {
@@ -517,8 +515,6 @@ var tableLegger;
                 e.preventDefault();
                 e.stopPropagation();
                 
-                console.log('Generate Legger button clicked');
-                
                 var btn = $(this);
                 var btnText = $('#btnGenerateText');
                 var btnSpinner = $('#btnGenerateSpinner');
@@ -527,7 +523,6 @@ var tableLegger;
                 
                 // Check if elements exist
                 if (btn.length === 0) {
-                    console.error('Button not found!');
                     return;
                 }
                 
@@ -541,9 +536,6 @@ var tableLegger;
                 loadingProgress.text('Sedang memproses generate legger, harap tunggu...');
                 
                 // Send AJAX request
-                console.log('Sending AJAX request to generate_ajax.php');
-                console.log('Periode:', '<?php echo $periode_aktif; ?>');
-                
                 $.ajax({
                     url: '<?php echo BASE_URL; ?>pages/legger/generate_ajax.php',
                     type: 'POST',
@@ -552,7 +544,6 @@ var tableLegger;
                     },
                     dataType: 'json',
                     beforeSend: function() {
-                        console.log('AJAX request started');
                     },
                     success: function(response) {
                         // Hide loading overlay first
@@ -603,10 +594,6 @@ var tableLegger;
                         }
                     },
                     error: function(xhr, status, error) {
-                        console.error('Error:', error);
-                        console.error('Status:', status);
-                        console.error('Response:', xhr.responseText);
-                        
                         var errorMessage = 'Terjadi kesalahan saat mengirim request.';
                         if (xhr.responseText) {
                             try {

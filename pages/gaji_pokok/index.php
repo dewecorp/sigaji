@@ -236,8 +236,6 @@ unset($g);
                         'gap': '5px'
                     });
                 }
-                
-                console.log('Export buttons initialized');
             }, 500);
         });
     }
