@@ -229,35 +229,7 @@ $settings['periode_akhir'] = isset($settings['periode_akhir']) ? $settings['peri
         var $ = jQuery;
         
         $(document).ready(function() {
-            // Handle jumlah periode change
-            function updatePeriodeFields() {
-                var jumlahPeriode = parseInt($('#jumlah_periode').val()) || 1;
-                
-                if (jumlahPeriode === 1) {
-                    // Tampilkan 1 field bulan
-                    $('#periode_single_row').show();
-                    $('#periode_range_row').hide();
-                } else {
-                    // Tampilkan 2 field bulan (mulai dan akhir)
-                    $('#periode_single_row').hide();
-                    $('#periode_range_row').show();
-                }
-            }
-            
-            // Initialize periode fields on page load
-            updatePeriodeFields();
-            
-            // Update periode fields when jumlah_periode changes
-            $('#jumlah_periode').on('change input', function() {
-                updatePeriodeFields();
-            });
-            
-            // Update hidden periode_aktif when single periode changes
-            $('#periode_single').on('change', function() {
-                $('#periode_aktif_hidden').val($(this).val());
-            });
-            
-            // Format Rupiah function (Indonesian format: 1.000.000)
+            // Format Rupiah function (Indonesian format: 1.000.000) - harus didefinisikan dulu
             function formatRupiah(angka) {
                 var number_string = angka.toString().replace(/[^\d]/g, '');
                 if (number_string === '' || number_string === '0') return '0';
@@ -274,6 +246,75 @@ $settings['periode_akhir'] = isset($settings['periode_akhir']) ? $settings['peri
                 return rupiah;
             }
             
+            // Store original honor_per_jam value from database (tidak tergantung periode)
+            var originalHonorPerJam = parseFloat($('#honor_per_jam').data('value')) || parseFloat($('#honor_per_jam_hidden').val()) || 0;
+            
+            // Function to ensure honor_per_jam tetap tampil (tidak ter-reset saat periode berubah)
+            function ensureHonorPerJamVisible() {
+                // Ambil nilai saat ini dari input
+                var currentValue = parseFloat($('#honor_per_jam_hidden').val()) || 0;
+                
+                // Jika nilai kosong atau 0, gunakan nilai original dari database
+                if (currentValue === 0 || isNaN(currentValue)) {
+                    currentValue = originalHonorPerJam;
+                }
+                
+                // Pastikan honor_per_jam tetap tampil dengan format yang benar
+                var honorFormatted = formatRupiah(currentValue.toString());
+                $('#honor_per_jam').val(honorFormatted);
+                $('#honor_per_jam_hidden').val(currentValue);
+                $('input[name="honor_per_jam"]').val(currentValue);
+            }
+            
+            // Handle jumlah periode change
+            function updatePeriodeFields() {
+                var jumlahPeriode = parseInt($('#jumlah_periode').val()) || 1;
+                
+                if (jumlahPeriode === 1) {
+                    // Tampilkan 1 field bulan
+                    $('#periode_single_row').show();
+                    $('#periode_range_row').hide();
+                } else {
+                    // Tampilkan 2 field bulan (mulai dan akhir)
+                    $('#periode_single_row').hide();
+                    $('#periode_range_row').show();
+                }
+                
+                // Pastikan honor_per_jam tetap tampil setelah periode berubah (karena honor tetap tidak tergantung periode)
+                ensureHonorPerJamVisible();
+            }
+            
+            // Initialize periode fields on page load
+            updatePeriodeFields();
+            
+            // Update periode fields when jumlah_periode changes
+            $('#jumlah_periode').on('change input', function() {
+                updatePeriodeFields();
+            });
+            
+            // Update hidden periode_aktif when single periode changes
+            $('#periode_single').on('change', function() {
+                $('#periode_aktif_hidden').val($(this).val());
+                // Pastikan honor_per_jam tetap tampil setelah periode berubah
+                ensureHonorPerJamVisible();
+            });
+            
+            // Update hidden periode_aktif when periode_mulai changes
+            $('#periode_mulai').on('change', function() {
+                var jumlahPeriode = parseInt($('#jumlah_periode').val()) || 1;
+                if (jumlahPeriode > 1) {
+                    $('#periode_aktif_hidden').val($(this).val());
+                }
+                // Pastikan honor_per_jam tetap tampil setelah periode berubah
+                ensureHonorPerJamVisible();
+            });
+            
+            // Update hidden periode_aktif when periode_akhir changes
+            $('#periode_akhir').on('change', function() {
+                // Pastikan honor_per_jam tetap tampil setelah periode berubah
+                ensureHonorPerJamVisible();
+            });
+            
             // Unformat Rupiah function (remove dots and convert to number)
             function unformatRupiah(rupiah) {
                 if (!rupiah || rupiah === '') return 0;
@@ -283,12 +324,16 @@ $settings['periode_akhir'] = isset($settings['periode_akhir']) ? $settings['peri
             }
             
             // Initialize honor_per_jam value - get from data-value attribute and hidden input value
+            // Honor per jam tidak tergantung periode, jadi selalu ambil dari database
             var honorDataValue = parseFloat($('#honor_per_jam').data('value')) || 0;
             var honorHiddenValue = parseFloat($('#honor_per_jam_hidden').val()) || 0;
             
             // Use the non-zero value or data-value (prioritize data-value, but accept any value including 0)
             var honorValue = (!isNaN(honorDataValue) && honorDataValue !== null) ? honorDataValue : 
                              (!isNaN(honorHiddenValue) && honorHiddenValue !== null) ? honorHiddenValue : 0;
+            
+            // Update originalHonorPerJam dengan nilai dari database (untuk restore saat periode berubah)
+            originalHonorPerJam = honorValue;
             
             // Format and display honor_per_jam, and update hidden inputs
             // Always format, even if 0
@@ -297,9 +342,6 @@ $settings['periode_akhir'] = isset($settings['periode_akhir']) ? $settings['peri
             $('#honor_per_jam').val(honorFormatted);
             $('#honor_per_jam_hidden').val(honorValue);
             $('input[name="honor_per_jam"]').val(honorValue);
-            
-                honor_formatted: honorFormatted
-            });
             
             // Preview logo when file is selected
             $('#logoInput').on('change', function(e) {
