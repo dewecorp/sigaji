@@ -57,13 +57,13 @@ if ($legger_exists && $legger_stats) {
     // This is used when legger hasn't been generated yet
     $stmt->close();
     
-    // Total Gaji Pokok
-    $sql = "SELECT COALESCE(SUM(jumlah), 0) as total FROM gaji_pokok WHERE periode = ?";
+    // Total Gaji Pokok (gaji pokok tidak tergantung periode)
+    $sql = "SELECT COALESCE(SUM(jumlah), 0) as total FROM gaji_pokok";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("s", $periode_aktif);
     $stmt->execute();
     $result = $stmt->get_result();
     $gaji_pokok_base = floatval($result->fetch_assoc()['total'] ?? 0);
+    // Kalikan dengan jumlah_periode karena ini untuk periode tertentu
     $stats['total_gaji_pokok'] = $gaji_pokok_base * $jumlah_periode;
     $stmt->close();
     

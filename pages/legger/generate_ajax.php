@@ -80,18 +80,18 @@ try {
         try {
             // Start transaction for this guru
             $conn->begin_transaction();
-            // Get gaji pokok dari tabel gaji_pokok
-            $sql = "SELECT jumlah FROM gaji_pokok WHERE guru_id = ? AND periode = ?";
+            // Get gaji pokok dari tabel gaji_pokok (gaji pokok tidak tergantung periode)
+            $sql = "SELECT jumlah FROM gaji_pokok WHERE guru_id = ? LIMIT 1";
             $stmt = $conn->prepare($sql);
             if (!$stmt) {
                 throw new Exception('Gagal prepare query gaji_pokok: ' . $conn->error);
             }
-            $stmt->bind_param("is", $g['id'], $periode);
+            $stmt->bind_param("i", $g['id']);
             $stmt->execute();
             $result = $stmt->get_result();
             $gaji_pokok_row = $result->fetch_assoc();
             $gaji_pokok_jumlah = isset($gaji_pokok_row['jumlah']) ? floatval($gaji_pokok_row['jumlah']) : 0;
-            // Kalikan dengan jumlah_periode
+            // Kalikan dengan jumlah_periode karena ini untuk periode tertentu
             $gaji_pokok_jumlah = $gaji_pokok_jumlah * $jumlah_periode;
             $stmt->close();
             

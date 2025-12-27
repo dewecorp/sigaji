@@ -9,7 +9,7 @@ if (empty($id) || !is_numeric($id)) {
     exit();
 }
 
-$sql = "SELECT id, guru_id, jumlah, periode FROM gaji_pokok WHERE id = ?";
+$sql = "SELECT id, guru_id, jumlah FROM gaji_pokok WHERE id = ?";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $id);
 $stmt->execute();
@@ -20,7 +20,6 @@ if ($result->num_rows > 0) {
     // Ensure all fields have values
     $data['guru_id'] = $data['guru_id'] ?? 0;
     $data['jumlah'] = $data['jumlah'] ?? 0;
-    $data['periode'] = $data['periode'] ?? date('Y-m');
     echo json_encode($data);
 } else {
     echo json_encode(['error' => 'Data tidak ditemukan']);

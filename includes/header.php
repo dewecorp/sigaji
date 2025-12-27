@@ -420,7 +420,7 @@ cleanupOldActivities($conn);
                             Madrasah Ibtidaiyah Sultan Fattah Sukosono
                         </div>
                         <div class="tahun-ajaran">
-                            Tahun Ajaran <?php echo htmlspecialchars($tahun_ajaran); ?>
+                            Tahun Ajaran <?php echo htmlspecialchars($tahun_ajaran ?? ''); ?>
                         </div>
                     </div>
                 </div>
@@ -444,7 +444,7 @@ cleanupOldActivities($conn);
                             $fallback_data_uri = 'data:image/svg+xml;base64,' . base64_encode('<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" fill="#e0e0e0"/><circle cx="50" cy="35" r="15" fill="#999"/><path d="M 30 70 Q 30 55 50 55 Q 70 55 70 70 L 70 85 L 30 85 Z" fill="#999"/></svg>');
                             ?>
                             <img alt="image" src="<?php echo $foto_url; ?>" class="user-img mr-2" style="width: 40px; height: 40px; object-fit: cover; border-radius: 50%; border: 2px solid #667eea; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: inline-block !important;" onerror="if(this.src!=='<?php echo $fallback_data_uri; ?>' && this.src!=='<?php echo $default_foto_url; ?>'){this.src='<?php echo $default_foto_url; ?>';}else if(this.src!=='<?php echo $fallback_data_uri; ?>'){this.src='<?php echo $fallback_data_uri; ?>';}this.onerror=null;">
-                            <div class="d-sm-none d-lg-inline-block" style="font-size: 14px; font-weight: 500; vertical-align: middle;"><?php echo htmlspecialchars($nama_lengkap); ?></div>
+                            <div class="d-sm-none d-lg-inline-block" style="font-size: 14px; font-weight: 500; vertical-align: middle;"><?php echo htmlspecialchars($nama_lengkap ?? ''); ?></div>
                         </a>
                         <div class="dropdown-menu dropdown-menu-right">
                             <a href="<?php echo BASE_URL; ?>pages/pengguna/profile.php" class="dropdown-item has-icon">

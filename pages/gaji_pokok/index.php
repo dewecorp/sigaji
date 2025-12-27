@@ -3,11 +3,10 @@ $page_title = 'Data Gaji Pokok';
 require_once __DIR__ . '/../../includes/header.php';
 require_once __DIR__ . '/../../includes/sidebar.php';
 
-// Get current period and honor_per_jam from settings
-$sql = "SELECT periode_aktif, honor_per_jam FROM settings LIMIT 1";
+// Get honor_per_jam from settings
+$sql = "SELECT honor_per_jam FROM settings LIMIT 1";
 $result = $conn->query($sql);
 $settings = $result->fetch_assoc();
-$periode_aktif = $settings['periode_aktif'] ?? date('Y-m');
 $honor_per_jam = floatval($settings['honor_per_jam'] ?? 0);
 
 // Get all teachers with their jumlah_jam_mengajar
@@ -21,10 +20,10 @@ foreach ($guru as &$g) {
     $jumlah_jam = intval($g['jumlah_jam_mengajar'] ?? 0);
     $total_gaji = $jumlah_jam * $honor_per_jam;
     
-    // Check if gaji_pokok record exists for this teacher and period
-    $check_sql = "SELECT id, jumlah FROM gaji_pokok WHERE guru_id = ? AND periode = ?";
+    // Check if gaji_pokok record exists for this teacher (gaji pokok tidak tergantung periode)
+    $check_sql = "SELECT id, jumlah FROM gaji_pokok WHERE guru_id = ? LIMIT 1";
     $check_stmt = $conn->prepare($check_sql);
-    $check_stmt->bind_param("is", $g['id'], $periode_aktif);
+    $check_stmt->bind_param("i", $g['id']);
     $check_stmt->execute();
     $existing = $check_stmt->get_result()->fetch_assoc();
     
@@ -38,10 +37,10 @@ foreach ($guru as &$g) {
         }
         $g['total_gaji_pokok'] = floatval($existing['jumlah']);
     } else {
-        // Insert new record
-        $insert_sql = "INSERT INTO gaji_pokok (guru_id, jumlah, periode) VALUES (?, ?, ?)";
+        // Insert new record (tanpa periode karena gaji pokok tetap)
+        $insert_sql = "INSERT INTO gaji_pokok (guru_id, jumlah, periode) VALUES (?, ?, '')";
         $insert_stmt = $conn->prepare($insert_sql);
-        $insert_stmt->bind_param("ids", $g['id'], $total_gaji, $periode_aktif);
+        $insert_stmt->bind_param("id", $g['id'], $total_gaji);
         $insert_stmt->execute();
         $g['total_gaji_pokok'] = $total_gaji;
     }
@@ -64,7 +63,7 @@ unset($g);
                     <div class="section-body">
                         <div class="card">
                             <div class="card-header">
-                                <h4>Data Gaji Pokok - <?php echo getPeriodLabel($periode_aktif); ?></h4>
+                                <h4>Data Gaji Pokok</h4>
                             </div>
                             <div class="card-body">
                                 <!-- Buttons container for DataTable export buttons -->
@@ -157,14 +156,14 @@ unset($g);
                                 }
                             },
                             filename: 'Data_Gaji_Pokok_' + new Date().toISOString().split('T')[0],
-                            title: 'Data Gaji Pokok - <?php echo getPeriodLabel($periode_aktif); ?>'
+                            title: 'Data Gaji Pokok'
                         },
                         { 
                             extend: 'pdf', 
                             text: '<i class="fas fa-file-pdf"></i> PDF', 
                             className: 'btn btn-danger btn-sm',
                             filename: 'Data_Gaji_Pokok_' + new Date().toISOString().split('T')[0],
-                            title: 'Data Gaji Pokok - <?php echo getPeriodLabel($periode_aktif); ?>',
+                            title: 'Data Gaji Pokok',
                             orientation: 'landscape',
                             pageSize: 'A4',
                             customize: function(doc) {
