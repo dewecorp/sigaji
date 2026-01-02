@@ -105,13 +105,13 @@ $stmt->close();
     <style>
         @page {
             size: F4 landscape;
-            margin: 10mm 5mm 10mm 5mm; /* top: 1cm, right: 0.5cm, bottom: 1cm, left: 0.5cm */
+            margin: 10mm 10mm 10mm 5mm; /* top: 1cm, right: 1cm, bottom: 1cm, left: 0.5cm */
         }
         
         @media print {
             @page {
                 size: 330mm 210mm;
-                margin: 10mm 5mm 10mm 5mm; /* top: 1cm, right: 0.5cm, bottom: 1cm, left: 0.5cm */
+                margin: 10mm 10mm 10mm 5mm; /* top: 1cm, right: 1cm, bottom: 1cm, left: 0.5cm */
             }
         }
         

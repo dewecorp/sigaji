@@ -149,12 +149,14 @@ function isActive($url, $current_page) {
     color: rgba(255, 255, 255, 0.9);
     text-decoration: none;
     transition: all 0.3s ease;
+    font-size: 14px !important;
 }
 
 .sidebar-menu > li > a i:first-child {
     width: 20px;
     margin-right: 10px;
     text-align: center;
+    font-size: 15px !important;
 }
 
 /* Parent Menu (Bold Header) */
@@ -164,7 +166,7 @@ function isActive($url, $current_page) {
 
 .sidebar-menu .menu-parent > .menu-parent-link {
     font-weight: bold !important;
-    font-size: 0.95rem;
+    font-size: 0.9rem !important;
     color: rgba(255, 255, 255, 0.9) !important;
     background-color: rgba(255, 255, 255, 0.08) !important;
     cursor: not-allowed !important;
@@ -206,7 +208,7 @@ function isActive($url, $current_page) {
     padding-left: 2.5rem;
     padding-top: 0.6rem;
     padding-bottom: 0.6rem;
-    font-size: 0.9rem;
+    font-size: 0.85rem !important;
     display: flex;
     align-items: center;
     color: rgba(255, 255, 255, 0.85);
@@ -216,7 +218,7 @@ function isActive($url, $current_page) {
     width: 18px;
     margin-right: 10px;
     text-align: center;
-    font-size: 0.85rem;
+    font-size: 0.8rem !important;
 }
 
 /* Active States */

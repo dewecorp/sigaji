@@ -11,15 +11,28 @@
 
 body {
     font-family: 'Nunito', sans-serif;
+    font-size: 14px !important;
     background-color: #f4f6f9;
     overflow-x: hidden;
     width: 100%;
     max-width: 100%;
 }
 
+/* Global font size reduction */
+p, span, div, td, th, label, input, select, textarea, button, a {
+    font-size: inherit;
+}
+
+h1 { font-size: 1.5rem !important; }
+h2 { font-size: 1.35rem !important; }
+h3 { font-size: 1.2rem !important; }
+h4 { font-size: 1.1rem !important; }
+h5 { font-size: 1rem !important; }
+h6 { font-size: 0.9rem !important; }
+
 .sidebar-brand {
     font-weight: 700;
-    font-size: 1.5rem;
+    font-size: 1.1rem;
     color: #fff;
 }
 
@@ -36,7 +49,7 @@ body {
     background-color: rgba(255, 255, 255, 0.2) !important;
     color: #ffffff !important;
     font-weight: 600;
-    font-size: 16px !important;
+    font-size: 14px !important;
     border-left: 4px solid #ffffff;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     transform: translateX(5px);
@@ -51,7 +64,7 @@ body {
 .main-sidebar .sidebar-menu a:hover {
     background-color: rgba(255, 255, 255, 0.1);
     transition: all 0.3s ease;
-    font-size: 16px !important;
+    font-size: 14px !important;
 }
 
 .main-sidebar .sidebar-menu li.active > a:hover {
@@ -89,7 +102,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 24px;
+    font-size: 19px;
     color: #fff;
 }
 
@@ -166,7 +179,7 @@ body {
 .btn-action {
     padding: 5px 10px;
     margin: 2px;
-    font-size: 12px;
+    font-size: 11px;
 }
 
 .modal-header {

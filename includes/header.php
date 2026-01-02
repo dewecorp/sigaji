@@ -99,13 +99,13 @@ cleanupOldActivities($conn);
         
         .main-sidebar .sidebar-menu li a {
             color: rgba(255, 255, 255, 0.9) !important;
-            font-size: 16px !important;
+            font-size: 14px !important;
             font-weight: 500 !important;
         }
         
         .main-sidebar .sidebar-menu li a i {
             color: rgba(255, 255, 255, 0.9) !important;
-            font-size: 18px !important;
+            font-size: 15px !important;
         }
         
         .main-sidebar .sidebar-menu li.active > a,

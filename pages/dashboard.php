@@ -280,19 +280,19 @@ $activities = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
 }
 
 .stat-card .card-body {
-    padding: 25px;
+    padding: 18px;
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 15px;
     flex: 1;
-    min-height: 120px;
+    min-height: 100px;
     width: 100%;
     box-sizing: border-box;
 }
 
 .stat-card-large .card-body {
-    padding: 35px;
-    min-height: 140px;
+    padding: 25px;
+    min-height: 120px;
 }
 
 .stat-icon-wrapper {
@@ -300,22 +300,22 @@ $activities = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
 }
 
 .stat-icon {
-    width: 70px;
-    height: 70px;
+    width: 60px;
+    height: 60px;
     border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 28px;
+    font-size: 18px;
     color: #fff;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     transition: all 0.3s ease;
 }
 
 .stat-card-large .stat-icon {
-    width: 90px;
-    height: 90px;
-    font-size: 36px;
+    width: 75px;
+    height: 75px;
+    font-size: 22px;
     border-radius: 16px;
 }
 
@@ -331,9 +331,9 @@ $activities = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
 }
 
 .stat-value {
-    font-size: 1.75rem;
+    font-size: 1rem;
     font-weight: 700;
-    margin: 0 0 8px 0;
+    margin: 0 0 6px 0;
     color: #2d3748;
     line-height: 1.2;
     word-break: break-word;
@@ -342,20 +342,20 @@ $activities = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
 }
 
 .stat-card-large .stat-value {
-    font-size: 2.25rem;
+    font-size: 1.25rem;
 }
 
 .stat-label {
-    font-size: 0.9rem;
+    font-size: 0.65rem;
     color: #718096;
     margin: 0;
     font-weight: 500;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.3px;
 }
 
 .stat-card-large .stat-label {
-    font-size: 1rem;
+    font-size: 0.7rem;
 }
 
 /* Color Themes */
@@ -548,23 +548,23 @@ $activities = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
     }
     
     .stat-icon {
-        width: 60px;
-        height: 60px;
-        font-size: 24px;
+        width: 50px;
+        height: 50px;
+        font-size: 16px;
     }
     
     .stat-value {
-        font-size: 1.5rem;
+        font-size: 0.95rem;
     }
     
     .stat-card-large .stat-icon {
-        width: 80px;
-        height: 80px;
-        font-size: 32px;
+        width: 70px;
+        height: 70px;
+        font-size: 20px;
     }
     
     .stat-card-large .stat-value {
-        font-size: 2rem;
+font-size: 1.2rem;
     }
 }
 
@@ -588,48 +588,48 @@ $activities = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
     }
     
     .stat-card .card-body {
-        padding: 18px;
-        gap: 12px;
-        min-height: 110px;
+        padding: 15px;
+        gap: 10px;
+        min-height: 90px;
         flex-wrap: nowrap;
     }
     
     .stat-card-large .card-body {
-        padding: 25px 18px;
-        min-height: 120px;
+        padding: 20px 15px;
+        min-height: 100px;
     }
     
     .stat-icon {
         width: 55px;
         height: 55px;
-        font-size: 22px;
+        font-size: 18px;
         flex-shrink: 0;
     }
     
     .stat-card-large .stat-icon {
         width: 65px;
         height: 65px;
-        font-size: 26px;
+        font-size: 20px;
     }
     
     .stat-value {
-        font-size: 1.35rem;
+        font-size: 0.9rem;
         line-height: 1.2;
         word-break: break-word;
         overflow-wrap: break-word;
     }
     
     .stat-card-large .stat-value {
-        font-size: 1.6rem;
+        font-size: 1.05rem;
     }
     
     .stat-label {
-        font-size: 0.85rem;
-        line-height: 1.3;
+        font-size: 0.65rem;
+        line-height: 1.2;
     }
     
     .stat-card-large .stat-label {
-        font-size: 0.9rem;
+        font-size: 0.7rem;
     }
     
     .timeline-scrollable {
@@ -664,29 +664,29 @@ $activities = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
     .stat-icon {
         width: 50px;
         height: 50px;
-        font-size: 20px;
+        font-size: 18px;
     }
     
     .stat-card-large .stat-icon {
         width: 60px;
         height: 60px;
-        font-size: 24px;
+        font-size: 22px;
     }
     
     .stat-value {
-        font-size: 1.2rem;
+        font-size: 1.1rem;
     }
     
     .stat-card-large .stat-value {
-        font-size: 1.4rem;
+        font-size: 1.3rem;
     }
     
     .stat-label {
-        font-size: 0.8rem;
+        font-size: 0.75rem;
     }
     
     .stat-card-large .stat-label {
-        font-size: 0.85rem;
+        font-size: 0.8rem;
     }
 }
 
