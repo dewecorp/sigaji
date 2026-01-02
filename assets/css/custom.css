@@ -26,13 +26,17 @@ body {
 }
 
 /* Desktop default */
+.main-sidebar {
+    width: 250px !important;
+}
+
 .main-content {
-    margin-left: 300px;
+    margin-left: 250px !important;
     margin-top: 70px;
     padding: 2rem;
     min-height: calc(100vh - 70px);
-    width: calc(100% - 300px);
-    max-width: calc(100% - 300px);
+    width: calc(100% - 250px) !important;
+    max-width: calc(100% - 250px) !important;
     transition: margin-left 0.3s ease, padding 0.3s ease, width 0.3s ease, max-width 0.3s ease;
     box-sizing: border-box;
 }
@@ -70,11 +74,15 @@ body {
 
 /* Tablet adjustments */
 @media (max-width: 991px) and (min-width: 769px) {
+    .main-sidebar {
+        width: 240px !important;
+    }
+    
     .main-content {
-        margin-left: 280px !important;
+        margin-left: 240px !important;
         padding: 1.5rem !important;
-        width: calc(100% - 280px) !important;
-        max-width: calc(100% - 280px) !important;
+        width: calc(100% - 240px) !important;
+        max-width: calc(100% - 240px) !important;
         transition: margin-left 0.3s ease, width 0.3s ease, max-width 0.3s ease;
     }
     

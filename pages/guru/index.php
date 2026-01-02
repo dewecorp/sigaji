@@ -97,6 +97,21 @@ $tunjangan_list = $result_tunjangan ? $result_tunjangan->fetch_all(MYSQLI_ASSOC)
                                             font-family: 'Nunito', sans-serif;
                                             font-size: 16px;
                                         }
+                                        
+                                        /* Kecilkan icon edit dan hapus */
+                                        #tableGuru .btn-sm i.fa-edit,
+                                        #tableGuru .btn-sm i.fa-trash {
+                                            font-size: 0.7rem !important;
+                                        }
+                                        
+                                        /* Kecilkan button edit dan hapus */
+                                        #tableGuru .btn-sm.btn-info,
+                                        #tableGuru .btn-sm.btn-danger {
+                                            padding: 0.25rem 0.5rem !important;
+                                            font-size: 0.75rem !important;
+                                            line-height: 1.2 !important;
+                                        }
+                                        
                                         #tableGuru thead th {
                                             background-color: #667eea !important;
                                             color: white !important;

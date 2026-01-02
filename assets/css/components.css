@@ -121,7 +121,7 @@ body .navbar-nav li a[data-toggle="sidebar"] i {
     position: fixed;
     top: 70px;
     left: 0;
-    width: 300px;
+    width: 250px !important;
     height: calc(100vh - 70px);
     z-index: 998;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -204,7 +204,7 @@ body .navbar-nav li a[data-toggle="sidebar"] i {
     padding: 2rem;
     min-height: calc(100vh - 70px);
     transition: margin-left 0.3s ease, padding 0.3s ease;
-    width: calc(100% - 300px);
+    width: calc(100% - 250px);
     box-sizing: border-box;
 }
 
@@ -278,14 +278,14 @@ body .navbar-nav li a[data-toggle="sidebar"] i {
 /* Tablet styles (768px - 991px) */
 @media (min-width: 769px) and (max-width: 991px) {
     .main-sidebar {
-        width: 280px;
+        width: 240px;
     }
     
     .main-content {
-        margin-left: 280px !important;
+        margin-left: 240px !important;
         padding: 1.5rem !important;
-        width: calc(100% - 280px) !important;
-        max-width: calc(100% - 280px) !important;
+        width: calc(100% - 240px) !important;
+        max-width: calc(100% - 240px) !important;
         box-sizing: border-box;
         transition: margin-left 0.3s ease, width 0.3s ease, max-width 0.3s ease;
     }
