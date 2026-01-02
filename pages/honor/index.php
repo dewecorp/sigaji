@@ -7,7 +7,7 @@ require_once __DIR__ . '/../../includes/sidebar.php';
 $sql = "SELECT h.*, p.nama_pembina 
         FROM honor h
         LEFT JOIN pembina p ON h.pembina_id = p.id
-        ORDER BY h.id ASC";
+        ORDER BY h.id ASC, p.nama_pembina ASC";
 $result = $conn->query($sql);
 $honor = $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
 
@@ -141,6 +141,22 @@ $pembina_list = $result_pembina ? $result_pembina->fetch_all(MYSQLI_ASSOC) : [];
 
 <?php require_once __DIR__ . '/../../includes/footer.php'; ?>
 
+<style>
+/* Paksa kolom No dan Nama Pembina selalu ascending - sembunyikan indikator descending */
+#tableHonor thead th:nth-child(1).sorting_desc,
+#tableHonor thead th:nth-child(2).sorting_desc {
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12"><path fill="%23666" d="M6 0L2 4h8z"/></svg>') !important;
+    background-position: right 8px center !important;
+    background-repeat: no-repeat !important;
+}
+
+/* Pastikan cursor pointer */
+#tableHonor thead th:nth-child(1),
+#tableHonor thead th:nth-child(2) {
+    cursor: pointer !important;
+}
+</style>
+
 <script>
 // Wait for jQuery to be loaded
 (function() {
@@ -193,10 +209,82 @@ $pembina_list = $result_pembina ? $result_pembina->fetch_all(MYSQLI_ASSOC) : [];
                 $('#jumlah_honor_hidden').val(unformatted);
             });
 
-            $('#tableHonor').DataTable({
-                language: { url: 'https://cdn.datatables.net/plug-ins/1.11.5/i18n/id.json' },
-                order: [[1, 'asc']]
-            });
+            // Clear DataTable state from localStorage and sessionStorage
+            if (typeof(Storage) !== "undefined") {
+                Object.keys(localStorage).forEach(function(key) {
+                    if (key.indexOf('DataTables_tableHonor') === 0 || key.indexOf('DataTables_') === 0) {
+                        localStorage.removeItem(key);
+                    }
+                });
+                Object.keys(sessionStorage).forEach(function(key) {
+                    if (key.indexOf('DataTables_tableHonor') === 0 || key.indexOf('DataTables_') === 0) {
+                        sessionStorage.removeItem(key);
+                    }
+                });
+            }
+            
+            // Destroy existing instance if it exists
+            if ($.fn.DataTable.isDataTable('#tableHonor')) {
+                $('#tableHonor').DataTable().destroy();
+            }
+
+            // Tunggu sedikit untuk memastikan semua script sudah loaded
+            setTimeout(function() {
+                var table = $('#tableHonor').DataTable({
+                    language: { url: 'https://cdn.datatables.net/plug-ins/1.11.5/i18n/id.json' },
+                    order: [[0, 'asc'], [1, 'asc']],
+                    stateSave: false,
+                    stateDuration: -1,
+                    retrieve: false,
+                    columnDefs: [
+                        {
+                            targets: [0, 1], // Kolom No dan Nama Pembina
+                            orderable: true,
+                            orderSequence: ['asc'] // Hanya bisa ascending
+                        }
+                    ]
+                });
+                
+                // Override method order untuk mencegah descending
+                var originalOrder = table.order;
+                table.order = function(order) {
+                    if (order && order.length > 0) {
+                        // Pastikan kolom 0 dan 1 selalu ascending
+                        var newOrder = [];
+                        if (Array.isArray(order[0])) {
+                            order.forEach(function(item) {
+                                if (item[0] === 0 || item[0] === 1) {
+                                    newOrder.push([item[0], 'asc']);
+                                } else {
+                                    newOrder.push(item);
+                                }
+                            });
+                        } else {
+                            if (order[0] === 0 || order[0] === 1) {
+                                newOrder = [[order[0], 'asc']];
+                            } else {
+                                newOrder = [order];
+                            }
+                        }
+                        return originalOrder.call(this, newOrder);
+                    }
+                    return originalOrder.apply(this, arguments);
+                };
+                
+                // Paksa urutan ascending setelah inisialisasi
+                table.order([[0, 'asc'], [1, 'asc']]).draw(false);
+                
+                // Hapus class sorting_desc secara berkala
+                setInterval(function() {
+                    $('#tableHonor thead th:eq(0), #tableHonor thead th:eq(1)').removeClass('sorting_desc').addClass('sorting_asc');
+                    var currentOrder = table.order();
+                    currentOrder.forEach(function(item) {
+                        if ((item[0] === 0 || item[0] === 1) && item[1] !== 'asc') {
+                            table.order([[0, 'asc'], [1, 'asc']]).draw(false);
+                        }
+                    });
+                }, 200);
+            }, 100);
 
             $('#formHonor').on('submit', function(e) {
                 e.preventDefault();
