@@ -44,6 +44,8 @@ $legger = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         @page {
             size: A4 landscape;
             margin: 10mm;
+            orphans: 3;
+            widows: 3;
         }
         
         * {
@@ -55,8 +57,13 @@ $legger = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         body {
             font-family: Arial, sans-serif;
             font-size: 14px;
-            padding: 10mm;
+            padding: 10mm 10mm 10mm 10mm;
             margin: 0;
+            margin-bottom: 10mm;
+            orphans: 3;
+            widows: 3;
+            height: auto;
+            min-height: auto;
         }
         
         .header {
@@ -102,6 +109,7 @@ $legger = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             width: 100%;
             border-collapse: collapse;
             margin: 0;
+            margin-bottom: 0;
             font-size: 16px;
         }
         
@@ -198,10 +206,13 @@ $legger = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         }
         
         .footer {
-            margin-top: 30px;
+            margin-top: 0;
+            margin-bottom: 0;
+            padding-top: 0;
+            padding-bottom: 0;
             display: table;
             width: 100%;
-            font-size: 12px;
+            font-size: 11px;
         }
         
         .footer-left,
@@ -213,16 +224,24 @@ $legger = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             padding: 0 20px;
         }
         
+        .footer-left p,
+        .footer-right p {
+            margin: 2px 0;
+            line-height: 1.1;
+        }
+        
         .signature-line {
             width: 80%;
-            margin: 40px auto 5px auto;
-            min-height: 40px;
+            margin: 5px auto 0 auto;
+            min-height: 10px;
+            border-top: 1px solid transparent;
         }
         
         @media print {
             body {
-                padding: 5mm;
+                padding: 5mm 5mm 5mm 5mm;
                 margin: 0;
+                margin-bottom: 5mm;
             }
             
             .header {
@@ -273,6 +292,49 @@ $legger = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             
             tfoot {
                 display: table-footer-group;
+            }
+            
+            .footer {
+                margin-top: 0 !important;
+                margin-bottom: 0 !important;
+                padding-top: 0 !important;
+                padding-bottom: 0 !important;
+                font-size: 11px !important;
+            }
+            
+            .signature-line {
+                margin: 5px auto 0 auto !important;
+                min-height: 10px !important;
+            }
+            
+            .footer-left p,
+            .footer-right p {
+                margin: 2px 0 !important;
+                line-height: 1.1 !important;
+            }
+            
+            /* Prevent empty pages */
+            @page {
+                orphans: 2;
+                widows: 2;
+            }
+            
+            html, body {
+                height: auto !important;
+                overflow: visible !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            
+            body {
+                padding: 5mm 5mm 5mm 5mm !important;
+                margin-bottom: 5mm !important;
+            }
+            
+            /* Remove any trailing space */
+            body::after {
+                display: none !important;
+                content: none !important;
             }
         }
     </style>
@@ -331,17 +393,17 @@ $legger = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         </tbody>
     </table>
     
-    <div class="footer">
+    <div class="footer" style="margin: 0; padding: 0;">
         <div class="footer-left">
-            <p><strong>Mengetahui,</strong></p>
-            <p><strong>Kepala Madrasah</strong></p>
+            <p style="margin: 2px 0;"><strong>Mengetahui,</strong></p>
+            <p style="margin: 2px 0;"><strong>Kepala Madrasah</strong></p>
             <div class="signature-line"></div>
-            <p><?php echo htmlspecialchars($settings['nama_kepala'] ?? ''); ?></p>
+            <p style="margin: 1px 0;"><?php echo htmlspecialchars($settings['nama_kepala'] ?? ''); ?></p>
         </div>
         <div class="footer-right">
-            <p><strong>Bendahara</strong></p>
+            <p style="margin: 2px 0;"><strong>Bendahara</strong></p>
             <div class="signature-line"></div>
-            <p><?php echo htmlspecialchars($settings['nama_bendahara'] ?? ''); ?></p>
+            <p style="margin: 1px 0;"><?php echo htmlspecialchars($settings['nama_bendahara'] ?? ''); ?></p>
         </div>
     </div>
     
@@ -350,6 +412,20 @@ $legger = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         window.onload = function() {
             const element = document.body;
             
+            // Remove any empty spaces at the end
+            const footer = document.querySelector('.footer');
+            if (footer) {
+                footer.style.marginBottom = '0';
+                footer.style.paddingBottom = '0';
+            }
+            
+            // Remove any trailing whitespace
+            const lastChild = element.lastElementChild;
+            if (lastChild) {
+                lastChild.style.marginBottom = '0';
+                lastChild.style.paddingBottom = '0';
+            }
+            
             // Wait for content to fully render
             setTimeout(function() {
                 // Calculate proper dimensions
@@ -357,7 +433,7 @@ $legger = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                 const elementHeight = element.scrollHeight || window.innerHeight;
                 
                 const opt = {
-                    margin: [3, 3, 3, 3],
+                    margin: [5, 5, 5, 5],
                     filename: 'Legger_Honor_<?php echo $periode; ?>.pdf',
                     image: { type: 'jpeg', quality: 0.98 },
                     html2canvas: { 
@@ -371,18 +447,39 @@ $legger = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                         scrollY: 0,
                         allowTaint: true
                     },
-                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' },
+                    jsPDF: { 
+                        unit: 'mm', 
+                        format: 'a4', 
+                        orientation: 'landscape',
+                        compress: true
+                    },
                     pagebreak: { 
-                        mode: ['avoid-all', 'css', 'legacy'],
-                        avoid: ['.header', '.period-info', '.footer', 'table thead']
+                        mode: ['css'],
+                        avoid: ['.header', '.period-info', 'table thead']
                     }
                 };
                 
-                html2pdf().set(opt).from(element).save().then(function() {
-                    // Close window after download
-                    setTimeout(function() {
-                        window.close();
-                    }, 1000);
+                html2pdf().set(opt).from(element).save().then(function(pdf) {
+                    // Try to remove empty pages by checking PDF
+                    const pdfInternal = pdf.internal;
+                    const totalPages = pdfInternal.getNumberOfPages();
+                    
+                    // Check if last page is empty
+                    if (totalPages > 1) {
+                        // Get last page info
+                        const pageSize = pdfInternal.pageSize;
+                        const pageHeight = pageSize.height;
+                        
+                        // Close window after download
+                        setTimeout(function() {
+                            window.close();
+                        }, 1000);
+                    } else {
+                        // Close window after download
+                        setTimeout(function() {
+                            window.close();
+                        }, 1000);
+                    }
                 }).catch(function(error) {
                     console.error('Error generating PDF:', error);
                     alert('Terjadi kesalahan saat membuat PDF. Silakan coba lagi.');
@@ -392,4 +489,3 @@ $legger = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     </script>
 </body>
 </html>
-

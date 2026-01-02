@@ -132,7 +132,7 @@ $stmt->close();
         .content-wrapper {
             width: 100%;
             max-width: 100%;
-            padding: 5mm 3mm;
+            padding: 5mm 5mm 5mm 3mm;
             box-sizing: border-box;
             page-break-inside: avoid !important;
             break-inside: avoid !important;
