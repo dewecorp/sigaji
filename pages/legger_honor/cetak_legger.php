@@ -44,8 +44,8 @@ $legger = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         @page {
             size: A4 landscape;
             margin: 10mm;
-            orphans: 3;
-            widows: 3;
+            orphans: 2;
+            widows: 2;
         }
         
         * {
@@ -239,9 +239,9 @@ $legger = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         
         @media print {
             body {
-                padding: 5mm 5mm 5mm 5mm;
+                padding: 5mm 5mm 10mm 5mm;
                 margin: 0;
-                margin-bottom: 5mm;
+                margin-bottom: 10mm;
             }
             
             .header {
@@ -300,11 +300,28 @@ $legger = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                 padding-top: 0 !important;
                 padding-bottom: 0 !important;
                 font-size: 11px !important;
+                page-break-after: avoid !important;
+                break-after: avoid !important;
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
             }
             
             .signature-line {
                 margin: 5px auto 0 auto !important;
                 min-height: 10px !important;
+            }
+            
+            /* Ensure table and footer stay together */
+            table {
+                page-break-after: avoid !important;
+                break-after: avoid !important;
+                margin-bottom: 0 !important;
+            }
+            
+            /* Prevent page break before footer */
+            table + .footer {
+                page-break-before: avoid !important;
+                break-before: avoid !important;
             }
             
             .footer-left p,
@@ -327,14 +344,32 @@ $legger = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             }
             
             body {
-                padding: 5mm 5mm 5mm 5mm !important;
-                margin-bottom: 5mm !important;
+                padding: 5mm 5mm 10mm 5mm !important;
+                margin-bottom: 0 !important;
             }
             
             /* Remove any trailing space */
             body::after {
                 display: none !important;
                 content: none !important;
+            }
+            
+            /* Prevent page break after footer */
+            .footer {
+                page-break-after: avoid !important;
+                break-after: avoid !important;
+            }
+            
+            /* Ensure table and footer fit on same page */
+            table + .footer {
+                page-break-before: avoid !important;
+                break-before: avoid !important;
+            }
+            
+            /* Prevent empty pages */
+            @page {
+                orphans: 2;
+                widows: 2;
             }
         }
     </style>
@@ -433,7 +468,7 @@ $legger = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                 const elementHeight = element.scrollHeight || window.innerHeight;
                 
                 const opt = {
-                    margin: [5, 5, 5, 5],
+                    margin: [5, 5, 10, 5],
                     filename: 'Legger_Honor_<?php echo $periode; ?>.pdf',
                     image: { type: 'jpeg', quality: 0.98 },
                     html2canvas: { 
@@ -489,3 +524,4 @@ $legger = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     </script>
 </body>
 </html>
+
