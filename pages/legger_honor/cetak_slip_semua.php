@@ -58,14 +58,14 @@ $legger_list = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         
         .page {
             width: 210mm;
-            min-height: 330mm;
+            min-height: auto;
             height: auto;
             padding: 0.5mm 0.5mm 0 0.5mm;
             margin: 0 auto;
             margin-bottom: 0;
             display: grid;
             grid-template-columns: 1fr 1fr;
-            grid-template-rows: auto auto;
+            grid-auto-rows: auto;
             gap: 5mm;
             box-sizing: border-box;
             align-content: start;
@@ -82,6 +82,26 @@ $legger_list = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         
         .page:empty {
             display: none !important;
+            visibility: hidden !important;
+            height: 0 !important;
+            min-height: 0 !important;
+            max-height: 0 !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            page-break-after: avoid !important;
+            page-break-before: avoid !important;
+        }
+        
+        .page.no-content {
+            display: none !important;
+            visibility: hidden !important;
+            height: 0 !important;
+            min-height: 0 !important;
+            max-height: 0 !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            page-break-after: avoid !important;
+            page-break-before: avoid !important;
         }
         
         .slip {
@@ -250,11 +270,11 @@ $legger_list = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                 margin-bottom: 0 !important;
                 padding: 0.5mm 0.5mm 0 0.5mm !important;
                 width: 210mm !important;
-                min-height: 330mm !important;
+                min-height: auto !important;
                 height: auto !important;
                 display: grid !important;
                 grid-template-columns: 1fr 1fr !important;
-                grid-template-rows: auto auto !important;
+                grid-auto-rows: auto !important;
                 gap: 5mm !important;
                 align-content: start !important;
             }
@@ -270,6 +290,26 @@ $legger_list = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             
             .page:empty {
                 display: none !important;
+                visibility: hidden !important;
+                height: 0 !important;
+                min-height: 0 !important;
+                max-height: 0 !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                page-break-after: avoid !important;
+                page-break-before: avoid !important;
+            }
+            
+            .page.no-content {
+                display: none !important;
+                visibility: hidden !important;
+                height: 0 !important;
+                min-height: 0 !important;
+                max-height: 0 !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                page-break-after: avoid !important;
+                page-break-before: avoid !important;
             }
             
             .slip {
@@ -297,7 +337,6 @@ $legger_list = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     $count = 0;
     $total = count($legger_list);
     $slips_per_page = 4;
-    $total_pages = ceil($total / $slips_per_page);
     $current_page = 0;
     $page_opened = false;
     
@@ -307,12 +346,14 @@ $legger_list = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             if ($page_opened):
                 echo '</div>'; // Close previous page
             endif;
-            // Determine if this will be the last page
-            $current_page++;
-            $is_last_page = ($current_page == $total_pages);
+            // Calculate remaining slips after current one (including current)
+            $remaining_slips = $total - $count;
+            // This is the last page if remaining slips fit in one page
+            $is_last_page = ($remaining_slips <= $slips_per_page);
             $page_class = $is_last_page ? 'page page-last' : 'page';
             echo '<div class="' . $page_class . '">';
             $page_opened = true;
+            $current_page++;
         endif;
     ?>
         <div class="slip">
@@ -407,7 +448,8 @@ $legger_list = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                     if (slips.length > 0) {
                         for (var i = 0; i < slips.length; i++) {
                             var slip = slips[i];
-                            if (slip.offsetHeight > 0 && slip.offsetWidth > 0) {
+                            // Check if slip exists and has content
+                            if (slip && slip.offsetHeight > 0 && slip.offsetWidth > 0) {
                                 var slipText = slip.textContent || slip.innerText || '';
                                 if (slipText.replace(/\s+/g, '').trim().length > 0) {
                                     hasContent = true;
@@ -417,16 +459,7 @@ $legger_list = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                         }
                     }
                     
-                    // Also check page's direct text content
-                    if (!hasContent) {
-                        var pageText = page.textContent || page.innerText || '';
-                        var trimmed = pageText.replace(/\s+/g, '').trim();
-                        if (trimmed.length > 0) {
-                            hasContent = true;
-                        }
-                    }
-                    
-                    // If no content found, mark for removal
+                    // If no slips or no content, mark for removal
                     if (!hasContent || slips.length === 0) {
                         pagesToRemove.push(page);
                     }
@@ -436,6 +469,14 @@ $legger_list = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                 pagesToRemove.forEach(function(page) {
                     page.classList.add('no-content');
                     page.style.display = 'none';
+                    page.style.visibility = 'hidden';
+                    page.style.height = '0';
+                    page.style.minHeight = '0';
+                    page.style.maxHeight = '0';
+                    page.style.padding = '0';
+                    page.style.margin = '0';
+                    page.style.pageBreakAfter = 'avoid';
+                    page.style.pageBreakBefore = 'avoid';
                     if (page.parentNode) {
                         try {
                             page.parentNode.removeChild(page);
@@ -445,6 +486,22 @@ $legger_list = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                         }
                     }
                 });
+                
+                // Ensure last page is marked correctly after removal
+                var remainingPages = document.querySelectorAll('.page:not(.no-content)');
+                if (remainingPages.length > 0) {
+                    // Remove page-last from all pages first
+                    remainingPages.forEach(function(p) {
+                        p.classList.remove('page-last');
+                        p.style.pageBreakAfter = '';
+                    });
+                    // Add page-last to the actual last page
+                    var lastPage = remainingPages[remainingPages.length - 1];
+                    if (lastPage) {
+                        lastPage.classList.add('page-last');
+                        lastPage.style.pageBreakAfter = 'auto';
+                    }
+                }
                 
                 return removed;
             }
@@ -469,22 +526,44 @@ $legger_list = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             // Also remove before print - multiple passes to be absolutely sure
             window.onload = function() {
                 setTimeout(function() {
-                    var removed1 = removeEmptyPages();
+                    removeEmptyPages();
                     setTimeout(function() {
-                        var removed2 = removeEmptyPages();
+                        removeEmptyPages();
                         setTimeout(function() {
-                            var removed3 = removeEmptyPages();
-                            var totalRemoved = removed1 + removed2 + removed3;
-                            if (totalRemoved > 0) {
-                                console.log('Removed ' + totalRemoved + ' empty pages before print');
-                            }
+                            removeEmptyPages();
                             setTimeout(function() {
-                                window.print();
-                            }, 100);
-                        }, 30);
-                    }, 30);
+                                removeEmptyPages();
+                                setTimeout(function() {
+                                    removeEmptyPages();
+                                    // Final check before print
+                                    setTimeout(function() {
+                                        removeEmptyPages();
+                                        window.print();
+                                    }, 100);
+                                }, 50);
+                            }, 50);
+                        }, 50);
+                    }, 50);
                 }, 100);
             };
+            
+            // Remove empty pages before print event
+            window.addEventListener('beforeprint', function() {
+                removeEmptyPages();
+                // Ensure last page doesn't have page-break-after
+                var pages = document.querySelectorAll('.page:not(.no-content)');
+                if (pages.length > 0) {
+                    pages.forEach(function(p) {
+                        p.classList.remove('page-last');
+                        p.style.pageBreakAfter = '';
+                    });
+                    var lastPage = pages[pages.length - 1];
+                    if (lastPage) {
+                        lastPage.classList.add('page-last');
+                        lastPage.style.pageBreakAfter = 'auto';
+                    }
+                }
+            });
         })();
     </script>
 </body>

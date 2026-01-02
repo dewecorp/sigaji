@@ -7,7 +7,7 @@ require_once __DIR__ . '/../../includes/sidebar.php';
 $sql = "SELECT h.*, p.nama_pembina 
         FROM honor h
         LEFT JOIN pembina p ON h.pembina_id = p.id
-        ORDER BY h.id ASC, p.nama_pembina ASC";
+        ORDER BY p.nama_pembina ASC, h.id ASC";
 $result = $conn->query($sql);
 $honor = $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
 
@@ -230,9 +230,14 @@ $pembina_list = $result_pembina ? $result_pembina->fetch_all(MYSQLI_ASSOC) : [];
 
             // Tunggu sedikit untuk memastikan semua script sudah loaded
             setTimeout(function() {
+                // Pastikan tidak ada instance DataTable yang sudah ada
+                if ($.fn.DataTable.isDataTable('#tableHonor')) {
+                    $('#tableHonor').DataTable().destroy();
+                }
+                
                 var table = $('#tableHonor').DataTable({
                     language: { url: 'https://cdn.datatables.net/plug-ins/1.11.5/i18n/id.json' },
-                    order: [[0, 'asc'], [1, 'asc']],
+                    order: [[1, 'asc'], [0, 'asc']], // Urutkan kolom Nama Pembina (1) dulu, lalu kolom No (0)
                     stateSave: false,
                     stateDuration: -1,
                     retrieve: false,
@@ -240,50 +245,135 @@ $pembina_list = $result_pembina ? $result_pembina->fetch_all(MYSQLI_ASSOC) : [];
                         {
                             targets: [0, 1], // Kolom No dan Nama Pembina
                             orderable: true,
-                            orderSequence: ['asc'] // Hanya bisa ascending
+                            orderSequence: ['asc', 'asc'] // Hanya bisa ascending (2x untuk mencegah descending)
                         }
                     ]
                 });
                 
-                // Override method order untuk mencegah descending
-                var originalOrder = table.order;
-                table.order = function(order) {
-                    if (order && order.length > 0) {
-                        // Pastikan kolom 0 dan 1 selalu ascending
-                        var newOrder = [];
-                        if (Array.isArray(order[0])) {
-                            order.forEach(function(item) {
-                                if (item[0] === 0 || item[0] === 1) {
-                                    newOrder.push([item[0], 'asc']);
-                                } else {
+                // Simpan table ke window untuk debugging
+                window.tableHonor = table;
+                
+                // Handler untuk memastikan kedua kolom selalu ascending - lebih agresif
+                var isFixing = false;
+                var fixOrder = function() {
+                    if (isFixing) return;
+                    isFixing = true;
+                    
+                    try {
+                        var currentOrder = table.order();
+                        var newOrder = [[1, 'asc'], [0, 'asc']]; // Selalu set kolom Nama Pembina (1) dulu, lalu No (0)
+                        
+                        // Tambahkan kolom lain jika ada
+                        if (currentOrder && currentOrder.length > 0) {
+                            currentOrder.forEach(function(item) {
+                                if (item[0] !== 0 && item[0] !== 1) {
                                     newOrder.push(item);
                                 }
                             });
-                        } else {
-                            if (order[0] === 0 || order[0] === 1) {
-                                newOrder = [[order[0], 'asc']];
-                            } else {
-                                newOrder = [order];
-                            }
                         }
-                        return originalOrder.call(this, newOrder);
+                        
+                        // Set order
+                        table.order(newOrder).draw(false);
+                        
+                        // Pastikan class CSS benar - WAJIB
+                        $('#tableHonor thead th:eq(0)').removeClass('sorting sorting_desc').addClass('sorting_asc');
+                        $('#tableHonor thead th:eq(1)').removeClass('sorting sorting_desc').addClass('sorting_asc');
+                        
+                        isFixing = false;
+                    } catch(e) {
+                        console.error('Error in fixOrder:', e);
+                        isFixing = false;
                     }
-                    return originalOrder.apply(this, arguments);
                 };
                 
-                // Paksa urutan ascending setelah inisialisasi
-                table.order([[0, 'asc'], [1, 'asc']]).draw(false);
+                // Handler untuk event order - BLOCK descending
+                table.on('order.dt', function(e, settings, order) {
+                    if (isFixing) return;
+                    
+                    // Cek apakah ada kolom 0 atau 1 yang descending
+                    var needsFix = false;
+                    if (order && order.length > 0) {
+                        order.forEach(function(item) {
+                            if ((item[0] === 0 || item[0] === 1) && item[1] === 'desc') {
+                                needsFix = true;
+                            }
+                        });
+                    }
+                    
+                    if (needsFix) {
+                        e.preventDefault();
+                        setTimeout(fixOrder, 10);
+                    } else {
+                        setTimeout(fixOrder, 10);
+                    }
+                });
                 
-                // Hapus class sorting_desc secara berkala
-                setInterval(function() {
-                    $('#tableHonor thead th:eq(0), #tableHonor thead th:eq(1)').removeClass('sorting_desc').addClass('sorting_asc');
+                // Handler untuk event draw
+                table.on('draw.dt', function() {
+                    setTimeout(fixOrder, 10);
+                });
+                
+                // Handler klik pada header - BLOCK descending
+                $('#tableHonor thead th').on('click', function(e) {
+                    var $th = $(this);
+                    var columnIndex = table.column($th).index();
+                    
+                    if (columnIndex === 0 || columnIndex === 1) {
+                        // Tunggu DataTable memproses, lalu perbaiki
+                        setTimeout(function() {
+                            var currentOrder = table.order();
+                            var needsFix = false;
+                            
+                            if (currentOrder && currentOrder.length > 0) {
+                                currentOrder.forEach(function(item) {
+                                    if ((item[0] === 0 || item[0] === 1) && item[1] === 'desc') {
+                                        needsFix = true;
+                                    }
+                                });
+                            }
+                            
+                            if (needsFix) {
+                                fixOrder();
+                            }
+                        }, 50);
+                    }
+                });
+                
+                // Paksa urutan setelah inisialisasi
+                setTimeout(fixOrder, 100);
+                setTimeout(fixOrder, 300);
+                
+                // Interval untuk memastikan urutan tetap benar - lebih sering
+                var fixInterval = setInterval(function() {
+                    if (isFixing) return;
+                    
+                    var $col0 = $('#tableHonor thead th:eq(0)');
+                    var $col1 = $('#tableHonor thead th:eq(1)');
                     var currentOrder = table.order();
-                    currentOrder.forEach(function(item) {
-                        if ((item[0] === 0 || item[0] === 1) && item[1] !== 'asc') {
-                            table.order([[0, 'asc'], [1, 'asc']]).draw(false);
-                        }
-                    });
-                }, 200);
+                    var needsFix = false;
+                    
+                    // Cek class CSS
+                    if ($col0.hasClass('sorting_desc') || $col1.hasClass('sorting_desc')) {
+                        needsFix = true;
+                    }
+                    
+                    // Cek order
+                    if (currentOrder && currentOrder.length > 0) {
+                        currentOrder.forEach(function(item) {
+                            if ((item[0] === 0 || item[0] === 1) && item[1] === 'desc') {
+                                needsFix = true;
+                            }
+                        });
+                    }
+                    
+                    if (needsFix) {
+                        fixOrder();
+                    }
+                }, 100);
+                
+                $(window).on('beforeunload', function() {
+                    clearInterval(fixInterval);
+                });
             }, 100);
 
             $('#formHonor').on('submit', function(e) {
