@@ -649,5 +649,21 @@ function editHonor(id) {
     });
 }
 
+// Ensure function is available globally
+window.editHonor = editHonor;
+
+// Ensure function is available after all scripts load
+if (typeof jQuery !== 'undefined') {
+    $(document).ready(function() {
+        if (typeof editHonor === 'undefined') {
+            console.error('editHonor function is not defined!');
+        } else {
+            console.log('editHonor function is available');
+            // Also assign to window to ensure global access
+            window.editHonor = editHonor;
+        }
+    });
+}
+
 </script>
 
