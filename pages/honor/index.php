@@ -341,6 +341,55 @@ function editHonor(id) {
                 }
                 
                 var table = $('#tableHonor').DataTable({
+                    dom: 'Bfrtip',
+                    buttons: {
+                        dom: {
+                            button: {
+                                className: 'btn btn-sm'
+                            }
+                        },
+                        buttons: [
+                            { 
+                                extend: 'excel', 
+                                text: '<i class="fas fa-file-excel"></i> Excel', 
+                                className: 'btn btn-success btn-sm',
+                                exportOptions: {
+                                    columns: [0, 1, 2, 3, 4, 5], // Export semua kolom kecuali Aksi (6)
+                                    format: {
+                                        body: function(data, row, column, node) {
+                                            return data ? data.replace(/<[^>]*>/g, '').trim() : '';
+                                        }
+                                    }
+                                },
+                                filename: 'Data_Honor_' + new Date().toISOString().split('T')[0],
+                                title: 'Data Honor'
+                            },
+                            { 
+                                extend: 'pdf', 
+                                text: '<i class="fas fa-file-pdf"></i> PDF', 
+                                className: 'btn btn-danger btn-sm',
+                                exportOptions: {
+                                    columns: [0, 1, 2, 3, 4, 5] // Export semua kolom kecuali Aksi (6)
+                                },
+                                filename: 'Data_Honor_' + new Date().toISOString().split('T')[0],
+                                title: 'Data Honor',
+                                orientation: 'landscape',
+                                pageSize: 'A4',
+                                customize: function(doc) {
+                                    doc.defaultStyle.fontSize = 9;
+                                    doc.styles.tableHeader.fontSize = 10;
+                                }
+                            },
+                            { 
+                                extend: 'print', 
+                                text: '<i class="fas fa-print"></i> Print', 
+                                className: 'btn btn-info btn-sm',
+                                exportOptions: {
+                                    columns: [0, 1, 2, 3, 4, 5] // Export semua kolom kecuali Aksi (6)
+                                }
+                            }
+                        ]
+                    },
                     language: { url: 'https://cdn.datatables.net/plug-ins/1.11.5/i18n/id.json' },
                     order: [[1, 'asc'], [0, 'asc']], // Urutkan kolom Nama Pembina (1) dulu, lalu kolom No (0)
                     stateSave: false,
@@ -351,6 +400,11 @@ function editHonor(id) {
                             targets: [0, 1], // Kolom No dan Nama Pembina
                             orderable: true,
                             orderSequence: ['asc', 'asc'] // Hanya bisa ascending (2x untuk mencegah descending)
+                        },
+                        {
+                            targets: 6, // Kolom Aksi
+                            orderable: false,
+                            searchable: false
                         }
                     ]
                 });
