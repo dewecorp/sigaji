@@ -2,25 +2,96 @@
 require_once __DIR__ . '/../config/config.php';
 requireLogin();
 
-$user_id = $_SESSION['user_id'];
-$username = $_SESSION['username'];
-$nama_lengkap = $_SESSION['nama_lengkap'];
+$user_id = $_SESSION['user_id'] ?? null;
+$username = $_SESSION['username'] ?? '';
+$nama_lengkap = $_SESSION['nama_lengkap'] ?? '';
 
-// Get foto from database to ensure it's always up to date
-$foto_sql = "SELECT foto FROM users WHERE id = ?";
-$foto_stmt = $conn->prepare($foto_sql);
-$foto_stmt->bind_param("i", $user_id);
-$foto_stmt->execute();
-$foto_result = $foto_stmt->get_result();
-if ($foto_result->num_rows > 0) {
-    $foto_data = $foto_result->fetch_assoc();
-    $foto = $foto_data['foto'] ?? 'default.jpg';
-    // Update session with latest foto
-    $_SESSION['foto'] = $foto;
-} else {
-    $foto = $_SESSION['foto'] ?? 'default.jpg';
+// Function to generate avatar with initials
+function generateAvatar($name, $size = 100) {
+    $name = trim($name);
+    if (empty($name)) {
+        $initials = 'U';
+    } else {
+        $words = explode(' ', $name);
+        if (count($words) >= 2) {
+            $initials = strtoupper(substr($words[0], 0, 1) . substr($words[count($words) - 1], 0, 1));
+        } else {
+            $initials = strtoupper(substr($name, 0, 2));
+        }
+    }
+    
+    // Generate color based on name (consistent color for same name)
+    $colors = [
+        ['#667eea', '#764ba2'], // Purple gradient
+        ['#f093fb', '#f5576c'], // Pink gradient
+        ['#4facfe', '#00f2fe'], // Blue gradient
+        ['#43e97b', '#38f9d7'], // Green gradient
+        ['#fa709a', '#fee140'], // Orange gradient
+        ['#30cfd0', '#330867'], // Cyan gradient
+        ['#a8edea', '#fed6e3'], // Light gradient
+        ['#ff9a9e', '#fecfef'], // Rose gradient
+    ];
+    
+    $colorIndex = abs(crc32($name)) % count($colors);
+    $color = $colors[$colorIndex];
+    
+    $svg = '<svg width="' . $size . '" height="' . $size . '" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+            <linearGradient id="grad' . $colorIndex . '" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:' . $color[0] . ';stop-opacity:1" />
+                <stop offset="100%" style="stop-color:' . $color[1] . ';stop-opacity:1" />
+            </linearGradient>
+        </defs>
+        <circle cx="' . ($size/2) . '" cy="' . ($size/2) . '" r="' . ($size/2) . '" fill="url(#grad' . $colorIndex . ')"/>
+        <text x="50%" y="50%" font-family="Arial, sans-serif" font-size="' . ($size * 0.4) . '" font-weight="bold" fill="white" text-anchor="middle" dominant-baseline="central">' . htmlspecialchars($initials) . '</text>
+    </svg>';
+    
+    return 'data:image/svg+xml;base64,' . base64_encode($svg);
 }
-$foto_stmt->close();
+
+// Get all user data including foto from database to ensure it's always correct
+// Never use session foto to avoid showing wrong user's foto
+$foto = '';
+$has_foto = false;
+if ($user_id) {
+    // Get complete user data to ensure we have the right user
+    $user_sql = "SELECT id, username, nama_lengkap, foto FROM users WHERE id = ?";
+    $user_stmt = $conn->prepare($user_sql);
+    if ($user_stmt) {
+        $user_stmt->bind_param("i", $user_id);
+        $user_stmt->execute();
+        $user_result = $user_stmt->get_result();
+        if ($user_result && $user_result->num_rows > 0) {
+            $user_data = $user_result->fetch_assoc();
+            // Verify this is the correct user by checking username matches session
+            if ($user_data['username'] === $username) {
+                // Check if user has foto
+                $foto_file = !empty($user_data['foto']) ? $user_data['foto'] : '';
+                $foto_path = __DIR__ . '/../assets/img/users/' . $foto_file;
+                
+                if (!empty($foto_file) && file_exists($foto_path)) {
+                    $foto = $foto_file;
+                    $has_foto = true;
+                } else {
+                    $foto = '';
+                    $has_foto = false;
+                }
+                // Update session with latest data
+                $_SESSION['foto'] = $foto;
+                $_SESSION['nama_lengkap'] = $user_data['nama_lengkap'] ?? $nama_lengkap;
+            } else {
+                // Username mismatch - use avatar
+                $foto = '';
+                $has_foto = false;
+                $_SESSION['foto'] = '';
+            }
+        }
+        $user_stmt->close();
+    }
+}
+
+// Generate avatar if no foto
+$avatar_url = $has_foto ? '' : generateAvatar($nama_lengkap, 100);
 
 // Get tahun ajaran from settings
 $sql = "SELECT tahun_ajaran FROM settings LIMIT 1";
@@ -431,19 +502,18 @@ cleanupOldActivities($conn);
                     <li class="dropdown">
                         <a href="#" data-toggle="dropdown" class="nav-link dropdown-toggle nav-link-lg nav-link-user">
                             <?php 
-                            $foto_path = __DIR__ . '/../assets/img/users/' . $foto;
-                            $foto_url = BASE_URL . 'assets/img/users/' . $foto;
-                            $default_foto_url = BASE_URL . 'assets/img/users/default.jpg';
-                            
-                            // Use default if user foto doesn't exist
-                            if (!file_exists($foto_path) || empty($foto)) {
-                                $foto_url = $default_foto_url;
+                            if ($has_foto && !empty($foto)) {
+                                $foto_path = __DIR__ . '/../assets/img/users/' . $foto;
+                                $foto_url = BASE_URL . 'assets/img/users/' . $foto;
+                                $cache_buster = '?v=' . $user_id . '&t=' . time();
+                                $foto_url .= $cache_buster;
+                                $img_src = $foto_url;
+                            } else {
+                                // Use avatar with initials
+                                $img_src = $avatar_url;
                             }
-                            
-                            // Data URI fallback for SVG placeholder (prevents infinite loop)
-                            $fallback_data_uri = 'data:image/svg+xml;base64,' . base64_encode('<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" fill="#e0e0e0"/><circle cx="50" cy="35" r="15" fill="#999"/><path d="M 30 70 Q 30 55 50 55 Q 70 55 70 70 L 70 85 L 30 85 Z" fill="#999"/></svg>');
                             ?>
-                            <img alt="image" src="<?php echo $foto_url; ?>" class="user-img mr-2" style="width: 40px; height: 40px; object-fit: cover; border-radius: 50%; border: 2px solid #667eea; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: inline-block !important;" onerror="if(this.src!=='<?php echo $fallback_data_uri; ?>' && this.src!=='<?php echo $default_foto_url; ?>'){this.src='<?php echo $default_foto_url; ?>';}else if(this.src!=='<?php echo $fallback_data_uri; ?>'){this.src='<?php echo $fallback_data_uri; ?>';}this.onerror=null;">
+                            <img alt="image" src="<?php echo $img_src; ?>" class="user-img mr-2" style="width: 40px; height: 40px; object-fit: cover; border-radius: 50%; border: 2px solid #667eea; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: inline-block !important;">
                             <div class="d-sm-none d-lg-inline-block" style="font-size: 14px; font-weight: 500; vertical-align: middle;"><?php echo htmlspecialchars($nama_lengkap ?? ''); ?></div>
                         </a>
                         <div class="dropdown-menu dropdown-menu-right">
