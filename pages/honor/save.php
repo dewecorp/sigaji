@@ -1,6 +1,12 @@
 <?php
+// Prevent any output before JSON
+ob_start();
+
 require_once __DIR__ . '/../../config/config.php';
 requireLogin();
+
+// Clear any output buffer
+ob_clean();
 
 header('Content-Type: application/json');
 
@@ -51,7 +57,13 @@ if ($result->num_rows == 0) {
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     try {
-        $id = isset($_POST['id']) && $_POST['id'] != '' && $_POST['id'] != '0' ? intval($_POST['id']) : null;
+        // Check both 'id' and 'honor_id' for backward compatibility
+        $id = null;
+        if (isset($_POST['id']) && $_POST['id'] != '' && $_POST['id'] != '0') {
+            $id = intval($_POST['id']);
+        } elseif (isset($_POST['honor_id']) && $_POST['honor_id'] != '' && $_POST['honor_id'] != '0') {
+            $id = intval($_POST['honor_id']);
+        }
         $pembina_id = isset($_POST['pembina_id']) && $_POST['pembina_id'] != '' ? intval($_POST['pembina_id']) : null;
         $jabatan = trim($_POST['jabatan'] ?? '');
         // Get jumlah_honor from hidden input if available, otherwise from jumlah_honor field
@@ -85,16 +97,44 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         
         if ($stmt->execute()) {
             logActivity($conn, ($id ? 'Mengubah' : 'Menambah') . ' data honor: ' . $jabatan, 'success');
-            echo json_encode(['success' => true, 'message' => 'Data berhasil ' . ($id ? 'diubah' : 'ditambahkan')]);
+            $stmt->close();
+            
+            // Clear output buffer before sending JSON
+            ob_clean();
+            echo json_encode([
+                'success' => true, 
+                'message' => 'Data berhasil ' . ($id ? 'diubah' : 'ditambahkan')
+            ]);
+            exit();
         } else {
-            throw new Exception('Gagal menyimpan data: ' . $stmt->error);
+            $error_msg = $stmt->error ? $stmt->error : "Database error";
+            $stmt->close();
+            
+            // Clear output buffer before sending JSON
+            ob_clean();
+            echo json_encode([
+                'success' => false,
+                'message' => 'Gagal menyimpan data: ' . $error_msg
+            ]);
+            exit();
         }
-        $stmt->close();
     } catch (Exception $e) {
-        echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        // Clear output buffer before sending JSON
+        ob_clean();
+        echo json_encode([
+            'success' => false, 
+            'message' => $e->getMessage()
+        ]);
+        exit();
     }
 } else {
-    echo json_encode(['success' => false, 'message' => 'Invalid request method']);
+    // Clear output buffer before sending JSON
+    ob_clean();
+    echo json_encode([
+        'success' => false, 
+        'message' => 'Invalid request method'
+    ]);
+    exit();
 }
 ?>
 
