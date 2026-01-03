@@ -300,22 +300,22 @@ $activities = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
 }
 
 .stat-icon {
-    width: 60px;
-    height: 60px;
+    width: 75px;
+    height: 75px;
     border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 18px;
+    font-size: 28px;
     color: #fff;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     transition: all 0.3s ease;
 }
 
 .stat-card-large .stat-icon {
-    width: 75px;
-    height: 75px;
-    font-size: 22px;
+    width: 90px;
+    height: 90px;
+    font-size: 32px;
     border-radius: 16px;
 }
 
@@ -548,9 +548,9 @@ $activities = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
     }
     
     .stat-icon {
-        width: 50px;
-        height: 50px;
-        font-size: 16px;
+        width: 65px;
+        height: 65px;
+        font-size: 24px;
     }
     
     .stat-value {
@@ -558,9 +558,9 @@ $activities = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
     }
     
     .stat-card-large .stat-icon {
-        width: 70px;
-        height: 70px;
-        font-size: 20px;
+        width: 80px;
+        height: 80px;
+        font-size: 28px;
     }
     
     .stat-card-large .stat-value {
@@ -600,16 +600,16 @@ font-size: 1.2rem;
     }
     
     .stat-icon {
-        width: 55px;
-        height: 55px;
-        font-size: 18px;
+        width: 70px;
+        height: 70px;
+        font-size: 26px;
         flex-shrink: 0;
     }
     
     .stat-card-large .stat-icon {
-        width: 65px;
-        height: 65px;
-        font-size: 20px;
+        width: 80px;
+        height: 80px;
+        font-size: 30px;
     }
     
     .stat-value {
@@ -662,15 +662,15 @@ font-size: 1.2rem;
     }
     
     .stat-icon {
-        width: 50px;
-        height: 50px;
-        font-size: 18px;
+        width: 65px;
+        height: 65px;
+        font-size: 24px;
     }
     
     .stat-card-large .stat-icon {
-        width: 60px;
-        height: 60px;
-        font-size: 22px;
+        width: 75px;
+        height: 75px;
+        font-size: 28px;
     }
     
     .stat-value {
