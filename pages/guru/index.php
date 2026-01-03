@@ -97,21 +97,6 @@ $tunjangan_list = $result_tunjangan ? $result_tunjangan->fetch_all(MYSQLI_ASSOC)
                                             font-family: 'Nunito', sans-serif;
                                             font-size: 16px;
                                         }
-                                        
-                                        /* Kecilkan icon edit dan hapus */
-                                        #tableGuru .btn-sm i.fa-edit,
-                                        #tableGuru .btn-sm i.fa-trash {
-                                            font-size: 0.7rem !important;
-                                        }
-                                        
-                                        /* Kecilkan button edit dan hapus */
-                                        #tableGuru .btn-sm.btn-info,
-                                        #tableGuru .btn-sm.btn-danger {
-                                            padding: 0.25rem 0.5rem !important;
-                                            font-size: 0.75rem !important;
-                                            line-height: 1.2 !important;
-                                        }
-                                        
                                         #tableGuru thead th {
                                             background-color: #667eea !important;
                                             color: white !important;
@@ -809,11 +794,8 @@ var selectedIds = new Set();
         drawCallback: function(settings) {
             var api = this.api();
             var pageInfo = api.page.info();
-            // Calculate starting number correctly based on current page
-            // pageInfo.start is 0-based index of first record on current page
-            var start = pageInfo.start;
-            api.column(1, {page: 'current'}).nodes().each(function(cell, i) {
-                cell.innerHTML = start + i + 1;
+            api.column(1, {search: 'applied'}).nodes().each(function(cell, i) {
+                cell.innerHTML = pageInfo.start + i + 1;
             });
             // Restore checkbox states after pagination
             $('.row-checkbox').each(function() {

@@ -120,7 +120,7 @@ if ($logo_exists) {
         }
         
         .info-table {
-            margin: 1mm 0 0 0;
+            margin: 0.5mm 0 0 0;
             border: none;
             width: 100%;
             table-layout: fixed;
@@ -137,10 +137,10 @@ if ($logo_exists) {
         }
         .info-table td {
             border: none;
-            padding: 0.1mm 0;
+            padding: 0;
             vertical-align: top;
             font-size: 12px;
-            line-height: 0.8;
+            line-height: 1;
         }
         .info-table td:first-child {
             width: 120px;

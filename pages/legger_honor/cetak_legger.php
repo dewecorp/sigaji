@@ -56,7 +56,7 @@ $legger = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         
         body {
             font-family: Arial, sans-serif;
-            font-size: 14px;
+            font-size: 11pt;
             padding: 10mm 10mm 10mm 10mm;
             margin: 0;
             margin-bottom: 10mm;
@@ -88,20 +88,20 @@ $legger = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         }
         
         .header-content h2 {
-            font-size: 20px;
+            font-size: 18pt;
             margin: 5px 0;
             font-weight: bold;
         }
         
         .header-content p {
-            font-size: 16px;
+            font-size: 12pt;
             margin: 3px 0;
         }
         
         .period-info {
             text-align: center;
             margin-bottom: 15px;
-            font-size: 15px;
+            font-size: 11pt;
             font-weight: bold;
         }
         
@@ -110,24 +110,24 @@ $legger = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             border-collapse: collapse;
             margin: 0;
             margin-bottom: 0;
-            font-size: 16px;
+            font-size: 11pt;
         }
         
         table th,
         table td {
             border: 1px solid #000;
-            padding: 12px 10px;
+            padding: 6px 8px;
             text-align: left;
             vertical-align: middle;
-            height: 50px;
-            font-size: 16px;
+            height: auto;
+            font-size: 11pt;
         }
         
         table th {
             background-color: #f0f0f0;
             font-weight: bold;
             text-align: center;
-            font-size: 16px;
+            font-size: 11pt;
         }
         
         /* Kolom No - width tetap kecil */
@@ -135,7 +135,7 @@ $legger = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         table td:first-child {
             width: 50px;
             text-align: center;
-            padding: 12px 10px;
+            padding: 6px 8px;
         }
         
         /* Kolom Nama Pembina - width lebih besar */
@@ -143,7 +143,7 @@ $legger = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         table td:nth-child(2) {
             width: 220px;
             min-width: 220px;
-            padding: 12px 10px;
+            padding: 6px 8px;
         }
         
         /* Kolom Jabatan */
@@ -151,7 +151,7 @@ $legger = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         table td:nth-child(3) {
             width: 180px;
             min-width: 180px;
-            padding: 12px 10px;
+            padding: 6px 8px;
         }
         
         /* Kolom dengan angka - align right */
@@ -161,11 +161,15 @@ $legger = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         }
         
         /* Kolom Honor per Pertemuan */
-        table th:nth-child(4),
+        table th:nth-child(4) {
+            width: 150px;
+            text-align: center;
+            padding: 6px 8px;
+        }
         table td:nth-child(4) {
             width: 150px;
             text-align: right;
-            padding: 12px 10px;
+            padding: 6px 8px;
         }
         
         /* Kolom Jumlah Pertemuan */
@@ -173,15 +177,19 @@ $legger = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         table td:nth-child(5) {
             width: 100px;
             text-align: center;
-            padding: 12px 10px;
+            padding: 6px 8px;
         }
         
         /* Kolom Total Honor */
-        table th:nth-child(6),
+        table th:nth-child(6) {
+            width: 160px;
+            text-align: center;
+            padding: 6px 8px;
+        }
         table td:nth-child(6) {
             width: 160px;
             text-align: right;
-            padding: 12px 10px;
+            padding: 6px 8px;
         }
         
         /* Kolom Tanda Tangan - align center */
@@ -191,7 +199,7 @@ $legger = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             font-family: Arial, sans-serif;
             min-width: 150px;
             width: 150px;
-            padding: 12px 10px;
+            padding: 6px 8px;
         }
         
         /* Total columns - bold */
@@ -230,11 +238,22 @@ $legger = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             line-height: 1.1;
         }
         
+        .tempat-tanggal {
+            text-align: right;
+            margin-bottom: 20px;
+            font-size: 11pt;
+        }
+        
         .signature-line {
             width: 80%;
-            margin: 5px auto 0 auto;
-            min-height: 10px;
+            margin: 30px auto 0 auto;
+            min-height: 40px;
             border-top: 1px solid transparent;
+        }
+        
+        .footer-left p:last-child,
+        .footer-right p:last-child {
+            margin-top: 8px;
         }
         
         @media print {
@@ -254,26 +273,32 @@ $legger = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             }
             
             .header-content h2 {
-                font-size: 20px;
+                font-size: 18pt;
             }
             
             .header-content p {
-                font-size: 16px;
+                font-size: 12pt;
             }
             
             .period-info {
-                font-size: 15px;
+                font-size: 11pt;
+            }
+            
+            .tempat-tanggal {
+                text-align: right;
+                margin-bottom: 20px;
+                font-size: 11pt;
             }
             
             table {
-                font-size: 16px;
+                font-size: 11pt;
             }
             
             table th,
             table td {
-                padding: 12px 10px;
-                height: 50px;
-                font-size: 16px;
+                padding: 6px 8px;
+                height: auto;
+                font-size: 11pt;
             }
             
             /* Ensure table fits on page */
@@ -307,8 +332,8 @@ $legger = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             }
             
             .signature-line {
-                margin: 5px auto 0 auto !important;
-                min-height: 10px !important;
+                margin: 30px auto 0 auto !important;
+                min-height: 40px !important;
             }
             
             /* Ensure table and footer stay together */
@@ -428,97 +453,36 @@ $legger = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         </tbody>
     </table>
     
+    <?php if (!empty($settings['tempat']) || !empty($settings['hari_tanggal'])): ?>
+    <div class="tempat-tanggal">
+        <?php if (!empty($settings['tempat'])): ?>
+            <?php echo htmlspecialchars($settings['tempat']); ?><?php if (!empty($settings['hari_tanggal'])): ?>,<?php endif; ?>
+        <?php endif; ?>
+        <?php if (!empty($settings['hari_tanggal'])): ?>
+            <?php echo formatTanggalTanpaHari($settings['hari_tanggal']); ?>
+        <?php endif; ?>
+    </div>
+    <?php endif; ?>
+    
     <div class="footer" style="margin: 0; padding: 0;">
         <div class="footer-left">
             <p style="margin: 2px 0;"><strong>Mengetahui,</strong></p>
             <p style="margin: 2px 0;"><strong>Kepala Madrasah</strong></p>
             <div class="signature-line"></div>
-            <p style="margin: 1px 0;"><?php echo htmlspecialchars($settings['nama_kepala'] ?? ''); ?></p>
+            <p style="margin-top: 8px; margin-bottom: 1px;"><?php echo htmlspecialchars($settings['nama_kepala'] ?? ''); ?></p>
         </div>
         <div class="footer-right">
             <p style="margin: 2px 0;"><strong>Bendahara</strong></p>
             <div class="signature-line"></div>
-            <p style="margin: 1px 0;"><?php echo htmlspecialchars($settings['nama_bendahara'] ?? ''); ?></p>
+            <p style="margin-top: 8px; margin-bottom: 1px;"><?php echo htmlspecialchars($settings['nama_bendahara'] ?? ''); ?></p>
         </div>
     </div>
     
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script>
         window.onload = function() {
-            const element = document.body;
-            
-            // Remove any empty spaces at the end
-            const footer = document.querySelector('.footer');
-            if (footer) {
-                footer.style.marginBottom = '0';
-                footer.style.paddingBottom = '0';
-            }
-            
-            // Remove any trailing whitespace
-            const lastChild = element.lastElementChild;
-            if (lastChild) {
-                lastChild.style.marginBottom = '0';
-                lastChild.style.paddingBottom = '0';
-            }
-            
             // Wait for content to fully render
             setTimeout(function() {
-                // Calculate proper dimensions
-                const elementWidth = element.scrollWidth || window.innerWidth;
-                const elementHeight = element.scrollHeight || window.innerHeight;
-                
-                const opt = {
-                    margin: [5, 5, 10, 5],
-                    filename: 'Legger_Honor_<?php echo $periode; ?>.pdf',
-                    image: { type: 'jpeg', quality: 0.98 },
-                    html2canvas: { 
-                        scale: 2, 
-                        useCORS: true, 
-                        letterRendering: true,
-                        logging: false,
-                        windowWidth: elementWidth,
-                        windowHeight: elementHeight,
-                        scrollX: 0,
-                        scrollY: 0,
-                        allowTaint: true
-                    },
-                    jsPDF: { 
-                        unit: 'mm', 
-                        format: 'a4', 
-                        orientation: 'landscape',
-                        compress: true
-                    },
-                    pagebreak: { 
-                        mode: ['css'],
-                        avoid: ['.header', '.period-info', 'table thead']
-                    }
-                };
-                
-                html2pdf().set(opt).from(element).save().then(function(pdf) {
-                    // Try to remove empty pages by checking PDF
-                    const pdfInternal = pdf.internal;
-                    const totalPages = pdfInternal.getNumberOfPages();
-                    
-                    // Check if last page is empty
-                    if (totalPages > 1) {
-                        // Get last page info
-                        const pageSize = pdfInternal.pageSize;
-                        const pageHeight = pageSize.height;
-                        
-                        // Close window after download
-                        setTimeout(function() {
-                            window.close();
-                        }, 1000);
-                    } else {
-                        // Close window after download
-                        setTimeout(function() {
-                            window.close();
-                        }, 1000);
-                    }
-                }).catch(function(error) {
-                    console.error('Error generating PDF:', error);
-                    alert('Terjadi kesalahan saat membuat PDF. Silakan coba lagi.');
-                });
+                window.print();
             }, 500);
         };
     </script>

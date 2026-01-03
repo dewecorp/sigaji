@@ -7,7 +7,7 @@ require_once __DIR__ . '/../../includes/sidebar.php';
 $sql = "SELECT h.*, p.nama_pembina 
         FROM honor h
         LEFT JOIN pembina p ON h.pembina_id = p.id
-        ORDER BY p.nama_pembina ASC, h.id ASC";
+        ORDER BY h.id ASC";
 $result = $conn->query($sql);
 $honor = $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
 
@@ -16,7 +16,6 @@ $sql_pembina = "SELECT * FROM pembina ORDER BY nama_pembina ASC";
 $result_pembina = $conn->query($sql_pembina);
 $pembina_list = $result_pembina ? $result_pembina->fetch_all(MYSQLI_ASSOC) : [];
 ?>
-
 
             <div class="main-content">
                 <section class="section">
@@ -66,10 +65,10 @@ $pembina_list = $result_pembina ? $result_pembina->fetch_all(MYSQLI_ASSOC) : [];
                                                         </span>
                                                     </td>
                                                     <td>
-                                                        <button class="btn btn-sm btn-info" onclick="editHonor(<?php echo intval($h['id']); ?>)" data-toggle="tooltip" title="Edit">
+                                                        <button class="btn btn-sm btn-info btn-edit" data-id="<?php echo $h['id']; ?>" onclick="editHonor(<?php echo $h['id']; ?>)">
                                                             <i class="fas fa-edit"></i>
                                                         </button>
-                                                        <button class="btn btn-sm btn-danger" onclick="confirmDelete('<?php echo BASE_URL; ?>pages/honor/delete.php?id=<?php echo intval($h['id']); ?>')" data-toggle="tooltip" title="Hapus">
+                                                        <button class="btn btn-sm btn-danger" onclick="confirmDelete('<?php echo BASE_URL; ?>pages/honor/delete.php?id=<?php echo $h['id']; ?>')">
                                                             <i class="fas fa-trash"></i>
                                                         </button>
                                                     </td>
@@ -139,152 +138,10 @@ $pembina_list = $result_pembina ? $result_pembina->fetch_all(MYSQLI_ASSOC) : [];
                 </div>
             </div>
 
+
 <?php require_once __DIR__ . '/../../includes/footer.php'; ?>
 
-
-
-<style>
-/* Paksa kolom No dan Nama Pembina selalu ascending - sembunyikan indikator descending */
-#tableHonor thead th:nth-child(1).sorting_desc,
-#tableHonor thead th:nth-child(2).sorting_desc {
-    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12"><path fill="%23666" d="M6 0L2 4h8z"/></svg>') !important;
-    background-position: right 8px center !important;
-    background-repeat: no-repeat !important;
-}
-
-/* Pastikan cursor pointer */
-#tableHonor thead th:nth-child(1),
-#tableHonor thead th:nth-child(2) {
-    cursor: pointer !important;
-}
-</style>
-
 <script>
-// All initialization code goes here
-
-// Format Rupiah function (must be available globally)
-function formatRupiah(angka) {
-    var number_string = angka.toString().replace(/[^\d]/g, '');
-    if (number_string === '' || number_string === '0') return '0';
-    number_string = number_string.replace(/^0+/, '') || '0';
-    var sisa = number_string.length % 3;
-    var rupiah = number_string.substr(0, sisa);
-    var ribuan = number_string.substr(sisa).match(/\d{3}/g);
-    if (ribuan) {
-        var separator = sisa ? '.' : '';
-        rupiah += separator + ribuan.join('.');
-    }
-    return rupiah;
-}
-
-// Unformat Rupiah function (must be available globally)
-function unformatRupiah(rupiah) {
-    if (!rupiah || rupiah === '') return 0;
-    var cleaned = rupiah.toString().replace(/\./g, '').replace(/[^0-9]/g, '');
-    return parseFloat(cleaned) || 0;
-}
-
-// Define editHonor function immediately (will be available globally)
-function editHonor(id) {
-    if (typeof jQuery === 'undefined') {
-        setTimeout(function() { editHonor(id); }, 100);
-        return;
-    }
-    var $ = window.jQuery;
-    
-    $.ajax({
-        url: '<?php echo BASE_URL; ?>pages/honor/get.php',
-        type: 'GET',
-        data: { id: id },
-        dataType: 'json',
-        success: function(response) {
-            if (response.success && response.data) {
-                $('#honor_id').val(response.data.id);
-                $('#pembina_id').val(response.data.pembina_id || '');
-                $('#jabatan').val(response.data.jabatan || '');
-                
-                // Format jumlah_honor as Rupiah
-                var jumlah = parseFloat(response.data.jumlah_honor || 0);
-                if (isNaN(jumlah)) {
-                    jumlah = 0;
-                }
-                
-                // Store raw value in hidden input
-                $('#jumlah_honor_hidden').val(jumlah.toString());
-                
-                // Format for display
-                var jumlahString = Math.floor(jumlah).toString();
-                var formatted = typeof formatRupiah === 'function' ? formatRupiah(jumlahString) : jumlahString;
-                $('#jumlah_honor').val(formatted);
-                
-                // Set jumlah_pertemuan
-                $('#jumlah_pertemuan').val(response.data.jumlah_pertemuan || 0);
-                
-                $('#aktif').prop('checked', response.data.aktif == 1);
-                $('#modalTitle').text('Edit Honor');
-                
-                // Ensure all fields are enabled and editable
-                $('#pembina_id').prop('disabled', false).removeAttr('disabled');
-                $('#jabatan').prop('disabled', false).removeAttr('disabled').prop('readonly', false).removeAttr('readonly');
-                $('#jumlah_honor').prop('disabled', false).removeAttr('disabled').prop('readonly', false).removeAttr('readonly');
-                $('#jumlah_pertemuan').prop('disabled', false).removeAttr('disabled').prop('readonly', false).removeAttr('readonly');
-                $('#aktif').prop('disabled', false).removeAttr('disabled');
-                
-                $('#modalTambah').modal('show');
-                
-                // Ensure format is applied after modal is shown
-                setTimeout(function() {
-                    $('#pembina_id').prop('disabled', false).removeAttr('disabled');
-                    $('#jabatan').prop('disabled', false).removeAttr('disabled').prop('readonly', false).removeAttr('readonly');
-                    $('#jumlah_honor').prop('disabled', false).removeAttr('disabled').prop('readonly', false).removeAttr('readonly');
-                    $('#jumlah_pertemuan').prop('disabled', false).removeAttr('disabled').prop('readonly', false).removeAttr('readonly');
-                    $('#aktif').prop('disabled', false).removeAttr('disabled');
-                    
-                    var currentValue = $('#jumlah_honor').val();
-                    if (currentValue && currentValue !== '0' && currentValue !== '') {
-                        if (typeof unformatRupiah === 'function' && typeof formatRupiah === 'function') {
-                            var unformatted = unformatRupiah(currentValue);
-                            var formatted = formatRupiah(unformatted.toString());
-                            $('#jumlah_honor').val(formatted);
-                            $('#jumlah_honor_hidden').val(unformatted);
-                        }
-                    }
-                }, 100);
-            } else {
-                var errorMsg = response.message || 'Gagal mengambil data honor';
-                if (typeof Swal !== 'undefined') {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: errorMsg
-                    });
-                } else {
-                    alert(errorMsg);
-                }
-            }
-        },
-        error: function(xhr, status, error) {
-            console.error('AJAX Error:', status, error);
-            var errorMsg = 'Terjadi kesalahan saat mengambil data honor';
-            try {
-                var response = JSON.parse(xhr.responseText);
-                errorMsg = response.message || errorMsg;
-            } catch(e) {
-                errorMsg = xhr.responseText || errorMsg;
-            }
-            if (typeof Swal !== 'undefined') {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: errorMsg
-                });
-            } else {
-                alert(errorMsg);
-            }
-        }
-    });
-}
-
 // Wait for jQuery to be loaded
 (function() {
     function initHonor() {
@@ -294,6 +151,28 @@ function editHonor(id) {
         }
         
         var $ = window.jQuery;
+        
+        // Format Rupiah function (must be available globally)
+        function formatRupiah(angka) {
+            var number_string = angka.toString().replace(/[^\d]/g, '');
+            if (number_string === '' || number_string === '0') return '0';
+            number_string = number_string.replace(/^0+/, '') || '0';
+            var sisa = number_string.length % 3;
+            var rupiah = number_string.substr(0, sisa);
+            var ribuan = number_string.substr(sisa).match(/\d{3}/g);
+            if (ribuan) {
+                var separator = sisa ? '.' : '';
+                rupiah += separator + ribuan.join('.');
+            }
+            return rupiah;
+        }
+        
+        // Unformat Rupiah function (must be available globally)
+        function unformatRupiah(rupiah) {
+            if (!rupiah || rupiah === '') return 0;
+            var cleaned = rupiah.toString().replace(/\./g, '').replace(/[^0-9]/g, '');
+            return parseFloat(cleaned) || 0;
+        }
         
         $(document).ready(function() {
             // Currency input formatting (same as tunjangan)
@@ -314,112 +193,13 @@ function editHonor(id) {
                 $('#jumlah_honor_hidden').val(unformatted);
             });
 
-            // Clear DataTable state from localStorage and sessionStorage
-            if (typeof(Storage) !== "undefined") {
-                Object.keys(localStorage).forEach(function(key) {
-                    if (key.indexOf('DataTables_tableHonor') === 0 || key.indexOf('DataTables_') === 0) {
-                        localStorage.removeItem(key);
-                    }
-                });
-                Object.keys(sessionStorage).forEach(function(key) {
-                    if (key.indexOf('DataTables_tableHonor') === 0 || key.indexOf('DataTables_') === 0) {
-                        sessionStorage.removeItem(key);
-                    }
-                });
-            }
-            
-            // Destroy existing instance if it exists
-            if ($.fn.DataTable.isDataTable('#tableHonor')) {
-                $('#tableHonor').DataTable().destroy();
-            }
+            $('#tableHonor').DataTable({
+                language: { url: 'https://cdn.datatables.net/plug-ins/1.11.5/i18n/id.json' },
+                order: [[1, 'asc']]
+            });
 
-            // Tunggu sedikit untuk memastikan semua script sudah loaded
-            setTimeout(function() {
-                // Pastikan tidak ada instance DataTable yang sudah ada
-                if ($.fn.DataTable.isDataTable('#tableHonor')) {
-                    $('#tableHonor').DataTable().destroy();
-                }
-                
-                var table = $('#tableHonor').DataTable({
-                    dom: 'Bfrtip',
-                    buttons: {
-                        dom: {
-                            button: {
-                                className: 'btn btn-sm'
-                            }
-                        },
-                        buttons: [
-                            { 
-                                extend: 'excel', 
-                                text: '<i class="fas fa-file-excel"></i> Excel', 
-                                className: 'btn btn-success btn-sm',
-                                exportOptions: {
-                                    columns: [0, 1, 2, 3, 4, 5], // Export semua kolom kecuali Aksi (6)
-                                    format: {
-                                        body: function(data, row, column, node) {
-                                            return data ? data.replace(/<[^>]*>/g, '').trim() : '';
-                                        }
-                                    }
-                                },
-                                filename: 'Data_Honor_' + new Date().toISOString().split('T')[0],
-                                title: 'Data Honor'
-                            },
-                            { 
-                                extend: 'pdf', 
-                                text: '<i class="fas fa-file-pdf"></i> PDF', 
-                                className: 'btn btn-danger btn-sm',
-                                exportOptions: {
-                                    columns: [0, 1, 2, 3, 4, 5] // Export semua kolom kecuali Aksi (6)
-                                },
-                                filename: 'Data_Honor_' + new Date().toISOString().split('T')[0],
-                                title: 'Data Honor',
-                                orientation: 'landscape',
-                                pageSize: 'A4',
-                                customize: function(doc) {
-                                    doc.defaultStyle.fontSize = 9;
-                                    doc.styles.tableHeader.fontSize = 10;
-                                }
-                            },
-                            { 
-                                extend: 'print', 
-                                text: '<i class="fas fa-print"></i> Print', 
-                                className: 'btn btn-info btn-sm',
-                                exportOptions: {
-                                    columns: [0, 1, 2, 3, 4, 5] // Export semua kolom kecuali Aksi (6)
-                                }
-                            }
-                        ]
-                    },
-                    language: { url: 'https://cdn.datatables.net/plug-ins/1.11.5/i18n/id.json' },
-                    order: [[1, 'asc'], [0, 'asc']], // Urutkan kolom Nama Pembina (1) dulu, lalu kolom No (0)
-                    stateSave: false,
-                    stateDuration: -1,
-                    retrieve: false,
-                    columnDefs: [
-                        {
-                            targets: [0, 1], // Kolom No dan Nama Pembina
-                            orderable: true,
-                            orderSequence: ['asc', 'asc'] // Hanya bisa ascending (2x untuk mencegah descending)
-                        },
-                        {
-                            targets: 6, // Kolom Aksi
-                            orderable: false,
-                            searchable: false
-                        }
-                    ]
-                });
-            }, 100);
-            
             $('#formHonor').on('submit', function(e) {
                 e.preventDefault();
-                
-                // Ensure all fields are enabled before serialize (disabled fields are not serialized)
-                $('#pembina_id').prop('disabled', false);
-                $('#jabatan').prop('disabled', false).prop('readonly', false);
-                $('#jumlah_honor').prop('disabled', false).prop('readonly', false);
-                $('#jumlah_pertemuan').prop('disabled', false).prop('readonly', false);
-                $('#aktif').prop('disabled', false);
-                
                 // Ensure hidden value is set before submit - same as tunjangan
                 var formatted = $('#jumlah_honor').val();
                 var unformatted = unformatRupiah(formatted);
@@ -437,132 +217,43 @@ function editHonor(id) {
                     return false;
                 }
                 
-                // Prepare form data
                 var formData = $(this).serialize();
-                var honorId = $('#honor_id').val();
-                
-                console.log('Form data being sent:', formData);
-                console.log('Honor ID:', honorId);
-                console.log('Is edit mode:', honorId && honorId !== '');
-                
-                // Show loading indicator
-                Swal.fire({
-                    title: 'Menyimpan...',
-                    text: 'Mohon tunggu',
-                    allowOutsideClick: false,
-                    allowEscapeKey: false,
-                    showConfirmButton: false,
-                    didOpen: function() {
-                        Swal.showLoading();
-                    }
-                });
                 
                 $.ajax({
                     url: '<?php echo BASE_URL; ?>pages/honor/save.php',
                     type: 'POST',
                     data: formData,
-                    contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
                     dataType: 'json',
-                    beforeSend: function() {
-                        console.log('Sending AJAX request');
-                        console.log('Form Data:', formData);
-                        console.log('URL: pages/honor/save.php');
-                    },
                     success: function(response) {
-                        console.log('=== SUCCESS HANDLER CALLED ===');
-                        console.log('Response from save.php:', response);
-                        console.log('Response type:', typeof response);
-                        console.log('Response.success:', response ? response.success : 'undefined');
-                        console.log('Response stringified:', JSON.stringify(response));
-                        
-                        Swal.close();
-                        
-                        // Handle both string and object responses
-                        var responseObj = response;
-                        if (typeof response === 'string') {
-                            try {
-                                responseObj = JSON.parse(response);
-                            } catch(e) {
-                                console.error('Failed to parse response:', e);
-                            }
-                        }
-                        
-                        if (responseObj && responseObj.success === true) {
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Berhasil!',
-                                text: responseObj.message || 'Data berhasil disimpan',
-                                timer: 2000,
-                                showConfirmButton: false
-                            }).then(function() {
+                        if (response.success) {
+                            Swal.fire({icon: 'success', title: 'Berhasil!', text: response.message, timer: 2000}).then(function() {
                                 window.location.reload();
                             });
                         } else {
-                            var errorMsg = (responseObj && responseObj.message) ? responseObj.message : 'Terjadi kesalahan saat menyimpan data';
-                            console.error('Save failed:', errorMsg);
-                            console.error('Full response:', responseObj);
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Gagal!',
-                                text: errorMsg
-                            });
+                            Swal.fire({icon: 'error', title: 'Gagal!', text: response.message || 'Terjadi kesalahan'});
                         }
                     },
                     error: function(xhr, status, error) {
-                        Swal.close();
-                        console.error('=== ERROR HANDLER CALLED ===');
                         console.error('AJAX Error:', status, error);
-                        console.error('Status Code:', xhr.status);
-                        console.error('Response Text:', xhr.responseText);
-                        console.error('Ready State:', xhr.readyState);
-                        
+                        console.error('Response:', xhr.responseText);
                         var errorMsg = 'Terjadi kesalahan saat menyimpan data';
-                        if (xhr.status === 0) {
-                            errorMsg = 'Tidak dapat terhubung ke server. Periksa koneksi internet Anda.';
-                        } else if (xhr.status === 404) {
-                            errorMsg = 'File save.php tidak ditemukan.';
-                        } else if (xhr.status === 500) {
-                            errorMsg = 'Terjadi kesalahan di server.';
-                        }
-                        
                         try {
                             var response = JSON.parse(xhr.responseText);
-                            if (response && response.message) {
-                                errorMsg = response.message;
-                            }
+                            errorMsg = response.message || errorMsg;
                         } catch(e) {
-                            if (xhr.responseText) {
-                                var responseText = xhr.responseText.substring(0, 200);
-                                if (responseText.trim()) {
-                                    errorMsg += '\n' + responseText;
-                                }
-                            }
+                            errorMsg = xhr.responseText || errorMsg;
                         }
                         Swal.fire({
                             icon: 'error',
                             title: 'Error!',
-                            text: errorMsg,
-                            width: '600px'
+                            text: errorMsg
                         });
-                    },
-                    complete: function(xhr, status) {
-                        console.log('=== AJAX COMPLETE ===');
-                        console.log('Status:', status);
-                        console.log('Ready State:', xhr.readyState);
-                        console.log('Status Code:', xhr.status);
                     }
                 });
             });
-            
+
             // Format on modal shown (to ensure format is applied)
             $('#modalTambah').on('shown.bs.modal', function() {
-                // Ensure all fields are enabled when modal is shown
-                $('#pembina_id').prop('disabled', false).removeAttr('disabled');
-                $('#jabatan').prop('disabled', false).removeAttr('disabled').prop('readonly', false).removeAttr('readonly');
-                $('#jumlah_honor').prop('disabled', false).removeAttr('disabled').prop('readonly', false).removeAttr('readonly');
-                $('#jumlah_pertemuan').prop('disabled', false).removeAttr('disabled').prop('readonly', false).removeAttr('readonly');
-                $('#aktif').prop('disabled', false).removeAttr('disabled');
-                
                 // Format jumlah_honor if it has value
                 var currentValue = $('#jumlah_honor').val();
                 if (currentValue && currentValue !== '0' && currentValue !== '') {
@@ -584,10 +275,93 @@ function editHonor(id) {
                 $('#modalTitle').text('Tambah Honor');
             });
         });
+        
+        // Make formatRupiah and unformatRupiah available globally
+        window.formatRupiah = formatRupiah;
+        window.unformatRupiah = unformatRupiah;
     }
     
     initHonor();
 })();
 
+function editHonor(id) {
+    if (typeof jQuery === 'undefined') {
+        setTimeout(function() { editHonor(id); }, 100);
+        return;
+    }
+    var $ = window.jQuery;
+    
+    $.ajax({
+        url: '<?php echo BASE_URL; ?>pages/honor/get.php',
+        type: 'GET',
+        data: { id: id },
+        dataType: 'json',
+        success: function(response) {
+            if (response.success) {
+                $('#honor_id').val(response.data.id);
+                $('#pembina_id').val(response.data.pembina_id || '');
+                $('#jabatan').val(response.data.jabatan);
+                
+                // Format jumlah_honor as Rupiah (same as tunjangan)
+                var jumlah = parseFloat(response.data.jumlah_honor || 0);
+                if (isNaN(jumlah)) {
+                    jumlah = 0;
+                }
+                
+                // Store raw value in hidden input
+                $('#jumlah_honor_hidden').val(jumlah.toString());
+                
+                // Format for display (remove decimals for formatting)
+                var jumlahString = Math.floor(jumlah).toString();
+                // Use formatRupiah function - ensure it handles large numbers correctly
+                var formatted = formatRupiah(jumlahString);
+                $('#jumlah_honor').val(formatted);
+                
+                // Set jumlah_pertemuan
+                $('#jumlah_pertemuan').val(response.data.jumlah_pertemuan || 0);
+                
+                $('#aktif').prop('checked', response.data.aktif == 1);
+                $('#modalTitle').text('Edit Honor');
+                $('#modalTambah').modal('show');
+                
+                // Ensure format is applied after modal is shown
+                setTimeout(function() {
+                    var currentValue = $('#jumlah_honor').val();
+                    if (currentValue && currentValue !== '0' && currentValue !== '') {
+                        // Re-format to ensure correct display
+                        var unformatted = unformatRupiah(currentValue);
+                        var formatted = formatRupiah(unformatted.toString());
+                        $('#jumlah_honor').val(formatted);
+                        $('#jumlah_honor_hidden').val(unformatted);
+                    }
+                }, 100);
+            }
+        }
+    });
+}
+
+function confirmDelete(url) {
+    if (typeof Swal === 'undefined') {
+        if (confirm('Apakah Anda yakin ingin menghapus data ini?')) {
+            window.location.href = url;
+        }
+        return;
+    }
+    
+    Swal.fire({
+        title: 'Apakah Anda yakin?',
+        text: "Data yang dihapus tidak dapat dikembalikan!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Ya, Hapus!',
+        cancelButtonText: 'Batal'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.location.href = url;
+        }
+    });
+}
 </script>
 
