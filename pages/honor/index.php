@@ -184,6 +184,107 @@ function unformatRupiah(rupiah) {
     return parseFloat(cleaned) || 0;
 }
 
+// Define editHonor function immediately (will be available globally)
+function editHonor(id) {
+    if (typeof jQuery === 'undefined') {
+        setTimeout(function() { editHonor(id); }, 100);
+        return;
+    }
+    var $ = window.jQuery;
+    
+    $.ajax({
+        url: '<?php echo BASE_URL; ?>pages/honor/get.php',
+        type: 'GET',
+        data: { id: id },
+        dataType: 'json',
+        success: function(response) {
+            if (response.success && response.data) {
+                $('#honor_id').val(response.data.id);
+                $('#pembina_id').val(response.data.pembina_id || '');
+                $('#jabatan').val(response.data.jabatan || '');
+                
+                // Format jumlah_honor as Rupiah
+                var jumlah = parseFloat(response.data.jumlah_honor || 0);
+                if (isNaN(jumlah)) {
+                    jumlah = 0;
+                }
+                
+                // Store raw value in hidden input
+                $('#jumlah_honor_hidden').val(jumlah.toString());
+                
+                // Format for display
+                var jumlahString = Math.floor(jumlah).toString();
+                var formatted = typeof formatRupiah === 'function' ? formatRupiah(jumlahString) : jumlahString;
+                $('#jumlah_honor').val(formatted);
+                
+                // Set jumlah_pertemuan
+                $('#jumlah_pertemuan').val(response.data.jumlah_pertemuan || 0);
+                
+                $('#aktif').prop('checked', response.data.aktif == 1);
+                $('#modalTitle').text('Edit Honor');
+                
+                // Ensure all fields are enabled and editable
+                $('#pembina_id').prop('disabled', false).removeAttr('disabled');
+                $('#jabatan').prop('disabled', false).removeAttr('disabled').prop('readonly', false).removeAttr('readonly');
+                $('#jumlah_honor').prop('disabled', false).removeAttr('disabled').prop('readonly', false).removeAttr('readonly');
+                $('#jumlah_pertemuan').prop('disabled', false).removeAttr('disabled').prop('readonly', false).removeAttr('readonly');
+                $('#aktif').prop('disabled', false).removeAttr('disabled');
+                
+                $('#modalTambah').modal('show');
+                
+                // Ensure format is applied after modal is shown
+                setTimeout(function() {
+                    $('#pembina_id').prop('disabled', false).removeAttr('disabled');
+                    $('#jabatan').prop('disabled', false).removeAttr('disabled').prop('readonly', false).removeAttr('readonly');
+                    $('#jumlah_honor').prop('disabled', false).removeAttr('disabled').prop('readonly', false).removeAttr('readonly');
+                    $('#jumlah_pertemuan').prop('disabled', false).removeAttr('disabled').prop('readonly', false).removeAttr('readonly');
+                    $('#aktif').prop('disabled', false).removeAttr('disabled');
+                    
+                    var currentValue = $('#jumlah_honor').val();
+                    if (currentValue && currentValue !== '0' && currentValue !== '') {
+                        if (typeof unformatRupiah === 'function' && typeof formatRupiah === 'function') {
+                            var unformatted = unformatRupiah(currentValue);
+                            var formatted = formatRupiah(unformatted.toString());
+                            $('#jumlah_honor').val(formatted);
+                            $('#jumlah_honor_hidden').val(unformatted);
+                        }
+                    }
+                }, 100);
+            } else {
+                var errorMsg = response.message || 'Gagal mengambil data honor';
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: errorMsg
+                    });
+                } else {
+                    alert(errorMsg);
+                }
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('AJAX Error:', status, error);
+            var errorMsg = 'Terjadi kesalahan saat mengambil data honor';
+            try {
+                var response = JSON.parse(xhr.responseText);
+                errorMsg = response.message || errorMsg;
+            } catch(e) {
+                errorMsg = xhr.responseText || errorMsg;
+            }
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: errorMsg
+                });
+            } else {
+                alert(errorMsg);
+            }
+        }
+    });
+}
+
 // Wait for jQuery to be loaded
 (function() {
     function initHonor() {
@@ -253,132 +354,18 @@ function unformatRupiah(rupiah) {
                         }
                     ]
                 });
-                
-                // Handler untuk memastikan kedua kolom selalu ascending - lebih agresif
-                var isFixing = false;
-                var fixOrder = function() {
-                    if (isFixing) return;
-                    isFixing = true;
-                    
-                    try {
-                        var currentOrder = table.order();
-                        var newOrder = [[1, 'asc'], [0, 'asc']]; // Selalu set kolom Nama Pembina (1) dulu, lalu No (0)
-                        
-                        // Tambahkan kolom lain jika ada
-                        if (currentOrder && currentOrder.length > 0) {
-                            currentOrder.forEach(function(item) {
-                                if (item[0] !== 0 && item[0] !== 1) {
-                                    newOrder.push(item);
-                                }
-                            });
-                        }
-                        
-                        // Set order
-                        table.order(newOrder).draw(false);
-                        
-                        // Pastikan class CSS benar - WAJIB
-                        $('#tableHonor thead th:eq(0)').removeClass('sorting sorting_desc').addClass('sorting_asc');
-                        $('#tableHonor thead th:eq(1)').removeClass('sorting sorting_desc').addClass('sorting_asc');
-                        
-                        isFixing = false;
-                    } catch(e) {
-                        console.error('Error in fixOrder:', e);
-                        isFixing = false;
-                    }
-                };
-                
-                // Handler untuk event order - BLOCK descending
-                table.on('order.dt', function(e, settings, order) {
-                    if (isFixing) return;
-                    
-                    // Cek apakah ada kolom 0 atau 1 yang descending
-                    var needsFix = false;
-                    if (order && order.length > 0) {
-                        order.forEach(function(item) {
-                            if ((item[0] === 0 || item[0] === 1) && item[1] === 'desc') {
-                                needsFix = true;
-                            }
-                        });
-                    }
-                    
-                    if (needsFix) {
-                        e.preventDefault();
-                        setTimeout(fixOrder, 10);
-                    } else {
-                        setTimeout(fixOrder, 10);
-                    }
-                });
-                
-                // Handler untuk event draw
-                table.on('draw.dt', function() {
-                    setTimeout(fixOrder, 10);
-                });
-                
-                // Handler klik pada header - BLOCK descending
-                $('#tableHonor thead th').on('click', function(e) {
-                    var $th = $(this);
-                    var columnIndex = table.column($th).index();
-                    
-                    if (columnIndex === 0 || columnIndex === 1) {
-                        // Tunggu DataTable memproses, lalu perbaiki
-                        setTimeout(function() {
-                            var currentOrder = table.order();
-                            var needsFix = false;
-                            
-                            if (currentOrder && currentOrder.length > 0) {
-                                currentOrder.forEach(function(item) {
-                                    if ((item[0] === 0 || item[0] === 1) && item[1] === 'desc') {
-                                        needsFix = true;
-                                    }
-                                });
-                            }
-                            
-                            if (needsFix) {
-                                fixOrder();
-                            }
-                        }, 50);
-                    }
-                });
-                
-                // Paksa urutan setelah inisialisasi
-                setTimeout(fixOrder, 100);
-                setTimeout(fixOrder, 300);
-                
-                // Interval untuk memastikan urutan tetap benar - lebih sering
-                var fixInterval = setInterval(function() {
-                    if (isFixing) return;
-                    
-                    var $col0 = $('#tableHonor thead th:eq(0)');
-                    var $col1 = $('#tableHonor thead th:eq(1)');
-                    var currentOrder = table.order();
-                    var needsFix = false;
-                    
-                    // Cek class CSS
-                    if ($col0.hasClass('sorting_desc') || $col1.hasClass('sorting_desc')) {
-                        needsFix = true;
-                    }
-                    
-                    // Cek order
-                    if (currentOrder && currentOrder.length > 0) {
-                        currentOrder.forEach(function(item) {
-                            if ((item[0] === 0 || item[0] === 1) && item[1] === 'desc') {
-                                needsFix = true;
-                            }
-                        });
-                    }
-                    
-                    if (needsFix) {
-                        fixOrder();
-                    }
-                }, 100);
-                
-                $(window).on('beforeunload', function() {
-                    clearInterval(fixInterval);
-                });
             }, 100);
             
             $('#formHonor').on('submit', function(e) {
                 e.preventDefault();
+                
+                // Ensure all fields are enabled before serialize (disabled fields are not serialized)
+                $('#pembina_id').prop('disabled', false);
+                $('#jabatan').prop('disabled', false).prop('readonly', false);
+                $('#jumlah_honor').prop('disabled', false).prop('readonly', false);
+                $('#jumlah_pertemuan').prop('disabled', false).prop('readonly', false);
+                $('#aktif').prop('disabled', false);
+                
                 // Ensure hidden value is set before submit - same as tunjangan
                 var formatted = $('#jumlah_honor').val();
                 var unformatted = unformatRupiah(formatted);
@@ -547,123 +534,6 @@ function unformatRupiah(rupiah) {
     
     initHonor();
 })();
-
-// Simple function definition - exactly like pembina page
-function editHonor(id) {
-    if (typeof jQuery === 'undefined') {
-        setTimeout(function() { editHonor(id); }, 100);
-        return;
-    }
-    var $ = window.jQuery;
-    
-    $.ajax({
-        url: '<?php echo BASE_URL; ?>pages/honor/get.php',
-        type: 'GET',
-        data: { id: id },
-        dataType: 'json',
-        success: function(response) {
-            if (response.success && response.data) {
-                $('#honor_id').val(response.data.id);
-                $('#pembina_id').val(response.data.pembina_id || '');
-                $('#jabatan').val(response.data.jabatan || '');
-                
-                // Format jumlah_honor as Rupiah
-                var jumlah = parseFloat(response.data.jumlah_honor || 0);
-                if (isNaN(jumlah)) {
-                    jumlah = 0;
-                }
-                
-                // Store raw value in hidden input
-                $('#jumlah_honor_hidden').val(jumlah.toString());
-                
-                // Format for display
-                var jumlahString = Math.floor(jumlah).toString();
-                var formatted = typeof formatRupiah === 'function' ? formatRupiah(jumlahString) : jumlahString;
-                $('#jumlah_honor').val(formatted);
-                
-                // Set jumlah_pertemuan
-                $('#jumlah_pertemuan').val(response.data.jumlah_pertemuan || 0);
-                
-                $('#aktif').prop('checked', response.data.aktif == 1);
-                $('#modalTitle').text('Edit Honor');
-                
-                // Ensure all fields are enabled and editable
-                $('#pembina_id').prop('disabled', false).removeAttr('disabled');
-                $('#jabatan').prop('disabled', false).removeAttr('disabled').prop('readonly', false).removeAttr('readonly');
-                $('#jumlah_honor').prop('disabled', false).removeAttr('disabled').prop('readonly', false).removeAttr('readonly');
-                $('#jumlah_pertemuan').prop('disabled', false).removeAttr('disabled').prop('readonly', false).removeAttr('readonly');
-                $('#aktif').prop('disabled', false).removeAttr('disabled');
-                
-                $('#modalTambah').modal('show');
-                
-                // Ensure format is applied after modal is shown
-                setTimeout(function() {
-                    $('#pembina_id').prop('disabled', false).removeAttr('disabled');
-                    $('#jabatan').prop('disabled', false).removeAttr('disabled').prop('readonly', false).removeAttr('readonly');
-                    $('#jumlah_honor').prop('disabled', false).removeAttr('disabled').prop('readonly', false).removeAttr('readonly');
-                    $('#jumlah_pertemuan').prop('disabled', false).removeAttr('disabled').prop('readonly', false).removeAttr('readonly');
-                    $('#aktif').prop('disabled', false).removeAttr('disabled');
-                    
-                    var currentValue = $('#jumlah_honor').val();
-                    if (currentValue && currentValue !== '0' && currentValue !== '') {
-                        if (typeof unformatRupiah === 'function' && typeof formatRupiah === 'function') {
-                            var unformatted = unformatRupiah(currentValue);
-                            var formatted = formatRupiah(unformatted.toString());
-                            $('#jumlah_honor').val(formatted);
-                            $('#jumlah_honor_hidden').val(unformatted);
-                        }
-                    }
-                }, 100);
-            } else {
-                var errorMsg = response.message || 'Gagal mengambil data honor';
-                if (typeof Swal !== 'undefined') {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: errorMsg
-                    });
-                } else {
-                    alert(errorMsg);
-                }
-            }
-        },
-        error: function(xhr, status, error) {
-            console.error('AJAX Error:', status, error);
-            var errorMsg = 'Terjadi kesalahan saat mengambil data honor';
-            try {
-                var response = JSON.parse(xhr.responseText);
-                errorMsg = response.message || errorMsg;
-            } catch(e) {
-                errorMsg = xhr.responseText || errorMsg;
-            }
-            if (typeof Swal !== 'undefined') {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: errorMsg
-                });
-            } else {
-                alert(errorMsg);
-            }
-        }
-    });
-}
-
-// Ensure function is available globally
-window.editHonor = editHonor;
-
-// Ensure function is available after all scripts load
-if (typeof jQuery !== 'undefined') {
-    $(document).ready(function() {
-        if (typeof editHonor === 'undefined') {
-            console.error('editHonor function is not defined!');
-        } else {
-            console.log('editHonor function is available');
-            // Also assign to window to ensure global access
-            window.editHonor = editHonor;
-        }
-    });
-}
 
 </script>
 
