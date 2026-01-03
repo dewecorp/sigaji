@@ -809,8 +809,11 @@ var selectedIds = new Set();
         drawCallback: function(settings) {
             var api = this.api();
             var pageInfo = api.page.info();
-            api.column(1, {search: 'applied'}).nodes().each(function(cell, i) {
-                cell.innerHTML = pageInfo.start + i + 1;
+            // Calculate starting number correctly based on current page
+            // pageInfo.start is 0-based index of first record on current page
+            var start = pageInfo.start;
+            api.column(1, {page: 'current'}).nodes().each(function(cell, i) {
+                cell.innerHTML = start + i + 1;
             });
             // Restore checkbox states after pagination
             $('.row-checkbox').each(function() {
