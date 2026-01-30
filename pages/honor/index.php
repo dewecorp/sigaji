@@ -11,8 +11,11 @@ $sql = "SELECT h.*, p.nama_pembina
 $result = $conn->query($sql);
 $honor = $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
 
-// Get all pembina for dropdown
-$sql_pembina = "SELECT * FROM pembina ORDER BY nama_pembina ASC";
+// Get all pembina for dropdown with ekstrakurikuler name
+$sql_pembina = "SELECT p.*, e.jenis_ekstrakurikuler 
+                FROM pembina p
+                LEFT JOIN ekstrakurikuler e ON p.ekstrakurikuler_id = e.id
+                ORDER BY p.nama_pembina ASC";
 $result_pembina = $conn->query($sql_pembina);
 $pembina_list = $result_pembina ? $result_pembina->fetch_all(MYSQLI_ASSOC) : [];
 ?>
@@ -101,13 +104,25 @@ $pembina_list = $result_pembina ? $result_pembina->fetch_all(MYSQLI_ASSOC) : [];
                                     <select class="form-control" name="pembina_id" id="pembina_id" required>
                                         <option value="">-- Pilih Pembina --</option>
                                         <?php foreach ($pembina_list as $p): ?>
-                                            <option value="<?php echo $p['id']; ?>"><?php echo htmlspecialchars($p['nama_pembina']); ?></option>
+                                            <option 
+                                                value="<?php echo $p['id']; ?>" 
+                                                data-eks="<?php echo htmlspecialchars($p['jenis_ekstrakurikuler'] ?? ''); ?>"
+                                            >
+                                                <?php echo htmlspecialchars($p['nama_pembina']); ?>
+                                            </option>
                                         <?php endforeach; ?>
                                     </select>
                                 </div>
                                 <div class="form-group">
                                     <label>Jabatan <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" name="jabatan" id="jabatan" required>
+                                    <select class="form-control" name="jabatan_type" id="jabatan_type" required>
+                                        <option value="">-- Pilih Jabatan --</option>
+                                        <option value="Pembina">Pembina</option>
+                                        <option value="Pelatih">Pelatih</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <input type="text" class="form-control" name="jabatan" id="jabatan" placeholder="Otomatis terisi berdasarkan pilihan" readonly required>
                                 </div>
                                 <div class="form-group">
                                     <label>Jumlah Honor</label>
@@ -211,6 +226,28 @@ $pembina_list = $result_pembina ? $result_pembina->fetch_all(MYSQLI_ASSOC) : [];
                 });
             }).draw();
 
+            function getEksByPembinaId(id) {
+                var opt = $('#pembina_id').find('option[value="'+id+'"]');
+                if (opt.length) {
+                    return opt.data('eks') || '';
+                }
+                return '';
+            }
+
+            function updateJabatanString() {
+                var type = $('#jabatan_type').val();
+                var pembinaId = $('#pembina_id').val();
+                var eks = getEksByPembinaId(pembinaId);
+                var text = '';
+                if (type && eks) {
+                    text = type + ' ' + eks;
+                }
+                $('#jabatan').val(text);
+            }
+
+            $('#pembina_id').on('change', updateJabatanString);
+            $('#jabatan_type').on('change', updateJabatanString);
+
             $('#formHonor').on('submit', function(e) {
                 e.preventDefault();
                 // Ensure hidden value is set before submit - same as tunjangan
@@ -220,6 +257,13 @@ $pembina_list = $result_pembina ? $result_pembina->fetch_all(MYSQLI_ASSOC) : [];
                 unformatted = parseFloat(unformatted) || 0;
                 $('#jumlah_honor_hidden').val(unformatted.toString());
                 
+                updateJabatanString();
+                var jabatanVal = $('#jabatan').val();
+                if (!jabatanVal) {
+                    Swal.fire({icon: 'error', title: 'Validasi Gagal', text: 'Pilih Pembina dan Jabatan terlebih dahulu'});
+                    return false;
+                }
+
                 // Validate jumlah honor
                 if (!unformatted || unformatted <= 0) {
                     Swal.fire({
@@ -281,6 +325,8 @@ $pembina_list = $result_pembina ? $result_pembina->fetch_all(MYSQLI_ASSOC) : [];
                 $('#formHonor')[0].reset();
                 $('#honor_id').val('');
                 $('#pembina_id').val('');
+                $('#jabatan_type').val('');
+                $('#jabatan').val('');
                 $('#jumlah_honor').val('');
                 $('#jumlah_honor_hidden').val('0');
                 $('#jumlah_pertemuan').val('');
@@ -313,7 +359,19 @@ function editHonor(id) {
             if (response.success) {
                 $('#honor_id').val(response.data.id);
                 $('#pembina_id').val(response.data.pembina_id || '');
-                $('#jabatan').val(response.data.jabatan);
+                var jabatanStr = response.data.jabatan || '';
+                var lower = jabatanStr.toLowerCase();
+                if (lower.indexOf('pembina') === 0) {
+                    $('#jabatan_type').val('Pembina');
+                } else if (lower.indexOf('pelatih') === 0) {
+                    $('#jabatan_type').val('Pelatih');
+                } else {
+                    $('#jabatan_type').val('');
+                }
+                setTimeout(function(){ 
+                    $('#pembina_id').trigger('change'); 
+                    $('#jabatan_type').trigger('change'); 
+                }, 50);
                 
                 // Format jumlah_honor as Rupiah (same as tunjangan)
                 var jumlah = parseFloat(response.data.jumlah_honor || 0);
@@ -377,4 +435,3 @@ function confirmDelete(url) {
     });
 }
 </script>
-
