@@ -297,7 +297,7 @@ foreach ($legger_list as $l) {
         }
         
         .signature-col p:last-child {
-            margin-top: 10mm;
+            margin-top: 1.5mm;
         }
         
         .signature-line {
@@ -305,6 +305,20 @@ foreach ($legger_list as $l) {
             margin: 3px auto 0 auto;
             min-height: 5px;
             border-top: none;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .qr-signature {
+            width: 14mm;
+            height: 14mm;
+        }
+        
+        .signature-name {
+            white-space: nowrap;
+            font-size: 10px;
         }
         
         .tempat-tanggal {
@@ -389,6 +403,23 @@ foreach ($legger_list as $l) {
                 max-height: 300mm !important;
                 overflow: hidden !important;
                 padding: 3mm !important;
+            }
+            
+            .signature-row {
+                margin-top: 0.5mm !important;
+                padding-top: 0.5mm !important;
+            }
+            
+            .signature-col p {
+                margin: 0 !important;
+                line-height: 1.1 !important;
+            }
+            
+            .signature-name {
+                position: static !important;
+                margin-top: 1mm !important;
+                margin-bottom: 0 !important;
+                white-space: nowrap !important;
             }
             
             .header {
@@ -585,13 +616,17 @@ foreach ($legger_list as $l) {
             <div class="signature-row">
                 <div class="signature-col">
                     <p><strong>Kepala Madrasah</strong></p>
-                    <div class="signature-line"></div>
-                    <p><?php echo htmlspecialchars($settings['nama_kepala'] ?? ''); ?></p>
+                    <div class="signature-line">
+                        <img class="qr-signature" src="<?php echo BASE_URL; ?>qrcode.php?data=<?php echo rawurlencode('Kepala Madrasah|' . ($settings['nama_kepala'] ?? '') . '|Slip Gaji'); ?>" alt="QR Kepala Madrasah">
+                        <div class="signature-name"><?php echo htmlspecialchars($settings['nama_kepala'] ?? ''); ?></div>
+                    </div>
                 </div>
                 <div class="signature-col">
                     <p><strong>Bendahara</strong></p>
-                    <div class="signature-line"></div>
-                    <p><?php echo htmlspecialchars($settings['nama_bendahara'] ?? ''); ?></p>
+                    <div class="signature-line">
+                        <img class="qr-signature" src="<?php echo BASE_URL; ?>qrcode.php?data=<?php echo rawurlencode('Bendahara|' . ($settings['nama_bendahara'] ?? '') . '|Slip Gaji'); ?>" alt="QR Bendahara">
+                        <div class="signature-name"><?php echo htmlspecialchars($settings['nama_bendahara'] ?? ''); ?></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -714,4 +749,3 @@ foreach ($legger_list as $l) {
     </script>
 </body>
 </html>
-

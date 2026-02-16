@@ -249,6 +249,12 @@ $legger = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             margin: 30px auto 0 auto;
             min-height: 40px;
             border-top: 1px solid transparent;
+            text-align: center;
+        }
+        
+        .qr-signature {
+            width: 18mm;
+            height: 18mm;
         }
         
         .footer-left p:last-child,
@@ -468,12 +474,16 @@ $legger = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         <div class="footer-left">
             <p style="margin: 2px 0;"><strong>Mengetahui,</strong></p>
             <p style="margin: 2px 0;"><strong>Kepala Madrasah</strong></p>
-            <div class="signature-line"></div>
+            <div class="signature-line">
+                <img class="qr-signature" src="<?php echo BASE_URL; ?>qrcode.php?data=<?php echo rawurlencode('Kepala Madrasah|' . ($settings['nama_kepala'] ?? '') . '|Legger Honor'); ?>" alt="QR Kepala Madrasah">
+            </div>
             <p style="margin-top: 8px; margin-bottom: 1px;"><?php echo htmlspecialchars($settings['nama_kepala'] ?? ''); ?></p>
         </div>
         <div class="footer-right">
             <p style="margin: 2px 0;"><strong>Bendahara</strong></p>
-            <div class="signature-line"></div>
+            <div class="signature-line">
+                <img class="qr-signature" src="<?php echo BASE_URL; ?>qrcode.php?data=<?php echo rawurlencode('Bendahara|' . ($settings['nama_bendahara'] ?? '') . '|Legger Honor'); ?>" alt="QR Bendahara">
+            </div>
             <p style="margin-top: 8px; margin-bottom: 1px;"><?php echo htmlspecialchars($settings['nama_bendahara'] ?? ''); ?></p>
         </div>
     </div>
@@ -488,4 +498,3 @@ $legger = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     </script>
 </body>
 </html>
-

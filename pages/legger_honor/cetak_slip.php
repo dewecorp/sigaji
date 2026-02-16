@@ -207,7 +207,7 @@ if ($logo_exists) {
         }
         
         .signature-col p {
-            margin: 0.5mm 0;
+            margin: 0.5mm 0 0 0;
             line-height: 1.2;
         }
         
@@ -216,6 +216,12 @@ if ($logo_exists) {
             margin: 15px auto 1mm auto;
             min-height: 20px;
             border-top: none;
+            text-align: center;
+        }
+        
+        .qr-signature {
+            width: 14mm;
+            height: 14mm;
         }
         
         .tempat-tanggal {
@@ -312,12 +318,16 @@ if ($logo_exists) {
         <div class="signature-row">
             <div class="signature-col">
                 <p><strong>Kepala Madrasah</strong></p>
-                <div class="signature-line"></div>
+                <div class="signature-line">
+                    <img class="qr-signature" src="<?php echo BASE_URL; ?>qrcode.php?data=<?php echo rawurlencode('Kepala Madrasah|' . ($settings['nama_kepala'] ?? '') . '|Slip Honor'); ?>" alt="QR Kepala Madrasah">
+                </div>
                 <p><?php echo htmlspecialchars($settings['nama_kepala'] ?? ''); ?></p>
             </div>
             <div class="signature-col">
                 <p><strong>Bendahara</strong></p>
-                <div class="signature-line"></div>
+                <div class="signature-line">
+                    <img class="qr-signature" src="<?php echo BASE_URL; ?>qrcode.php?data=<?php echo rawurlencode('Bendahara|' . ($settings['nama_bendahara'] ?? '') . '|Slip Honor'); ?>" alt="QR Bendahara">
+                </div>
                 <p><?php echo htmlspecialchars($settings['nama_bendahara'] ?? ''); ?></p>
             </div>
         </div>
@@ -332,4 +342,3 @@ if ($logo_exists) {
     </script>
 </body>
 </html>
-

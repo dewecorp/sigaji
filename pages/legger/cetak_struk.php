@@ -185,6 +185,20 @@ $details = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             width: 70%;
             margin: 15px auto 1mm auto;
             min-height: 20px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .qr-signature {
+            width: 14mm;
+            height: 14mm;
+        }
+        
+        .signature-name {
+            white-space: nowrap;
+            font-size: 10px;
         }
         
         .tempat-tanggal {
@@ -211,6 +225,18 @@ $details = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             .header {
                 page-break-inside: avoid !important;
                 break-inside: avoid !important;
+            }
+            
+            .signature-col p {
+                margin: 0 !important;
+                line-height: 1.1 !important;
+            }
+            
+            .signature-name {
+                position: static !important;
+                margin-top: 1mm !important;
+                margin-bottom: 0 !important;
+                white-space: nowrap !important;
             }
         }
     </style>
@@ -312,13 +338,17 @@ $details = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         <div class="signature-row">
             <div class="signature-col">
                 <p><strong>Kepala Madrasah</strong></p>
-                <div class="signature-line"></div>
-                <p><?php echo htmlspecialchars($settings['nama_kepala'] ?? ''); ?></p>
+                <div class="signature-line">
+                    <img class="qr-signature" src="<?php echo BASE_URL; ?>qrcode.php?data=<?php echo rawurlencode('Kepala Madrasah|' . ($settings['nama_kepala'] ?? '') . '|Slip Gaji'); ?>" alt="QR Kepala Madrasah">
+                    <div class="signature-name"><?php echo htmlspecialchars($settings['nama_kepala'] ?? ''); ?></div>
+                </div>
             </div>
             <div class="signature-col">
                 <p><strong>Bendahara</strong></p>
-                <div class="signature-line"></div>
-                <p><?php echo htmlspecialchars($settings['nama_bendahara'] ?? ''); ?></p>
+                <div class="signature-line">
+                    <img class="qr-signature" src="<?php echo BASE_URL; ?>qrcode.php?data=<?php echo rawurlencode('Bendahara|' . ($settings['nama_bendahara'] ?? '') . '|Slip Gaji'); ?>" alt="QR Bendahara">
+                    <div class="signature-name"><?php echo htmlspecialchars($settings['nama_bendahara'] ?? ''); ?></div>
+                </div>
             </div>
         </div>
     </div>
@@ -329,5 +359,3 @@ $details = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     </script>
 </body>
 </html>
-
-

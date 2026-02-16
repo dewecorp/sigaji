@@ -407,6 +407,12 @@ $stmt->close();
             width: 80%;
             margin: 40px auto 5px auto;
             min-height: 40px;
+            text-align: center;
+        }
+        
+        .qr-signature {
+            width: 18mm;
+            height: 18mm;
         }
         
         @media print {
@@ -642,12 +648,16 @@ $stmt->close();
         <div class="footer-left">
             <p>Mengetahui,</p>
             <p>Kepala Madrasah</p>
-            <div class="signature-line"></div>
+            <div class="signature-line">
+                <img class="qr-signature" src="<?php echo BASE_URL; ?>qrcode.php?data=<?php echo rawurlencode('Kepala Madrasah|' . ($settings['nama_kepala'] ?? '') . '|Legger Gaji'); ?>" alt="QR Kepala Madrasah">
+            </div>
             <p><?php echo htmlspecialchars($settings['nama_kepala'] ?? ''); ?></p>
         </div>
         <div class="footer-right">
             <p>Bendahara</p>
-            <div class="signature-line"></div>
+            <div class="signature-line">
+                <img class="qr-signature" src="<?php echo BASE_URL; ?>qrcode.php?data=<?php echo rawurlencode('Bendahara|' . ($settings['nama_bendahara'] ?? '') . '|Legger Gaji'); ?>" alt="QR Bendahara">
+            </div>
             <p><?php echo htmlspecialchars($settings['nama_bendahara'] ?? ''); ?></p>
         </div>
     </div>
@@ -663,4 +673,3 @@ $stmt->close();
     </script>
 </body>
 </html>
-
