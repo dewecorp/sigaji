@@ -389,7 +389,7 @@ $stmt->close();
             margin-top: 20px;
             display: table;
             width: 100%;
-            font-size: 9px;
+            font-size: 12pt;
             page-break-inside: avoid !important;
             break-inside: avoid !important;
         }
@@ -398,7 +398,7 @@ $stmt->close();
             text-align: right;
             margin-top: 15px;
             margin-bottom: 5px;
-            font-size: 10px;
+            font-size: 12pt;
         }
         
         .footer-left,
@@ -408,6 +408,13 @@ $stmt->close();
             text-align: center;
             vertical-align: top;
             padding: 0 20px;
+        }
+        
+        .footer-left p,
+        .footer-right p {
+            margin: 2px 0;
+            line-height: 1.2;
+            font-size: 12pt;
         }
         
         .signature-line {
@@ -455,6 +462,7 @@ $stmt->close();
                 page-break-inside: avoid !important;
                 break-inside: avoid !important;
                 page-break-before: avoid !important;
+                font-size: 12pt !important;
             }
             
             .header-logo {
@@ -742,6 +750,7 @@ $stmt->close();
             <p><?php echo htmlspecialchars($settings['nama_kepala'] ?? ''); ?></p>
         </div>
         <div class="footer-right">
+            <p>&nbsp;</p>
             <p>Bendahara</p>
             <div class="signature-line">
                 <img 

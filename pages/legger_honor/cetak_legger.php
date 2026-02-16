@@ -43,7 +43,7 @@ $legger = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     <style>
         @page {
             size: A4 landscape;
-            margin: 10mm;
+            margin: 5mm 10mm 10mm 0mm;
             orphans: 2;
             widows: 2;
         }
@@ -154,10 +154,9 @@ $legger = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             padding: 6px 8px;
         }
         
-        /* Kolom dengan angka - align right */
+        /* Kolom dengan angka - align right, gunakan font yang sama dengan teks lain */
         table td:nth-child(n+4):not(:last-child) {
             text-align: right;
-            font-family: 'Courier New', monospace;
         }
         
         /* Kolom Honor per Pertemuan */
@@ -220,7 +219,7 @@ $legger = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             padding-bottom: 0;
             display: table;
             width: 100%;
-            font-size: 11px;
+            font-size: 11pt;
         }
         
         .footer-left,
@@ -235,7 +234,8 @@ $legger = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         .footer-left p,
         .footer-right p {
             margin: 2px 0;
-            line-height: 1.1;
+            line-height: 1.2;
+            font-size: 11pt;
         }
         
         .tempat-tanggal {
@@ -264,7 +264,7 @@ $legger = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         
         @media print {
             body {
-                padding: 5mm 5mm 10mm 5mm;
+                padding: 5mm 5mm 10mm 0mm;
                 margin: 0;
                 margin-bottom: 10mm;
             }
@@ -330,7 +330,7 @@ $legger = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                 margin-bottom: 0 !important;
                 padding-top: 0 !important;
                 padding-bottom: 0 !important;
-                font-size: 11px !important;
+                font-size: 11pt !important;
                 page-break-after: avoid !important;
                 break-after: avoid !important;
                 page-break-inside: avoid !important;
@@ -358,7 +358,8 @@ $legger = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             .footer-left p,
             .footer-right p {
                 margin: 2px 0 !important;
-                line-height: 1.1 !important;
+                line-height: 1.2 !important;
+                font-size: 11pt !important;
             }
             
             /* Prevent empty pages */
@@ -420,6 +421,11 @@ $legger = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         Bulan Penerimaan: <?php echo getPeriodLabel($bulan_aktif); ?>
     </div>
     
+    <?php
+    $qr_kepala_data_legger_honor = 'Kepala Madrasah|' . ($settings['nama_kepala'] ?? '') . '|Legger Honor';
+    $qr_bendahara_data_legger_honor = 'Bendahara|' . ($settings['nama_bendahara'] ?? '') . '|Legger Honor';
+    ?>
+    
     <table>
         <thead>
             <tr>
@@ -449,14 +455,15 @@ $legger = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                 <td></td>
             </tr>
             <?php endforeach; ?>
-            
-            <!-- Total row -->
+        </tbody>
+        <tfoot>
+            <!-- Total row tetap di tfoot; tanda tangan tidak ikut di dalam tabel -->
             <tr style="background-color: #e0e0e0; font-weight: bold;">
                 <td colspan="5" style="text-align: center; font-weight: bold;">TOTAL</td>
                 <td><?php echo formatRupiahTanpaRp($total_honor); ?></td>
                 <td>-</td>
             </tr>
-        </tbody>
+        </tfoot>
     </table>
     
     <?php if (!empty($settings['tempat']) || !empty($settings['hari_tanggal'])): ?>
@@ -470,10 +477,6 @@ $legger = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     </div>
     <?php endif; ?>
     
-    <?php
-    $qr_kepala_data_legger_honor = 'Kepala Madrasah|' . ($settings['nama_kepala'] ?? '') . '|Legger Honor';
-    $qr_bendahara_data_legger_honor = 'Bendahara|' . ($settings['nama_bendahara'] ?? '') . '|Legger Honor';
-    ?>
     <div class="footer" style="margin: 0; padding: 0;">
         <div class="footer-left">
             <p style="margin: 2px 0;"><strong>Mengetahui,</strong></p>
@@ -489,6 +492,7 @@ $legger = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             <p style="margin-top: 8px; margin-bottom: 1px;"><?php echo htmlspecialchars($settings['nama_kepala'] ?? ''); ?></p>
         </div>
         <div class="footer-right">
+            <p style="margin: 2px 0;">&nbsp;</p>
             <p style="margin: 2px 0;"><strong>Bendahara</strong></p>
             <div class="signature-line">
                 <img 
