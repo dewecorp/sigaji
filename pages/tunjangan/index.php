@@ -14,7 +14,7 @@ if (!empty($print_settings['logo'])) {
     $print_logo_url = BASE_URL . 'assets/img/' . $print_settings['logo'];
 }
 
-// Periode hanya digunakan untuk penyimpanan riwayat, tidak untuk filter tampilan
+// Periode pada tunjangan tidak untuk filter data, hanya metadata jika dibutuhkan
 $periode = date('Y-m');
 
 // Get tunjangan dengan jumlah_tunjangan dan daftar guru (semua periode)
@@ -120,7 +120,7 @@ $all_guru = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
                         </div>
                         <form id="formTunjangan" method="POST" action="save.php">
                             <input type="hidden" name="id" id="tunjangan_id">
-                            <input type="hidden" name="periode" id="periode_form" value="<?php echo date('Y-m'); ?>">
+                            <input type="hidden" name="periode" id="periode_form" value="<?php echo htmlspecialchars($periode, ENT_QUOTES); ?>">
                             <div class="modal-body">
                                 <div class="form-group">
                                     <label>Nama Tunjangan <span class="text-danger">*</span></label>

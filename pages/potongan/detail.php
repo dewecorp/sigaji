@@ -3,11 +3,6 @@ $page_title = 'Detail Potongan';
 require_once __DIR__ . '/../../includes/header.php';
 require_once __DIR__ . '/../../includes/sidebar.php';
 
-$sql = "SELECT periode_aktif FROM settings LIMIT 1";
-$result = $conn->query($sql);
-$settings = $result->fetch_assoc();
-$periode_aktif = $settings['periode_aktif'] ?? date('Y-m');
-
 $potongan_id = $_GET['potongan_id'] ?? 0;
 $sql = "SELECT * FROM potongan WHERE id = ?";
 $stmt = $conn->prepare($sql);
@@ -18,10 +13,10 @@ $potongan = $stmt->get_result()->fetch_assoc();
 $sql = "SELECT pd.*, g.nama_lengkap 
         FROM potongan_detail pd 
         JOIN guru g ON pd.guru_id = g.id 
-        WHERE pd.potongan_id = ? AND pd.periode = ?
+        WHERE pd.potongan_id = ?
         ORDER BY g.nama_lengkap";
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("is", $potongan_id, $periode_aktif);
+$stmt->bind_param("i", $potongan_id);
 $stmt->execute();
 $details = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 
@@ -43,7 +38,7 @@ $guru = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
                     <div class="section-body">
                         <div class="card">
                             <div class="card-header">
-                                <h4>Data Potongan - <?php echo getPeriodLabel($periode_aktif); ?></h4>
+                                <h4>Data Potongan (Tidak Bergantung Periode)</h4>
                                 <div class="card-header-action">
                                     <button class="btn btn-primary" data-toggle="modal" data-target="#modalTambah">
                                         <i class="fas fa-plus"></i> Tambah Detail
@@ -151,5 +146,3 @@ $('#modalTambah').on('hidden.bs.modal', function () {
 </script>
 
 <?php require_once __DIR__ . '/../../includes/footer.php'; ?>
-
-

@@ -3,12 +3,6 @@ $page_title = 'Detail Tunjangan';
 require_once __DIR__ . '/../../includes/header.php';
 require_once __DIR__ . '/../../includes/sidebar.php';
 
-// Get current period
-$sql = "SELECT periode_aktif FROM settings LIMIT 1";
-$result = $conn->query($sql);
-$settings = $result->fetch_assoc();
-$periode_aktif = $settings['periode_aktif'] ?? date('Y-m');
-
 $tunjangan_id = $_GET['tunjangan_id'] ?? 0;
 $sql = "SELECT * FROM tunjangan WHERE id = ?";
 $stmt = $conn->prepare($sql);
@@ -16,14 +10,14 @@ $stmt->bind_param("i", $tunjangan_id);
 $stmt->execute();
 $tunjangan = $stmt->get_result()->fetch_assoc();
 
-// Get tunjangan details
+// Get tunjangan details (tidak bergantung periode)
 $sql = "SELECT td.*, g.nama_lengkap 
         FROM tunjangan_detail td 
         JOIN guru g ON td.guru_id = g.id 
-        WHERE td.tunjangan_id = ? AND td.periode = ?
+        WHERE td.tunjangan_id = ?
         ORDER BY g.nama_lengkap";
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("is", $tunjangan_id, $periode_aktif);
+$stmt->bind_param("i", $tunjangan_id);
 $stmt->execute();
 $details = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 
@@ -46,7 +40,7 @@ $guru = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
                     <div class="section-body">
                         <div class="card">
                             <div class="card-header">
-                                <h4>Data Tunjangan - <?php echo getPeriodLabel($periode_aktif); ?></h4>
+                                <h4>Data Tunjangan (Tidak Bergantung Periode)</h4>
                                 <div class="card-header-action">
                                     <button class="btn btn-primary" data-toggle="modal" data-target="#modalTambah">
                                         <i class="fas fa-plus"></i> Tambah Detail
@@ -155,5 +149,3 @@ $('#modalTambah').on('hidden.bs.modal', function () {
 </script>
 
 <?php require_once __DIR__ . '/../../includes/footer.php'; ?>
-
-

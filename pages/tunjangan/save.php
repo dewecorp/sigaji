@@ -132,10 +132,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             exit();
         }
         
-        // Delete existing tunjangan_detail for this tunjangan and period
-        $sql = "DELETE FROM tunjangan_detail WHERE tunjangan_id = ? AND periode = ?";
+        // Delete existing tunjangan_detail untuk tunjangan ini (semua periode)
+        // Tunjangan tidak bergantung periode; periode hanya dipakai di legger
+        $sql = "DELETE FROM tunjangan_detail WHERE tunjangan_id = ?";
         $delete_stmt = $conn->prepare($sql);
-        $delete_stmt->bind_param("is", $tunjangan_id, $periode);
+        $delete_stmt->bind_param("i", $tunjangan_id);
         $delete_stmt->execute();
         $delete_stmt->close();
         
@@ -178,4 +179,3 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 }
 exit();
 ?>
-
