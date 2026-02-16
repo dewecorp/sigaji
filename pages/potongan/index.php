@@ -98,7 +98,7 @@ $all_guru = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
                                                         </span>
                                                     </td>
                                                     <td>
-                                                        <button class="btn btn-sm btn-info btn-edit-potongan" data-id="<?php echo $p['id']; ?>" onclick="if(typeof editPotongan==='function'){editPotongan(<?php echo $p['id']; ?>);}else{// console.error('editPotongan not defined');}" data-toggle="tooltip" title="Edit">
+                                                        <button class="btn btn-sm btn-info btn-edit-potongan" data-id="<?php echo $p['id']; ?>" onclick="if(typeof editPotongan==='function'){editPotongan(<?php echo $p['id']; ?>);}" data-toggle="tooltip" title="Edit">
                                                             <i class="fas fa-edit"></i>
                                                         </button>
                                                         <button class="btn btn-sm btn-danger" onclick="confirmDelete('<?php echo BASE_URL; ?>pages/potongan/delete.php?id=<?php echo $p['id']; ?>')" data-toggle="tooltip" title="Hapus">

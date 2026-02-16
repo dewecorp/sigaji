@@ -90,7 +90,7 @@ $all_guru = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
                                                         </span>
                                                     </td>
                                                     <td>
-                                                        <button class="btn btn-sm btn-info btn-edit-tunjangan" data-id="<?php echo $t['id']; ?>" onclick="if(typeof editTunjangan==='function'){editTunjangan(<?php echo $t['id']; ?>);}else{// console.error('editTunjangan not defined');}" data-toggle="tooltip" title="Edit">
+                                                        <button class="btn btn-sm btn-info btn-edit-tunjangan" data-id="<?php echo $t['id']; ?>" onclick="if(typeof editTunjangan==='function'){editTunjangan(<?php echo $t['id']; ?>);}" data-toggle="tooltip" title="Edit">
                                                             <i class="fas fa-edit"></i>
                                                         </button>
                                                         <button class="btn btn-sm btn-danger" onclick="confirmDelete('<?php echo BASE_URL; ?>pages/tunjangan/delete.php?id=<?php echo $t['id']; ?>')" data-toggle="tooltip" title="Hapus">
