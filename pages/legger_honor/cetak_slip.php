@@ -315,18 +315,32 @@ if ($logo_exists) {
             <?php endif; ?>
         </div>
         <?php endif; ?>
+        <?php
+        $qr_kepala_data_honor = 'Kepala Madrasah|' . ($settings['nama_kepala'] ?? '') . '|Slip Honor';
+        $qr_bendahara_data_honor = 'Bendahara|' . ($settings['nama_bendahara'] ?? '') . '|Slip Honor';
+        ?>
         <div class="signature-row">
             <div class="signature-col">
                 <p><strong>Kepala Madrasah</strong></p>
                 <div class="signature-line">
-                    <img class="qr-signature" src="<?php echo BASE_URL; ?>qrcode.php?data=<?php echo rawurlencode('Kepala Madrasah|' . ($settings['nama_kepala'] ?? '') . '|Slip Honor'); ?>" alt="QR Kepala Madrasah">
+                    <img 
+                        class="qr-signature" 
+                        src="<?php echo BASE_URL; ?>qrcode.php?data=<?php echo rawurlencode($qr_kepala_data_honor); ?>" 
+                        alt="QR Kepala Madrasah"
+                        onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='https://api.qrserver.com/v1/create-qr-code/?size=160x160&data='+encodeURIComponent('<?php echo htmlspecialchars($qr_kepala_data_honor, ENT_QUOTES); ?>');}"
+                    >
                 </div>
                 <p><?php echo htmlspecialchars($settings['nama_kepala'] ?? ''); ?></p>
             </div>
             <div class="signature-col">
                 <p><strong>Bendahara</strong></p>
                 <div class="signature-line">
-                    <img class="qr-signature" src="<?php echo BASE_URL; ?>qrcode.php?data=<?php echo rawurlencode('Bendahara|' . ($settings['nama_bendahara'] ?? '') . '|Slip Honor'); ?>" alt="QR Bendahara">
+                    <img 
+                        class="qr-signature" 
+                        src="<?php echo BASE_URL; ?>qrcode.php?data=<?php echo rawurlencode($qr_bendahara_data_honor); ?>" 
+                        alt="QR Bendahara"
+                        onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='https://api.qrserver.com/v1/create-qr-code/?size=160x160&data='+encodeURIComponent('<?php echo htmlspecialchars($qr_bendahara_data_honor, ENT_QUOTES); ?>');}"
+                    >
                 </div>
                 <p><?php echo htmlspecialchars($settings['nama_bendahara'] ?? ''); ?></p>
             </div>

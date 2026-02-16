@@ -470,19 +470,33 @@ $legger = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     </div>
     <?php endif; ?>
     
+    <?php
+    $qr_kepala_data_legger_honor = 'Kepala Madrasah|' . ($settings['nama_kepala'] ?? '') . '|Legger Honor';
+    $qr_bendahara_data_legger_honor = 'Bendahara|' . ($settings['nama_bendahara'] ?? '') . '|Legger Honor';
+    ?>
     <div class="footer" style="margin: 0; padding: 0;">
         <div class="footer-left">
             <p style="margin: 2px 0;"><strong>Mengetahui,</strong></p>
             <p style="margin: 2px 0;"><strong>Kepala Madrasah</strong></p>
             <div class="signature-line">
-                <img class="qr-signature" src="<?php echo BASE_URL; ?>qrcode.php?data=<?php echo rawurlencode('Kepala Madrasah|' . ($settings['nama_kepala'] ?? '') . '|Legger Honor'); ?>" alt="QR Kepala Madrasah">
+                <img 
+                    class="qr-signature" 
+                    src="<?php echo BASE_URL; ?>qrcode.php?data=<?php echo rawurlencode($qr_kepala_data_legger_honor); ?>" 
+                    alt="QR Kepala Madrasah"
+                    onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='https://api.qrserver.com/v1/create-qr-code/?size=180x180&data='+encodeURIComponent('<?php echo htmlspecialchars($qr_kepala_data_legger_honor, ENT_QUOTES); ?>');}"
+                >
             </div>
             <p style="margin-top: 8px; margin-bottom: 1px;"><?php echo htmlspecialchars($settings['nama_kepala'] ?? ''); ?></p>
         </div>
         <div class="footer-right">
             <p style="margin: 2px 0;"><strong>Bendahara</strong></p>
             <div class="signature-line">
-                <img class="qr-signature" src="<?php echo BASE_URL; ?>qrcode.php?data=<?php echo rawurlencode('Bendahara|' . ($settings['nama_bendahara'] ?? '') . '|Legger Honor'); ?>" alt="QR Bendahara">
+                <img 
+                    class="qr-signature" 
+                    src="<?php echo BASE_URL; ?>qrcode.php?data=<?php echo rawurlencode($qr_bendahara_data_legger_honor); ?>" 
+                    alt="QR Bendahara"
+                    onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='https://api.qrserver.com/v1/create-qr-code/?size=180x180&data='+encodeURIComponent('<?php echo htmlspecialchars($qr_bendahara_data_legger_honor, ENT_QUOTES); ?>');}"
+                >
             </div>
             <p style="margin-top: 8px; margin-bottom: 1px;"><?php echo htmlspecialchars($settings['nama_bendahara'] ?? ''); ?></p>
         </div>

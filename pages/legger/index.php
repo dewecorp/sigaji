@@ -3,13 +3,14 @@ $page_title = 'Legger Gaji';
 require_once __DIR__ . '/../../includes/header.php';
 require_once __DIR__ . '/../../includes/sidebar.php';
 
-// Get settings
 $sql = "SELECT * FROM settings LIMIT 1";
 $settings = $conn->query($sql)->fetch_assoc();
 $periode_aktif = $settings['periode_aktif'] ?? date('Y-m');
 $jumlah_periode = $settings['jumlah_periode'] ?? 1;
 $periode_mulai = $settings['periode_mulai'] ?? '';
 $periode_akhir = $settings['periode_akhir'] ?? '';
+// Periode leger mengikuti periode_aktif dari settings, tidak bisa difilter per bulan
+$periode = $periode_aktif;
 
 // Get tunjangan: ambil yang aktif, PLUS yang pernah ada datanya di tunjangan_detail (dari periode manapun)
 // Ini memastikan tunjangan yang pernah punya data tetap ditampilkan meskipun tidak aktif atau tidak ada di periode aktif
@@ -39,14 +40,13 @@ $guru = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
 
 // Generate legger is now handled via AJAX (generate_ajax.php)
 
-// Get legger data
 $sql = "SELECT lg.*, g.nama_lengkap 
         FROM legger_gaji lg 
         JOIN guru g ON lg.guru_id = g.id 
         WHERE lg.periode = ? 
         ORDER BY g.nama_lengkap";
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("s", $periode_aktif);
+$stmt->bind_param("s", $periode);
 $stmt->execute();
 $legger = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 ?>
@@ -68,7 +68,7 @@ $legger = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                                 if ($jumlah_periode > 1 && !empty($periode_mulai) && !empty($periode_akhir)) {
                                     echo getPeriodRangeLabel($periode_mulai, $periode_akhir);
                                 } else {
-                                    echo getPeriodLabel($periode_aktif);
+                                    echo getPeriodLabel($periode);
                                 }
                                 ?></h4>
                                 <div class="card-header-action">
@@ -76,10 +76,10 @@ $legger = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                                         <i class="fas fa-sync"></i> <span id="btnGenerateText">Generate Legger</span>
                                         <span id="btnGenerateSpinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
                                     </button>
-                                    <a href="cetak_slip_semua.php?periode=<?php echo $periode_aktif; ?>" class="btn btn-warning" target="_blank">
+                                    <a href="cetak_slip_semua.php?periode=<?php echo $periode; ?>" class="btn btn-warning" target="_blank">
                                         <i class="fas fa-file-invoice"></i> Cetak Slip Semua
                                     </a>
-                                    <a href="cetak_legger.php?periode=<?php echo $periode_aktif; ?>" class="btn btn-primary" target="_blank">
+                                    <a href="cetak_legger.php?periode=<?php echo $periode; ?>" class="btn btn-primary" target="_blank">
                                         <i class="fas fa-print"></i> Cetak Legger
                                     </a>
                                 </div>
@@ -482,21 +482,21 @@ var tableLegger;
                         text: '<i class="fas fa-file-excel"></i> Excel', 
                         className: 'btn btn-success btn-sm',
                         action: function (e, dt, node, config) {
-                            window.location.href = 'export_excel.php?periode=<?php echo $periode_aktif; ?>';
+                            window.location.href = 'export_excel.php?periode=<?php echo $periode; ?>';
                         }
                     },
                     { 
                         text: '<i class="fas fa-file-pdf"></i> PDF',
                         className: 'btn btn-danger btn-sm',
                         action: function (e, dt, node, config) {
-                            window.open('cetak_legger.php?periode=<?php echo $periode_aktif; ?>', '_blank');
+                            window.open('cetak_legger.php?periode=<?php echo $periode; ?>', '_blank');
                         }
                     },
                     { 
                         text: '<i class="fas fa-print"></i> Print',
                         className: 'btn btn-info btn-sm',
                         action: function (e, dt, node, config) {
-                            window.open('cetak_legger.php?periode=<?php echo $periode_aktif; ?>', '_blank');
+                            window.open('cetak_legger.php?periode=<?php echo $periode; ?>', '_blank');
                         }
                     }
                 ],
@@ -540,7 +540,7 @@ var tableLegger;
                     url: '<?php echo BASE_URL; ?>pages/legger/generate_ajax.php',
                     type: 'POST',
                     data: {
-                        periode: '<?php echo $periode_aktif; ?>'
+                        periode: '<?php echo $periode; ?>'
                     },
                     dataType: 'json',
                     beforeSend: function() {
@@ -639,4 +639,3 @@ var tableLegger;
 </div>
 
 <?php require_once __DIR__ . '/../../includes/footer.php'; ?>
-

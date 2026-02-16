@@ -3,39 +3,30 @@ $page_title = 'Data Tunjangan';
 require_once __DIR__ . '/../../includes/header.php';
 require_once __DIR__ . '/../../includes/sidebar.php';
 
-// Get current period
-$sql = "SELECT periode_aktif FROM settings LIMIT 1";
-$result = $conn->query($sql);
-$settings = $result->fetch_assoc();
-$periode_aktif = $settings['periode_aktif'] ?? date('Y-m');
+// Ambil informasi madrasah untuk header cetak
+$settings_sql = "SELECT nama_madrasah, tahun_ajaran, logo FROM settings LIMIT 1";
+$settings_result = $conn->query($settings_sql);
+$print_settings = $settings_result ? $settings_result->fetch_assoc() : [];
+$print_nama_madrasah = $print_settings['nama_madrasah'] ?? 'Madrasah Ibtidaiyah Sultan Fattah Sukosono';
+$print_tahun_ajaran = $print_settings['tahun_ajaran'] ?? ($tahun_ajaran ?? '');
+$print_logo_url = '';
+if (!empty($print_settings['logo'])) {
+    $print_logo_url = BASE_URL . 'assets/img/' . $print_settings['logo'];
+}
 
-// Get tunjangan with jumlah_tunjangan and list of gurus
-// Show all gurus who have ever received this tunjangan (from any period)
-// Priority: current period first, then latest period if current has no data
-$sql = "SELECT t.*, 
-        COALESCE(
-            (SELECT GROUP_CONCAT(DISTINCT g1.nama_lengkap ORDER BY g1.nama_lengkap SEPARATOR ', ')
-             FROM tunjangan_detail td1
-             JOIN guru g1 ON td1.guru_id = g1.id
-             WHERE td1.tunjangan_id = t.id AND td1.periode = ?),
-            (SELECT GROUP_CONCAT(DISTINCT g2.nama_lengkap ORDER BY g2.nama_lengkap SEPARATOR ', ')
-             FROM tunjangan_detail td2
-             JOIN guru g2 ON td2.guru_id = g2.id
-             WHERE td2.tunjangan_id = t.id
-             AND td2.periode = (
-                 SELECT MAX(td3.periode) 
-                 FROM tunjangan_detail td3 
-                 WHERE td3.tunjangan_id = t.id
-             ))
-        ) as nama_guru_list
+// Periode hanya digunakan untuk penyimpanan riwayat, tidak untuk filter tampilan
+$periode = date('Y-m');
+
+// Get tunjangan dengan jumlah_tunjangan dan daftar guru (semua periode)
+$sql = "SELECT t.*,
+        (SELECT GROUP_CONCAT(DISTINCT g.nama_lengkap ORDER BY g.nama_lengkap SEPARATOR ', ')
+         FROM tunjangan_detail td
+         JOIN guru g ON td.guru_id = g.id
+         WHERE td.tunjangan_id = t.id) AS nama_guru_list
         FROM tunjangan t
         ORDER BY t.nama_tunjangan ASC";
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("s", $periode_aktif);
-$stmt->execute();
-$result = $stmt->get_result();
-$tunjangan = $result->fetch_all(MYSQLI_ASSOC);
-$stmt->close();
+$result = $conn->query($sql);
+$tunjangan = $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
 
 // Get all teachers for dropdown
 $sql = "SELECT id, nama_lengkap FROM guru ORDER BY nama_lengkap ASC";
@@ -54,16 +45,15 @@ $all_guru = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
 
                     <div class="section-body">
                         <div class="card">
-                            <div class="card-header">
-                                <h4>Data Tunjangan</h4>
-                                <div class="card-header-action" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                                    <!-- Buttons container for DataTable export buttons -->
-                                    <div id="tableTunjangan_buttons" style="display: flex; gap: 5px; flex-wrap: wrap;"></div>
-                                    <button class="btn btn-primary" data-toggle="modal" data-target="#modalTambah">
-                                        <i class="fas fa-plus"></i> Tambah Tunjangan
-                                    </button>
-                                </div>
+                        <div class="card-header">
+                            <h4>Data Tunjangan</h4>
+                            <div class="card-header-action" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                                <div id="tableTunjangan_buttons" style="display: flex; gap: 5px; flex-wrap: wrap;"></div>
+                                <button class="btn btn-primary" data-toggle="modal" data-target="#modalTambah">
+                                    <i class="fas fa-plus"></i> Tambah Tunjangan
+                                </button>
                             </div>
+                        </div>
                             <div class="card-body">
                                 <div class="table-responsive">
                                     <table class="table table-striped" id="tableTunjangan">
@@ -130,6 +120,7 @@ $all_guru = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
                         </div>
                         <form id="formTunjangan" method="POST" action="save.php">
                             <input type="hidden" name="id" id="tunjangan_id">
+                            <input type="hidden" name="periode" id="periode_form" value="<?php echo date('Y-m'); ?>">
                             <div class="modal-body">
                                 <div class="form-group">
                                     <label>Nama Tunjangan <span class="text-danger">*</span></label>
@@ -169,7 +160,7 @@ $all_guru = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
                                                 <?php foreach ($all_guru as $guru): ?>
                                                 <div class="dropdown-item guru-item" data-name="<?php echo strtolower(htmlspecialchars($guru['nama_lengkap'])); ?>">
                                                     <div class="form-check">
-                                                        <input class="form-check-input guru-checkbox" type="checkbox" name="guru_ids[]" value="<?php echo $guru['id']; ?>" id="guru_<?php echo $guru['id']; ?>" checked>
+                                                        <input class="form-check-input guru-checkbox" type="checkbox" name="guru_ids[]" value="<?php echo $guru['id']; ?>" id="guru_<?php echo $guru['id']; ?>">
                                                         <label class="form-check-label" for="guru_<?php echo $guru['id']; ?>">
                                                             <?php echo htmlspecialchars($guru['nama_lengkap']); ?>
                                                         </label>
@@ -199,9 +190,100 @@ $all_guru = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
                     </div>
                 </div>
             </div>
+            <style>
+.dropdown-checkbox-wrapper .dropdown-menu {
+    padding: 0;
+    border: 1px solid #ddd;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
 
-<script>
-// Format Rupiah function (must be available globally)
+.dropdown-checkbox-wrapper .dropdown-item {
+    padding: 8px 15px;
+    cursor: pointer;
+}
+
+.dropdown-checkbox-wrapper .dropdown-item:hover {
+    background-color: #f8f9fa;
+}
+
+.dropdown-checkbox-wrapper .dropdown-item .form-check {
+    margin: 0;
+}
+
+.dropdown-checkbox-wrapper .dropdown-item .form-check-label {
+    cursor: pointer;
+    width: 100%;
+    margin-left: 5px;
+}
+
+.dropdown-checkbox-wrapper .dropdown-item:first-child {
+    border-bottom: 1px solid #ddd;
+    background-color: #f8f9fa;
+}
+
+/* Styling untuk button dropdown agar teks tidak keluar box */
+#guruDropdownBtn {
+    position: relative;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding-right: 35px !important;
+}
+
+#guruSelectedText {
+    display: inline-block;
+    max-width: calc(100% - 30px);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+#guruDropdownBtn .float-right {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    flex-shrink: 0;
+}
+
+/* Styling untuk kolom Nama Guru agar semua nama terlihat */
+.nama-guru-cell {
+    min-width: 200px;
+    max-width: 400px;
+    white-space: normal;
+    word-wrap: break-word;
+    vertical-align: top;
+    padding: 10px 8px !important;
+}
+
+.nama-guru-text {
+    display: block;
+    line-height: 1.6;
+    word-break: break-word;
+}
+
+/* Memastikan baris tabel bisa menyesuaikan tinggi dengan konten */
+#tableTunjangan tbody tr {
+    height: auto !important;
+}
+
+#tableTunjangan tbody td {
+    height: auto !important;
+}
+</style>
+<div id="print-config-tunjangan"
+     data-periode="<?php echo htmlspecialchars($periode, ENT_QUOTES); ?>"
+     data-nama="<?php echo htmlspecialchars($print_nama_madrasah, ENT_QUOTES); ?>"
+     data-tahun="<?php echo htmlspecialchars($print_tahun_ajaran, ENT_QUOTES); ?>"
+     data-logo="<?php echo htmlspecialchars($print_logo_url, ENT_QUOTES); ?>"></div>
+            <script>
+var printConfigTunjanganEl = document.getElementById('print-config-tunjangan') || null;
+var currentPeriode = printConfigTunjanganEl ? (printConfigTunjanganEl.getAttribute('data-periode') || '') : '';
+var printNamaMadrasah = printConfigTunjanganEl ? (printConfigTunjanganEl.getAttribute('data-nama') || '') : '';
+var printTahunAjaran = printConfigTunjanganEl ? (printConfigTunjanganEl.getAttribute('data-tahun') || '') : '';
+var printLogoUrl = printConfigTunjanganEl ? (printConfigTunjanganEl.getAttribute('data-logo') || '') : '';
+// @ts-nocheck Format Rupiah function (must be available globally)
 function formatRupiah(angka) {
     // Convert to string and remove any non-numeric characters
     var number_string = angka.toString().replace(/[^\d]/g, '');
@@ -305,7 +387,7 @@ function editTunjangan(id) {
             
             // Load selected gurus for this tunjangan
             $.ajax({
-                url: 'get_guru.php?tunjangan_id=' + data.id,
+                url: 'get_guru.php?tunjangan_id=' + data.id + '&periode=' + encodeURIComponent(window.currentPeriode || ''),
                 type: 'GET',
                 dataType: 'json',
                 success: function(guruData) {
@@ -319,14 +401,12 @@ function editTunjangan(id) {
                             $('#guru_' + guruId).prop('checked', true);
                         });
                         
-                        // Update select all checkbox
                         var total = $('.guru-checkbox').length;
                         var checked = $('.guru-checkbox:checked').length;
                         $('#selectAllGuru').prop('checked', checked === total);
                     } else {
-                        // If no data, select all by default
-                        $('.guru-checkbox').prop('checked', true);
-                        $('#selectAllGuru').prop('checked', true);
+                        $('.guru-checkbox').prop('checked', false);
+                        $('#selectAllGuru').prop('checked', false);
                     }
                     if (typeof updateGuruSelectedText === 'function') {
                         updateGuruSelectedText();
@@ -463,15 +543,14 @@ function editTunjangan(id) {
                 updateGuruSelectedText();
             });
             
-            // Initialize on modal show - only for new entries (not edit)
             $('#modalTambah').on('shown.bs.modal', function() {
-                // Only auto-select all if it's a new entry (no ID)
                 var isEdit = $('#tunjangan_id').val() && $('#tunjangan_id').val() !== '';
                 if (!isEdit) {
-                    // For new entries, select all by default
-                    $('.guru-checkbox').prop('checked', true);
-                    $('#selectAllGuru').prop('checked', true);
-                    updateGuruSelectedText();
+                    $('.guru-checkbox').prop('checked', false);
+                    $('#selectAllGuru').prop('checked', false);
+                    if (typeof updateGuruSelectedText === 'function') {
+                        updateGuruSelectedText();
+                    }
                 }
             });
             
@@ -738,18 +817,16 @@ function editTunjangan(id) {
     }
 })();
 
-// Wait for jQuery to be loaded
-(function() {
+(function initTunjanganDataTable() {
     var retryCount = 0;
-    var maxRetries = 20; // Maximum 20 retries (10 seconds)
+    var maxRetries = 40;
     
-    function initTunjanganPage() {
-        if (typeof jQuery === 'undefined') {
+    function init() {
+        // Pastikan jQuery dan plugin DataTables sudah siap sebelum digunakan
+        if (typeof jQuery === 'undefined' || typeof jQuery.fn === 'undefined' || typeof jQuery.fn.DataTable === 'undefined') {
             retryCount++;
             if (retryCount < maxRetries) {
-                setTimeout(initTunjanganPage, 50);
-            } else {
-                // console.error('jQuery failed to load after ' + maxRetries + ' retries');
+                setTimeout(init, 50);
             }
             return;
         }
@@ -757,214 +834,147 @@ function editTunjangan(id) {
         var $ = jQuery;
         
         $(document).ready(function() {
-            // Check if DataTable is available
-            if (typeof $.fn.DataTable === 'undefined') {
-                retryCount++;
-                if (retryCount < maxRetries) {
-                    // console.error('DataTable is not loaded, retrying...');
-                    setTimeout(function() {
-                        initTunjanganPage();
-                    }, 200);
-                } else {
-                    // console.error('DataTable failed to load after ' + maxRetries + ' retries');
-                }
-                return;
+            if ($.fn.DataTable.isDataTable('#tableTunjangan')) {
+                $('#tableTunjangan').DataTable().destroy();
             }
             
-            // Reset retry count on success
-            retryCount = 0;
-            
-            // Delay to ensure main.js finishes first
-            setTimeout(function() {
-                // Aggressively clear ALL DataTable state
-                if (typeof(Storage) !== "undefined") {
-                    // Clear all DataTable keys, not just specific ones
-                    Object.keys(localStorage).forEach(function(key) {
-                        if (key.indexOf('DataTables_') === 0) {
-                            localStorage.removeItem(key);
-                        }
-                    });
-                    Object.keys(sessionStorage).forEach(function(key) {
-                        if (key.indexOf('DataTables_') === 0) {
-                            sessionStorage.removeItem(key);
-                        }
-                    });
-                }
-                
-                // Destroy existing instance
-                if ($.fn.DataTable.isDataTable('#tableTunjangan')) {
-                    $('#tableTunjangan').DataTable().destroy();
-                }
-                
-                // Small delay to ensure cleanup is complete
-                setTimeout(function() {
-                    // Double check DataTable is available
-                    if (typeof $.fn.DataTable === 'undefined') {
-                        // console.error('DataTable still not available');
-                        return;
-                    }
-                    
-                    var table = $('#tableTunjangan').DataTable({
-                    dom: 'Bfrtip',
-                    buttons: [
-                        { extend: 'excel', text: '<i class="fas fa-file-excel"></i> Excel', className: 'btn btn-success btn-sm' },
-                        { extend: 'pdf', text: '<i class="fas fa-file-pdf"></i> PDF', className: 'btn btn-danger btn-sm' },
-                        { extend: 'print', text: '<i class="fas fa-print"></i> Print', className: 'btn btn-info btn-sm' }
-                    ],
-                    language: { url: 'https://cdn.datatables.net/plug-ins/1.11.5/i18n/id.json' },
-                    order: [[1, 'asc']],
-                    stateSave: false,
-                    stateDuration: -1,
-                    retrieve: false,
-                    autoWidth: false,
-                    columnDefs: [
-                        {
-                            targets: 0, // No column
-                            orderable: false,
-                            searchable: false
+            var table = $('#tableTunjangan').DataTable({
+                dom: 'Bfrtip',
+                buttons: [
+                    { 
+                        extend: 'excel', 
+                        text: '<i class="fas fa-file-excel"></i> Excel', 
+                        className: 'btn btn-success btn-sm'
+                    },
+                    { 
+                        extend: 'print', 
+                        text: '<i class="fas fa-file-pdf"></i> PDF', 
+                        className: 'btn btn-danger btn-sm',
+                        title: '',
+                        exportOptions: {
+                            columns: [0, 1, 2, 3, 4]
                         },
-                        {
-                            targets: '_all',
-                            orderable: true
+                        customize: function (win) {
+                            try {
+                                var doc = win.document;
+                                var body = doc.body;
+                                
+                                var headerDiv = doc.createElement('div');
+                                headerDiv.style.marginBottom = '15px';
+                                
+                                var html = '';
+                                html += '<table style="width:100%; border-collapse:collapse;">';
+                                html += '<tr>';
+                                html += '<td style="width:80px; text-align:left; vertical-align:top;">';
+                                if (printLogoUrl) {
+                                    html += '<img src=\"' + printLogoUrl + '\" style=\"max-height:60px; max-width:60px;\" />';
+                                }
+                                html += '</td>';
+                                html += '<td style="text-align:left; vertical-align:middle;">';
+                                if (printNamaMadrasah) {
+                                    html += '<div style=\"font-size:18px; font-weight:bold; text-transform:uppercase;\">' + printNamaMadrasah + '</div>';
+                                }
+                                html += '<div style=\"font-size:14px;\">Data Tunjangan</div>';
+                                if (printTahunAjaran) {
+                                    html += '<div style=\"font-size:12px;\">Tahun Ajaran ' + printTahunAjaran + '</div>';
+                                }
+                                html += '</td>';
+                                html += '</tr>';
+                                html += '</table>';
+                                
+                                headerDiv.innerHTML = html;
+                                
+                                body.insertBefore(headerDiv, body.firstChild);
+                            } catch (e) {
+                                console && console.error && console.error('Print customize error:', e);
+                            }
                         }
-                    ],
-                    drawCallback: function(settings) {
-                        // Remove drawCallback to prevent infinite loop
-                        // Order is already set in initial configuration
+                    },
+                    { 
+                        extend: 'print', 
+                        text: '<i class="fas fa-print"></i> Print', 
+                        className: 'btn btn-info btn-sm',
+                        title: '',
+                        exportOptions: {
+                            columns: [0, 1, 2, 3, 4]
+                        },
+                        customize: function (win) {
+                            try {
+                                var doc = win.document;
+                                var body = doc.body;
+                                
+                                var headerDiv = doc.createElement('div');
+                                headerDiv.style.marginBottom = '15px';
+                                
+                                var html = '';
+                                html += '<table style="width:100%; border-collapse:collapse;">';
+                                html += '<tr>';
+                                html += '<td style="width:80px; text-align:left; vertical-align:top;">';
+                                if (printLogoUrl) {
+                                    html += '<img src=\"' + printLogoUrl + '\" style=\"max-height:60px; max-width:60px;\" />';
+                                }
+                                html += '</td>';
+                                html += '<td style="text-align:left; vertical-align:middle;">';
+                                if (printNamaMadrasah) {
+                                    html += '<div style=\"font-size:18px; font-weight:bold; text-transform:uppercase;\">' + printNamaMadrasah + '</div>';
+                                }
+                                html += '<div style=\"font-size:14px;\">Data Tunjangan</div>';
+                                if (printTahunAjaran) {
+                                    html += '<div style=\"font-size:12px;\">Tahun Ajaran ' + printTahunAjaran + '</div>';
+                                }
+                                html += '</td>';
+                                html += '</tr>';
+                                html += '</table>';
+                                
+                                headerDiv.innerHTML = html;
+                                
+                                body.insertBefore(headerDiv, body.firstChild);
+                            } catch (e) {
+                                console && console.error && console.error('Print customize error:', e);
+                            }
+                        }
                     }
+                ],
+                language: { url: 'https://cdn.datatables.net/plug-ins/1.11.5/i18n/id.json' },
+                order: [[1, 'asc']],
+                stateSave: false,
+                retrieve: false,
+                autoWidth: false,
+                columnDefs: [
+                    {
+                        targets: 0,
+                        orderable: false,
+                        searchable: false
+                    },
+                    {
+                        targets: '_all',
+                        orderable: true
+                    }
+                ]
+            });
+            
+            var buttonsContainer = table.buttons().container();
+            var targetContainer = $('#tableTunjangan_buttons');
+            
+            if (buttonsContainer.length > 0 && targetContainer.length > 0) {
+                if (buttonsContainer.parent().attr('id') !== 'tableTunjangan_buttons') {
+                    buttonsContainer.appendTo(targetContainer);
+                }
+                buttonsContainer.css({
+                    'display': 'flex',
+                    'flex-wrap': 'wrap',
+                    'gap': '5px'
                 });
-                
-                // Move buttons to custom container
-                setTimeout(function() {
-                    var buttonsContainer = table.buttons().container();
-                    var targetContainer = $('#tableTunjangan_buttons');
-                    
-                    if (buttonsContainer.length > 0 && targetContainer.length > 0) {
-                        if (buttonsContainer.parent().attr('id') !== 'tableTunjangan_buttons') {
-                            buttonsContainer.appendTo(targetContainer);
-                        }
-                        buttonsContainer.css({
-                            'display': 'flex',
-                            'flex-wrap': 'wrap',
-                            'gap': '5px'
-                        });
-                        buttonsContainer.find('.dt-button').css({
-                            'margin': '0',
-                            'display': 'inline-block'
-                        });
-                    }
-                    
-                    // Also check for default location
-                    var defaultButtons = $('.dt-buttons');
-                    if (defaultButtons.length > 0) {
-                        if (defaultButtons.parent().attr('id') !== 'tableTunjangan_buttons') {
-                            defaultButtons.appendTo('#tableTunjangan_buttons');
-                        }
-                        defaultButtons.css({
-                            'display': 'flex',
-                            'flex-wrap': 'wrap',
-                            'gap': '5px'
-                        });
-                    }
-                    
-                    // console.log('Export buttons initialized');
-                }, 500);
-                }, 100);
-            }, 1000); // Delay to ensure main.js doesn't interfere
+                buttonsContainer.find('.dt-button').css({
+                    'margin': '0',
+                    'display': 'inline-block'
+                });
+            }
         });
     }
     
-    // Start initialization
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initTunjanganPage);
-    } else {
-        initTunjanganPage();
-    }
+    init();
 })();
 </script>
 
-<style>
-.dropdown-checkbox-wrapper .dropdown-menu {
-    padding: 0;
-    border: 1px solid #ddd;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
-.dropdown-checkbox-wrapper .dropdown-item {
-    padding: 8px 15px;
-    cursor: pointer;
-}
-
-.dropdown-checkbox-wrapper .dropdown-item:hover {
-    background-color: #f8f9fa;
-}
-
-.dropdown-checkbox-wrapper .dropdown-item .form-check {
-    margin: 0;
-}
-
-.dropdown-checkbox-wrapper .dropdown-item .form-check-label {
-    cursor: pointer;
-    width: 100%;
-    margin-left: 5px;
-}
-
-.dropdown-checkbox-wrapper .dropdown-item:first-child {
-    border-bottom: 1px solid #ddd;
-    background-color: #f8f9fa;
-}
-
-/* Styling untuk button dropdown agar teks tidak keluar box */
-#guruDropdownBtn {
-    position: relative;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    padding-right: 35px !important;
-}
-
-#guruSelectedText {
-    display: inline-block;
-    max-width: calc(100% - 30px);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    vertical-align: middle;
-}
-
-#guruDropdownBtn .float-right {
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    flex-shrink: 0;
-}
-
-/* Styling untuk kolom Nama Guru agar semua nama terlihat */
-.nama-guru-cell {
-    min-width: 200px;
-    max-width: 400px;
-    white-space: normal;
-    word-wrap: break-word;
-    vertical-align: top;
-    padding: 10px 8px !important;
-}
-
-.nama-guru-text {
-    display: block;
-    line-height: 1.6;
-    word-break: break-word;
-}
-
-/* Memastikan baris tabel bisa menyesuaikan tinggi dengan konten */
-#tableTunjangan tbody tr {
-    height: auto !important;
-}
-
-#tableTunjangan tbody td {
-    height: auto !important;
-}
-</style>
-
 <?php require_once __DIR__ . '/../../includes/footer.php'; ?>
-

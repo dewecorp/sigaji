@@ -105,13 +105,13 @@ $stmt->close();
     <style>
         @page {
             size: F4 landscape;
-            margin: 10mm 10mm 10mm 5mm; /* top: 1cm, right: 1cm, bottom: 1cm, left: 0.5cm */
+            margin: 0mm 10mm 10mm 5mm; /* top: 0cm, right: 1cm, bottom: 1cm, left: 0.5cm */
         }
         
         @media print {
             @page {
                 size: 330mm 210mm;
-                margin: 10mm 10mm 10mm 5mm; /* top: 1cm, right: 1cm, bottom: 1cm, left: 0.5cm */
+                margin: 0mm 10mm 10mm 5mm; /* top: 0cm, right: 1cm, bottom: 1cm, left: 0.5cm */
             }
         }
         
@@ -132,7 +132,7 @@ $stmt->close();
         .content-wrapper {
             width: 100%;
             max-width: 100%;
-            padding: 5mm 5mm 5mm 3mm;
+            padding: 0mm 5mm 5mm 3mm;
             box-sizing: border-box;
             page-break-inside: avoid !important;
             break-inside: avoid !important;
@@ -294,7 +294,7 @@ $stmt->close();
         }
         table td:nth-child(3) {
             text-align: right;
-            font-family: 'Courier New', monospace;
+            font-family: 'Arial Narrow', Arial, sans-serif;
             font-size: 11px;
             overflow: hidden !important;
             white-space: nowrap;
@@ -324,7 +324,7 @@ $stmt->close();
             font-size: 11px;
             padding: 10px 4px;
             text-align: right;
-            font-family: 'Courier New', monospace;
+            font-family: 'Arial Narrow', Arial, sans-serif;
             overflow: hidden !important;
             white-space: nowrap;
             text-overflow: ellipsis;
@@ -354,7 +354,7 @@ $stmt->close();
             font-weight: normal;
             font-size: 11px;
             padding: 10px 3px;
-            font-family: 'Courier New', monospace;
+            font-family: 'Arial Narrow', Arial, sans-serif;
             overflow: hidden !important;
             white-space: nowrap;
             text-overflow: ellipsis;
@@ -392,6 +392,13 @@ $stmt->close();
             font-size: 9px;
             page-break-inside: avoid !important;
             break-inside: avoid !important;
+        }
+        
+        .tempat-tanggal {
+            text-align: right;
+            margin-top: 15px;
+            margin-bottom: 5px;
+            font-size: 10px;
         }
         
         .footer-left,
@@ -469,16 +476,74 @@ $stmt->close();
             }
             
             table {
-                font-size: 13px;
-                margin-top: 10px;
+                font-size: 12px;
+                margin-top: 8px;
                 page-break-inside: auto;
                 width: 100%;
                 max-width: 100%;
+                table-layout: auto;
             }
             
             table th,
             table td {
-                padding: 10px 6px;
+                padding: 6px 3px;
+                overflow: visible !important;
+                color: #000000 !important;
+                white-space: normal !important;
+                text-overflow: clip !important;
+                font-family: 'Arial Narrow', Arial, sans-serif !important;
+            }
+            
+            /* Pastikan semua angka di body tabel tidak terpotong */
+            table tbody tr td {
+                overflow: visible !important;
+                white-space: normal !important;
+                text-overflow: clip !important;
+                line-height: 1.2;
+            }
+            
+            /* Override kolom angka yang sebelumnya dipaksa ellipsis */
+            table tbody tr td:nth-child(3),
+            table tbody tr td:not(:first-child):not(:nth-child(2)):not(:nth-child(3)):not([colspan]):not(:last-child):not(:nth-last-child(4)):not(:nth-last-child(3)):not(:nth-last-child(2)),
+            table tbody tr td:nth-last-child(4),
+            table tbody tr td:nth-last-child(3),
+            table tbody tr td:nth-last-child(2) {
+                overflow: visible !important;
+                white-space: normal !important;
+                text-overflow: clip !important;
+            }
+            
+            /* Reset width kolom di print supaya tidak melebar dan tidak terpotong */
+            table th,
+            table td {
+                width: auto !important;
+                min-width: 0 !important;
+                max-width: none !important;
+            }
+            
+            /* Lebar kolom No, Nama, Gaji Pokok, Tanda Tangan di print */
+            table th:first-child,
+            table td:first-child {
+                width: 25px !important;
+            }
+            
+            table th:nth-child(2),
+            table td:nth-child(2) {
+                width: 160px !important;
+            }
+            
+            table th:nth-child(3),
+            table td:nth-child(3) {
+                width: 55px !important;
+            }
+            
+            /* Kolom Tanda Tangan boleh wrap agar muat penuh */
+            table th:last-child,
+            table td:last-child {
+                width: 80px !important;
+                white-space: normal !important;
+                word-wrap: break-word;
+                overflow-wrap: break-word;
                 overflow: visible !important;
             }
             
@@ -507,6 +572,9 @@ $stmt->close();
         <div class="header-content">
             <h2><?php echo strtoupper(htmlspecialchars($settings['nama_madrasah'] ?? 'MADRASAH IBTIDAIYAH')); ?></h2>
             <p>LEGGER GAJI</p>
+            <?php if (!empty($settings['tahun_ajaran'])): ?>
+                <p>Tahun Ajaran <?php echo htmlspecialchars($settings['tahun_ajaran']); ?></p>
+            <?php endif; ?>
         </div>
     </div>
     
@@ -644,19 +712,44 @@ $stmt->close();
     
     <?php endforeach; ?>
     
+    <?php if (!empty($settings['tempat']) || !empty($settings['hari_tanggal'])): ?>
+    <div class="tempat-tanggal">
+        <?php if (!empty($settings['tempat'])): ?>
+            <?php echo htmlspecialchars($settings['tempat']); ?><?php if (!empty($settings['hari_tanggal'])): ?>,<?php endif; ?>
+        <?php endif; ?>
+        <?php if (!empty($settings['hari_tanggal'])): ?>
+            <?php echo formatTanggalTanpaHari($settings['hari_tanggal']); ?>
+        <?php endif; ?>
+    </div>
+    <?php endif; ?>
+    
+    <?php
+    $qr_kepala_data = 'Kepala Madrasah|' . ($settings['nama_kepala'] ?? '') . '|Legger Gaji';
+    $qr_bendahara_data = 'Bendahara|' . ($settings['nama_bendahara'] ?? '') . '|Legger Gaji';
+    ?>
     <div class="footer">
         <div class="footer-left">
             <p>Mengetahui,</p>
             <p>Kepala Madrasah</p>
             <div class="signature-line">
-                <img class="qr-signature" src="<?php echo BASE_URL; ?>qrcode.php?data=<?php echo rawurlencode('Kepala Madrasah|' . ($settings['nama_kepala'] ?? '') . '|Legger Gaji'); ?>" alt="QR Kepala Madrasah">
+                <img 
+                    class="qr-signature" 
+                    src="<?php echo BASE_URL; ?>qrcode.php?data=<?php echo rawurlencode($qr_kepala_data); ?>" 
+                    alt="QR Kepala Madrasah"
+                    onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='https://api.qrserver.com/v1/create-qr-code/?size=180x180&data='+encodeURIComponent('<?php echo htmlspecialchars($qr_kepala_data, ENT_QUOTES); ?>');}"
+                >
             </div>
             <p><?php echo htmlspecialchars($settings['nama_kepala'] ?? ''); ?></p>
         </div>
         <div class="footer-right">
             <p>Bendahara</p>
             <div class="signature-line">
-                <img class="qr-signature" src="<?php echo BASE_URL; ?>qrcode.php?data=<?php echo rawurlencode('Bendahara|' . ($settings['nama_bendahara'] ?? '') . '|Legger Gaji'); ?>" alt="QR Bendahara">
+                <img 
+                    class="qr-signature" 
+                    src="<?php echo BASE_URL; ?>qrcode.php?data=<?php echo rawurlencode($qr_bendahara_data); ?>" 
+                    alt="QR Bendahara"
+                    onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='https://api.qrserver.com/v1/create-qr-code/?size=180x180&data='+encodeURIComponent('<?php echo htmlspecialchars($qr_bendahara_data, ENT_QUOTES); ?>');}"
+                >
             </div>
             <p><?php echo htmlspecialchars($settings['nama_bendahara'] ?? ''); ?></p>
         </div>

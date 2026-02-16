@@ -1,10 +1,4 @@
 <?php
-require_once __DIR__ . '/vendor/autoload.php';
-
-use Endroid\QrCode\Builder\Builder;
-use Endroid\QrCode\Encoding\Encoding;
-use Endroid\QrCode\ErrorCorrectionLevel\ErrorCorrectionLevelHigh;
-use Endroid\QrCode\Writer\PngWriter;
 
 $data = $_GET['data'] ?? '';
 
@@ -15,20 +9,37 @@ if ($data === '') {
     exit;
 }
 
-try {
-    $result = Builder::create()
-        ->writer(new PngWriter())
-        ->data($data)
-        ->encoding(new Encoding('UTF-8'))
-        ->errorCorrectionLevel(new ErrorCorrectionLevelHigh())
-        ->size(180)
-        ->margin(0)
-        ->build();
-
-    header('Content-Type: image/png');
-    echo $result->getString();
-} catch (Throwable $e) {
-    http_response_code(500);
-    header('Content-Type: text/plain');
-    echo 'QR error';
+$size = isset($_GET['size']) ? (int) $_GET['size'] : 180;
+if ($size < 50) {
+    $size = 50;
+} elseif ($size > 500) {
+    $size = 500;
 }
+
+$autoload = __DIR__ . '/vendor/autoload.php';
+
+if (file_exists($autoload)) {
+    require_once $autoload;
+    
+    try {
+        $result = \Endroid\QrCode\Builder\Builder::create()
+            ->writer(new \Endroid\QrCode\Writer\PngWriter())
+            ->data($data)
+            ->encoding(new \Endroid\QrCode\Encoding\Encoding('UTF-8'))
+            ->errorCorrectionLevel(new \Endroid\QrCode\ErrorCorrectionLevel\ErrorCorrectionLevelHigh())
+            ->size($size)
+            ->margin(0)
+            ->build();
+        
+        header('Content-Type: image/png');
+        echo $result->getString();
+        exit;
+    } catch (Throwable $e) {
+        // Jika library offline error, lanjut ke fallback online di bawah
+    }
+}
+
+// Fallback: gunakan layanan QR online jika library offline tidak tersedia / gagal
+$remoteUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=' . $size . 'x' . $size . '&data=' . rawurlencode($data);
+header('Location: ' . $remoteUrl, true, 302);
+exit;

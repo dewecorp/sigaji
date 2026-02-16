@@ -92,11 +92,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if ($execute_result) {
         $tunjangan_id = $id ? $id : $conn->insert_id;
         
-        // Get periode_aktif from settings
-        $sql = "SELECT periode_aktif FROM settings LIMIT 1";
-        $result = $conn->query($sql);
-        $settings = $result->fetch_assoc();
-        $periode_aktif = $settings['periode_aktif'] ?? date('Y-m');
+        // Get periode from request (do not depend on settings.periode_aktif)
+        $periode = $_POST['periode'] ?? date('Y-m');
         
         // Get selected guru IDs - handle both array and indexed array formats
         $guru_ids = [];
@@ -138,7 +135,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         // Delete existing tunjangan_detail for this tunjangan and period
         $sql = "DELETE FROM tunjangan_detail WHERE tunjangan_id = ? AND periode = ?";
         $delete_stmt = $conn->prepare($sql);
-        $delete_stmt->bind_param("is", $tunjangan_id, $periode_aktif);
+        $delete_stmt->bind_param("is", $tunjangan_id, $periode);
         $delete_stmt->execute();
         $delete_stmt->close();
         
@@ -151,7 +148,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             foreach ($guru_ids as $guru_id) {
                 $guru_id = intval($guru_id);
                 if ($guru_id > 0) {
-                    $detail_stmt->bind_param("iids", $guru_id, $tunjangan_id, $jumlah_tunjangan, $periode_aktif);
+                    $detail_stmt->bind_param("iids", $guru_id, $tunjangan_id, $jumlah_tunjangan, $periode);
                     if ($detail_stmt->execute()) {
                         $inserted_count++;
                     }
@@ -181,5 +178,4 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 }
 exit();
 ?>
-
 

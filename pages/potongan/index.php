@@ -3,11 +3,19 @@ $page_title = 'Data Potongan';
 require_once __DIR__ . '/../../includes/header.php';
 require_once __DIR__ . '/../../includes/sidebar.php';
 
-// Get current period
-$sql = "SELECT periode_aktif FROM settings LIMIT 1";
-$result = $conn->query($sql);
-$settings = $result->fetch_assoc();
-$periode_aktif = $settings['periode_aktif'] ?? date('Y-m');
+// Ambil informasi madrasah untuk header cetak
+$settings_sql = "SELECT nama_madrasah, tahun_ajaran, logo FROM settings LIMIT 1";
+$settings_result = $conn->query($settings_sql);
+$print_settings = $settings_result ? $settings_result->fetch_assoc() : [];
+$print_nama_madrasah = $print_settings['nama_madrasah'] ?? 'Madrasah Ibtidaiyah Sultan Fattah Sukosono';
+$print_tahun_ajaran = $print_settings['tahun_ajaran'] ?? ($tahun_ajaran ?? '');
+$print_logo_url = '';
+if (!empty($print_settings['logo'])) {
+    $print_logo_url = BASE_URL . 'assets/img/' . $print_settings['logo'];
+}
+
+// Periode hanya digunakan untuk penyimpanan riwayat, tidak untuk filter tampilan
+$periode = date('Y-m');
 
 // Ensure jumlah_potongan column exists
 $sql = "SHOW COLUMNS FROM potongan LIKE 'jumlah_potongan'";
@@ -16,33 +24,16 @@ if ($result->num_rows == 0) {
     $conn->query("ALTER TABLE potongan ADD COLUMN jumlah_potongan DECIMAL(15,2) DEFAULT 0");
 }
 
-// Get potongan with jumlah_potongan and list of gurus
-// Show all gurus who have ever received this potongan (from any period)
-// Priority: current period first, then latest period if current has no data
-$sql = "SELECT p.*, 
-        COALESCE(
-            (SELECT GROUP_CONCAT(DISTINCT g1.nama_lengkap ORDER BY g1.nama_lengkap SEPARATOR ', ')
-             FROM potongan_detail pd1
-             JOIN guru g1 ON pd1.guru_id = g1.id
-             WHERE pd1.potongan_id = p.id AND pd1.periode = ?),
-            (SELECT GROUP_CONCAT(DISTINCT g2.nama_lengkap ORDER BY g2.nama_lengkap SEPARATOR ', ')
-             FROM potongan_detail pd2
-             JOIN guru g2 ON pd2.guru_id = g2.id
-             WHERE pd2.potongan_id = p.id
-             AND pd2.periode = (
-                 SELECT MAX(pd3.periode) 
-                 FROM potongan_detail pd3 
-                 WHERE pd3.potongan_id = p.id
-             ))
-        ) as nama_guru_list
+// Get potongan dengan jumlah_potongan dan daftar guru (semua periode)
+$sql = "SELECT p.*,
+        (SELECT GROUP_CONCAT(DISTINCT g.nama_lengkap ORDER BY g.nama_lengkap SEPARATOR ', ')
+         FROM potongan_detail pd
+         JOIN guru g ON pd.guru_id = g.id
+         WHERE pd.potongan_id = p.id) AS nama_guru_list
         FROM potongan p
         ORDER BY p.nama_potongan ASC";
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("s", $periode_aktif);
-$stmt->execute();
-$result = $stmt->get_result();
-$potongan = $result->fetch_all(MYSQLI_ASSOC);
-$stmt->close();
+$result = $conn->query($sql);
+$potongan = $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
 
 // Get all teachers for dropdown
 $sql = "SELECT id, nama_lengkap FROM guru ORDER BY nama_lengkap ASC";
@@ -137,6 +128,7 @@ $all_guru = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
                         </div>
                         <form id="formPotongan" method="POST" action="save.php">
                             <input type="hidden" name="id" id="potongan_id">
+                            <input type="hidden" name="periode" id="periode_form" value="<?php echo date('Y-m'); ?>">
                             <div class="modal-body">
                                 <div class="form-group">
                                     <label>Nama Potongan <span class="text-danger">*</span></label>
@@ -176,7 +168,7 @@ $all_guru = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
                                                 <?php foreach ($all_guru as $guru): ?>
                                                 <div class="dropdown-item guru-item" data-name="<?php echo strtolower(htmlspecialchars($guru['nama_lengkap'])); ?>">
                                                     <div class="form-check">
-                                                        <input class="form-check-input guru-checkbox" type="checkbox" name="guru_ids[]" value="<?php echo $guru['id']; ?>" id="guru_<?php echo $guru['id']; ?>" checked>
+                                                        <input class="form-check-input guru-checkbox" type="checkbox" name="guru_ids[]" value="<?php echo $guru['id']; ?>" id="guru_<?php echo $guru['id']; ?>">
                                                         <label class="form-check-label" for="guru_<?php echo $guru['id']; ?>">
                                                             <?php echo htmlspecialchars($guru['nama_lengkap']); ?>
                                                         </label>
@@ -206,7 +198,7 @@ $all_guru = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
                     </div>
                 </div>
             </div>
-
+            
 <style>
 .dropdown-checkbox-wrapper .dropdown-menu {
     min-width: 100%;
@@ -284,9 +276,19 @@ $all_guru = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
     height: auto !important;
 }
 </style>
-
+<div id="print-config-potongan"
+     data-periode="<?php echo htmlspecialchars($periode, ENT_QUOTES); ?>"
+     data-nama="<?php echo htmlspecialchars($print_nama_madrasah, ENT_QUOTES); ?>"
+     data-tahun="<?php echo htmlspecialchars($print_tahun_ajaran, ENT_QUOTES); ?>"
+     data-logo="<?php echo htmlspecialchars($print_logo_url, ENT_QUOTES); ?>"></div>
+        
 <script>
-// Format Rupiah function (must be available globally)
+var printConfigPotonganEl = document.getElementById('print-config-potongan') || null;
+var currentPeriode = printConfigPotonganEl ? (printConfigPotonganEl.getAttribute('data-periode') || '') : '';
+var printNamaMadrasah = printConfigPotonganEl ? (printConfigPotonganEl.getAttribute('data-nama') || '') : '';
+var printTahunAjaran = printConfigPotonganEl ? (printConfigPotonganEl.getAttribute('data-tahun') || '') : '';
+var printLogoUrl = printConfigPotonganEl ? (printConfigPotonganEl.getAttribute('data-logo') || '') : '';
+// @ts-nocheck Format Rupiah function (must be available globally)
 function formatRupiah(angka) {
     var number_string = angka.toString().replace(/[^\d]/g, '');
     if (number_string === '' || number_string === '0') return '0';
@@ -384,7 +386,7 @@ function editPotongan(id) {
             
             // Load selected gurus for this potongan
             $.ajax({
-                url: 'get_guru.php?potongan_id=' + data.id,
+                url: 'get_guru.php?potongan_id=' + data.id + '&periode=' + encodeURIComponent(window.currentPeriode || ''),
                 type: 'GET',
                 dataType: 'json',
                 success: function(guruData) {
@@ -576,15 +578,14 @@ function editPotongan(id) {
                 updateGuruSelectedText();
             });
             
-            // Initialize on modal show - only for new entries (not edit)
             $('#modalTambah').on('shown.bs.modal', function() {
-                // Only auto-select all if it's a new entry (no ID)
                 var isEdit = $('#potongan_id').val() && $('#potongan_id').val() !== '';
                 if (!isEdit) {
-                    // For new entries, select all by default
-                    $('.guru-checkbox').prop('checked', true);
-                    $('#selectAllGuru').prop('checked', true);
-                    updateGuruSelectedText();
+                    $('.guru-checkbox').prop('checked', false);
+                    $('#selectAllGuru').prop('checked', false);
+                    if (typeof updateGuruSelectedText === 'function') {
+                        updateGuruSelectedText();
+                    }
                 }
             });
             
@@ -837,18 +838,16 @@ function editPotongan(id) {
     }
 })();
 
-// Wait for jQuery to be loaded
-(function() {
+(function initPotonganDataTable() {
     var retryCount = 0;
-    var maxRetries = 20; // Maximum 20 retries (10 seconds)
+    var maxRetries = 40;
     
-    function initPotonganPage() {
-        if (typeof jQuery === 'undefined') {
+    function init() {
+        // Pastikan jQuery dan plugin DataTables sudah siap sebelum digunakan
+        if (typeof jQuery === 'undefined' || typeof jQuery.fn === 'undefined' || typeof jQuery.fn.DataTable === 'undefined') {
             retryCount++;
             if (retryCount < maxRetries) {
-                setTimeout(initPotonganPage, 50);
-            } else {
-                // console.error('jQuery failed to load after ' + maxRetries + ' retries');
+                setTimeout(init, 50);
             }
             return;
         }
@@ -856,117 +855,148 @@ function editPotongan(id) {
         var $ = jQuery;
         
         $(document).ready(function() {
-            if (typeof $.fn.DataTable === 'undefined') {
-                retryCount++;
-                if (retryCount < maxRetries) {
-                    setTimeout(function() {
-                        initPotonganPage();
-                    }, 200);
-                } else {
-                    // console.error('DataTable failed to load after ' + maxRetries + ' retries');
-                }
-                return;
+            if ($.fn.DataTable.isDataTable('#tablePotongan')) {
+                $('#tablePotongan').DataTable().destroy();
             }
             
-            // Reset retry count on success
-            retryCount = 0;
-            
-            setTimeout(function() {
-                if (typeof(Storage) !== "undefined") {
-                    Object.keys(localStorage).forEach(function(key) {
-                        if (key.indexOf('DataTables_') === 0) {
-                            localStorage.removeItem(key);
+            var table = $('#tablePotongan').DataTable({
+                dom: 'Bfrtip',
+                buttons: [
+                    { 
+                        extend: 'excel', 
+                        text: '<i class="fas fa-file-excel"></i> Excel', 
+                        className: 'btn btn-success btn-sm'
+                    },
+                    { 
+                        extend: 'print', 
+                        text: '<i class="fas fa-file-pdf"></i> PDF', 
+                        className: 'btn btn-danger btn-sm',
+                        title: '',
+                        exportOptions: {
+                            columns: [0, 1, 2, 3, 4]
+                        },
+                        customize: function (win) {
+                            try {
+                                var doc = win.document;
+                                var body = doc.body;
+                                
+                                var headerDiv = doc.createElement('div');
+                                headerDiv.style.marginBottom = '15px';
+                                
+                                var html = '';
+                                html += '<table style="width:100%; border-collapse:collapse;">';
+                                html += '<tr>';
+                                html += '<td style="width:80px; text-align:left; vertical-align:top;">';
+                                if (printLogoUrl) {
+                                    html += '<img src=\"' + printLogoUrl + '\" style=\"max-height:60px; max-width:60px;\" />';
+                                }
+                                html += '</td>';
+                                html += '<td style="text-align:left; vertical-align:middle;">';
+                                if (printNamaMadrasah) {
+                                    html += '<div style=\"font-size:18px; font-weight:bold; text-transform:uppercase;\">' + printNamaMadrasah + '</div>';
+                                }
+                                html += '<div style=\"font-size:14px;\">Data Potongan</div>';
+                                if (printTahunAjaran) {
+                                    html += '<div style=\"font-size:12px;\">Tahun Ajaran ' + printTahunAjaran + '</div>';
+                                }
+                                html += '</td>';
+                                html += '</tr>';
+                                html += '</table>';
+                                
+                                headerDiv.innerHTML = html;
+                                
+                                body.insertBefore(headerDiv, body.firstChild);
+                            } catch (e) {
+                                console && console.error && console.error('Print customize error:', e);
+                            }
                         }
-                    });
-                    Object.keys(sessionStorage).forEach(function(key) {
-                        if (key.indexOf('DataTables_') === 0) {
-                            sessionStorage.removeItem(key);
+                    },
+                    { 
+                        extend: 'print', 
+                        text: '<i class="fas fa-print"></i> Print', 
+                        className: 'btn btn-info btn-sm',
+                        title: '',
+                        exportOptions: {
+                            columns: [0, 1, 2, 3, 4]
+                        },
+                        customize: function (win) {
+                            try {
+                                var doc = win.document;
+                                var body = doc.body;
+                                
+                                var headerDiv = doc.createElement('div');
+                                headerDiv.style.marginBottom = '15px';
+                                
+                                var html = '';
+                                html += '<table style="width:100%; border-collapse:collapse;">';
+                                html += '<tr>';
+                                html += '<td style="width:80px; text-align:left; vertical-align:top;">';
+                                if (printLogoUrl) {
+                                    html += '<img src=\"' + printLogoUrl + '\" style=\"max-height:60px; max-width:60px;\" />';
+                                }
+                                html += '</td>';
+                                html += '<td style="text-align:left; vertical-align:middle;">';
+                                if (printNamaMadrasah) {
+                                    html += '<div style=\"font-size:18px; font-weight:bold; text-transform:uppercase;\">' + printNamaMadrasah + '</div>';
+                                }
+                                html += '<div style=\"font-size:14px;\">Data Potongan</div>';
+                                if (printTahunAjaran) {
+                                    html += '<div style=\"font-size:12px;\">Tahun Ajaran ' + printTahunAjaran + '</div>';
+                                }
+                                html += '</td>';
+                                html += '</tr>';
+                                html += '</table>';
+                                
+                                headerDiv.innerHTML = html;
+                                
+                                body.insertBefore(headerDiv, body.firstChild);
+                            } catch (e) {
+                                console && console.error && console.error('Print customize error:', e);
+                            }
                         }
-                    });
-                }
-                
-                if ($.fn.DataTable.isDataTable('#tablePotongan')) {
-                    $('#tablePotongan').DataTable().destroy();
-                }
-                
-                setTimeout(function() {
-                    if (typeof $.fn.DataTable === 'undefined') {
-                        return;
                     }
-                    
-                    var table = $('#tablePotongan').DataTable({
-                        dom: 'Bfrtip',
-                        buttons: [
-                            { extend: 'excel', text: '<i class="fas fa-file-excel"></i> Excel', className: 'btn btn-success btn-sm' },
-                            { extend: 'pdf', text: '<i class="fas fa-file-pdf"></i> PDF', className: 'btn btn-danger btn-sm' },
-                            { extend: 'print', text: '<i class="fas fa-print"></i> Print', className: 'btn btn-info btn-sm' }
-                        ],
-                        language: { url: 'https://cdn.datatables.net/plug-ins/1.11.5/i18n/id.json' },
-                        order: [[1, 'asc']],
-                        stateSave: false,
-                        stateDuration: -1,
-                        retrieve: false,
-                        autoWidth: false,
-                        columnDefs: [
-                            {
-                                targets: 0,
-                                orderable: false,
-                                searchable: false
-                            },
-                            {
-                                targets: '_all',
-                                orderable: true
-                            }
-                        ],
-                        drawCallback: function(settings) {
-                            // Remove drawCallback to prevent infinite loop
-                            // Order is already set in initial configuration
-                        }
-                    });
-                    
-                    setTimeout(function() {
-                        var buttonsContainer = table.buttons().container();
-                        var targetContainer = $('#tablePotongan_buttons');
-                        
-                        if (buttonsContainer.length > 0 && targetContainer.length > 0) {
-                            if (buttonsContainer.parent().attr('id') !== 'tablePotongan_buttons') {
-                                buttonsContainer.appendTo(targetContainer);
-                            }
-                            buttonsContainer.css({
-                                'display': 'flex',
-                                'flex-wrap': 'wrap',
-                                'gap': '5px'
-                            });
-                            buttonsContainer.find('.dt-button').css({
-                                'margin': '0',
-                                'display': 'inline-block'
-                            });
-                        }
-                        
-                        var defaultButtons = $('.dt-buttons');
-                        if (defaultButtons.length > 0) {
-                            if (defaultButtons.parent().attr('id') !== 'tablePotongan_buttons') {
-                                defaultButtons.appendTo('#tablePotongan_buttons');
-                            }
-                            defaultButtons.css({
-                                'display': 'flex',
-                                'flex-wrap': 'wrap',
-                                'gap': '5px'
-                            });
-                        }
-                    }, 200);
-                }, 100);
-            }, 100);
+                ],
+                language: { url: 'https://cdn.datatables.net/plug-ins/1.11.5/i18n/id.json' },
+                order: [[1, 'asc']],
+                stateSave: false,
+                retrieve: false,
+                autoWidth: false,
+                columnDefs: [
+                    {
+                        targets: 0,
+                        orderable: false,
+                        searchable: false
+                    },
+                    {
+                        targets: '_all',
+                        orderable: true
+                    }
+                ]
+            });
+            
+            var buttonsContainer = table.buttons().container();
+            var targetContainer = $('#tablePotongan_buttons');
+            
+            if (buttonsContainer.length > 0 && targetContainer.length > 0) {
+                if (buttonsContainer.parent().attr('id') !== 'tablePotongan_buttons') {
+                    buttonsContainer.appendTo(targetContainer);
+                }
+                buttonsContainer.css({
+                    'display': 'flex',
+                    'flex-wrap': 'wrap',
+                    'gap': '5px'
+                });
+                buttonsContainer.find('.dt-button').css({
+                    'margin': '0',
+                    'display': 'inline-block'
+                });
+            }
         });
     }
     
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initPotonganPage);
-    } else {
-        initPotonganPage();
-    }
+    init();
 })();
-
+    
 </script>
-
+    
 <?php require_once __DIR__ . '/../../includes/footer.php'; ?>

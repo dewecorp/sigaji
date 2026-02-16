@@ -95,8 +95,6 @@ try {
             $gaji_pokok_jumlah = $gaji_pokok_jumlah * $jumlah_periode;
             $stmt->close();
             
-            // Calculate total tunjangan dari tunjangan_detail
-            // Khusus untuk tunjangan "Masa Bakti", hitung: masa_bakti × jumlah_tunjangan
             $total_tunjangan = 0;
             $tunjangan_details = [];
             
@@ -111,11 +109,9 @@ try {
                 $is_masa_bakti = (strpos($nama_tunjangan_lower, 'masa') !== false && strpos($nama_tunjangan_lower, 'bakti') !== false);
                 
                 if ($is_masa_bakti) {
-                    // Calculate: masa_bakti × jumlah_tunjangan_per_tahun (per bulan)
                     $jumlah_tunjangan_per_tahun = isset($t['jumlah_tunjangan']) ? floatval($t['jumlah_tunjangan']) : 0;
                     $jumlah_per_bulan = $masa_bakti_guru * $jumlah_tunjangan_per_tahun;
                     
-                    // Update or insert into tunjangan_detail (simpan per bulan)
                     $sql_check = "SELECT id FROM tunjangan_detail WHERE guru_id = ? AND tunjangan_id = ? AND periode = ?";
                     $stmt_check = $conn->prepare($sql_check);
                     if ($stmt_check) {
@@ -126,7 +122,6 @@ try {
                         $stmt_check->close();
                         
                         if ($existing) {
-                            // Update existing
                             $sql_update = "UPDATE tunjangan_detail SET jumlah = ? WHERE id = ?";
                             $stmt_update = $conn->prepare($sql_update);
                             if ($stmt_update) {
@@ -135,7 +130,6 @@ try {
                                 $stmt_update->close();
                             }
                         } else {
-                            // Insert new
                             $sql_insert = "INSERT INTO tunjangan_detail (guru_id, tunjangan_id, periode, jumlah) VALUES (?, ?, ?, ?)";
                             $stmt_insert = $conn->prepare($sql_insert);
                             if ($stmt_insert) {
@@ -145,53 +139,45 @@ try {
                             }
                         }
                     }
-                    // Kalikan dengan jumlah_periode untuk legger
                     $jumlah = $jumlah_per_bulan * $jumlah_periode;
                 } else {
-                    // For other tunjangan, get from tunjangan_detail
-                    // Hanya ambil data dari periode aktif, jangan copy dari periode sebelumnya
-                    // Jika tidak ada data di periode aktif, berarti jumlah = 0 (guru tidak menerima tunjangan)
-                    $sql = "SELECT jumlah FROM tunjangan_detail WHERE guru_id = ? AND tunjangan_id = ? AND periode = ?";
-                    $stmt = $conn->prepare($sql);
-                    if (!$stmt) {
-                        continue; // Skip if prepare fails
+                    $sql_latest = "SELECT jumlah FROM tunjangan_detail WHERE guru_id = ? AND tunjangan_id = ? ORDER BY periode DESC LIMIT 1";
+                    $stmt_latest = $conn->prepare($sql_latest);
+                    $jumlah_per_bulan = 0;
+                    if ($stmt_latest) {
+                        $stmt_latest->bind_param("ii", $g['id'], $t['id']);
+                        $stmt_latest->execute();
+                        $result_latest = $stmt_latest->get_result();
+                        $row_latest = $result_latest->fetch_assoc();
+                        $stmt_latest->close();
+                        if ($row_latest) {
+                            $jumlah_per_bulan = isset($row_latest['jumlah']) ? floatval($row_latest['jumlah']) : 0;
+                        }
                     }
-                    $stmt->bind_param("iis", $g['id'], $t['id'], $periode);
-                    $stmt->execute();
-                    $result = $stmt->get_result();
-                    $row = $result->fetch_assoc();
-                    $jumlah = isset($row['jumlah']) ? floatval($row['jumlah']) : 0;
-                    $stmt->close();
-                    
-                    // Kalikan dengan jumlah_periode
-                    $jumlah = $jumlah * $jumlah_periode;
+                    $jumlah = $jumlah_per_bulan * $jumlah_periode;
                 }
                 
                 $total_tunjangan += $jumlah;
                 $tunjangan_details[$t['id']] = $jumlah;
             }
             
-            // Calculate total potongan dari potongan_detail
             $total_potongan = 0;
             $potongan_details = [];
             foreach ($potongan as $p) {
-                // Hanya ambil data dari periode aktif, jangan copy dari periode sebelumnya
-                // Jika tidak ada data di periode aktif, berarti jumlah = 0 (guru tidak menerima potongan)
-                $sql = "SELECT jumlah FROM potongan_detail WHERE guru_id = ? AND potongan_id = ? AND periode = ?";
-                $stmt = $conn->prepare($sql);
-                if (!$stmt) {
-                    continue; // Skip if prepare fails
+                $sql_latest_pot = "SELECT jumlah FROM potongan_detail WHERE guru_id = ? AND potongan_id = ? ORDER BY periode DESC LIMIT 1";
+                $stmt_latest_pot = $conn->prepare($sql_latest_pot);
+                $jumlah_per_bulan_pot = 0;
+                if ($stmt_latest_pot) {
+                    $stmt_latest_pot->bind_param("ii", $g['id'], $p['id']);
+                    $stmt_latest_pot->execute();
+                    $result_latest_pot = $stmt_latest_pot->get_result();
+                    $row_latest_pot = $result_latest_pot->fetch_assoc();
+                    $stmt_latest_pot->close();
+                    if ($row_latest_pot) {
+                        $jumlah_per_bulan_pot = isset($row_latest_pot['jumlah']) ? floatval($row_latest_pot['jumlah']) : 0;
+                    }
                 }
-                $stmt->bind_param("iis", $g['id'], $p['id'], $periode);
-                $stmt->execute();
-                $result = $stmt->get_result();
-                $row = $result->fetch_assoc();
-                $jumlah = isset($row['jumlah']) ? floatval($row['jumlah']) : 0;
-                $stmt->close();
-                
-                // Kalikan dengan jumlah_periode
-                $jumlah = $jumlah * $jumlah_periode;
-                
+                $jumlah = $jumlah_per_bulan_pot * $jumlah_periode;
                 $total_potongan += $jumlah;
                 $potongan_details[$p['id']] = $jumlah;
             }
@@ -300,49 +286,10 @@ try {
                     }
                 }
                 
-                // Update atau Insert potongan details (jumlah sudah dikalikan dengan jumlah_periode)
-                // Logika:
-                // 1. Jika ada di potongan_detail untuk periode ini → gunakan data baru (UPDATE/INSERT)
-                // 2. Jika TIDAK ada di potongan_detail → HAPUS dari legger_detail (guru sudah di-uncheck)
-                // Logika uncheck adalah hapus, tidak peduli potongan aktif atau tidak aktif
                 foreach ($potongan as $p) {
                     $jumlah = isset($potongan_details[$p['id']]) ? $potongan_details[$p['id']] : 0;
-                    
-                    // Cek apakah ada di potongan_detail untuk periode ini
-                    $sql_check = "SELECT COUNT(*) as cnt FROM potongan_detail WHERE guru_id = ? AND potongan_id = ? AND periode = ?";
-                    $stmt_check = $conn->prepare($sql_check);
-                    $ada_di_potongan_detail = false;
-                    if ($stmt_check) {
-                        $stmt_check->bind_param("iis", $g['id'], $p['id'], $periode);
-                        $stmt_check->execute();
-                        $result_check = $stmt_check->get_result();
-                        $row_check = $result_check->fetch_assoc();
-                        $ada_di_potongan_detail = ($row_check['cnt'] > 0);
-                        $stmt_check->close();
-                    }
-                    
-                    // Jika tidak ada di potongan_detail untuk periode ini → HAPUS dari legger_detail (guru sudah di-uncheck)
-                    // Logika uncheck adalah hapus, tidak peduli potongan aktif atau tidak aktif
-                    if (!$ada_di_potongan_detail) {
-                        // HAPUS dari legger_detail jika ada data lama
+                    if ($jumlah > 0) {
                         if (isset($old_legger_details['potongan'][$p['id']])) {
-                            $sql = "DELETE FROM legger_detail WHERE legger_id = ? AND jenis = 'potongan' AND item_id = ?";
-                            $stmt = $conn->prepare($sql);
-                            if ($stmt) {
-                                $stmt->bind_param("ii", $legger_id, $p['id']);
-                                $stmt->execute();
-                                $stmt->close();
-                            }
-                        }
-                        // Skip, tidak perlu insert/update
-                        continue;
-                    }
-                    
-                    // Update atau Insert potongan jika ada datanya
-                    if ($jumlah > 0 || $ada_di_potongan_detail) {
-                        // Cek apakah sudah ada
-                        if (isset($old_legger_details['potongan'][$p['id']])) {
-                            // UPDATE data yang sudah ada
                             $sql = "UPDATE legger_detail SET nama_item = ?, jumlah = ? WHERE legger_id = ? AND jenis = 'potongan' AND item_id = ?";
                             $stmt = $conn->prepare($sql);
                             if ($stmt) {
@@ -351,7 +298,6 @@ try {
                                 $stmt->close();
                             }
                         } else {
-                            // INSERT data baru
                             $sql = "INSERT INTO legger_detail (legger_id, jenis, item_id, nama_item, jumlah) VALUES (?, 'potongan', ?, ?, ?)";
                             $stmt = $conn->prepare($sql);
                             if ($stmt) {
@@ -361,6 +307,16 @@ try {
                             }
                         }
                         $existing_detail_ids['potongan'][$p['id']] = true;
+                    } else {
+                        if (isset($old_legger_details['potongan'][$p['id']])) {
+                            $sql = "DELETE FROM legger_detail WHERE legger_id = ? AND jenis = 'potongan' AND item_id = ?";
+                            $stmt = $conn->prepare($sql);
+                            if ($stmt) {
+                                $stmt->bind_param("ii", $legger_id, $p['id']);
+                                $stmt->execute();
+                                $stmt->close();
+                            }
+                        }
                     }
                 }
                 
@@ -374,7 +330,7 @@ try {
             
         } catch (Exception $e) {
             // Rollback transaction for this guru only
-            if ($conn->in_transaction) {
+            if (method_exists($conn, 'rollback')) {
                 $conn->rollback();
             }
             $errors[] = $g['nama_lengkap'] . ': ' . $e->getMessage();
@@ -414,7 +370,7 @@ try {
     ]);
     
 } catch (Exception $e) {
-    if ($conn->in_transaction) {
+    if (method_exists($conn, 'rollback')) {
         $conn->rollback();
     }
     
@@ -431,5 +387,3 @@ try {
     ]);
 }
 ?>
-
-

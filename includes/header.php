@@ -94,10 +94,19 @@ if ($user_id) {
 $avatar_url = $has_foto ? '' : generateAvatar($nama_lengkap, 100);
 
 // Get tahun ajaran from settings
-$sql = "SELECT tahun_ajaran FROM settings LIMIT 1";
+$sql = "SELECT tahun_ajaran, nama_madrasah, logo FROM settings LIMIT 1";
 $result = $conn->query($sql);
 $settings = $result->fetch_assoc();
 $tahun_ajaran = $settings['tahun_ajaran'] ?? date('Y') . '/' . (date('Y') + 1);
+$nama_madrasah = $settings['nama_madrasah'] ?? 'Madrasah Ibtidaiyah';
+$navbar_logo_url = '';
+if (!empty($settings['logo'])) {
+    $logo_filename = basename($settings['logo']);
+    $logo_path_nav = __DIR__ . '/../assets/img/' . $logo_filename;
+    if (file_exists($logo_path_nav)) {
+        $navbar_logo_url = BASE_URL . 'assets/img/' . $logo_filename;
+    }
+}
 
 // Cleanup old activities (older than 24 hours) on every page load
 cleanupOldActivities($conn);
@@ -206,43 +215,54 @@ cleanupOldActivities($conn);
             background-color: rgba(255, 255, 255, 0.3) !important;
         }
         
-        /* Header Info Styles */
         .navbar-info {
             flex: 1;
             justify-content: flex-start;
             display: flex;
             align-items: center;
+            flex-direction: row;
             text-align: left;
             padding-left: 20px;
         }
         
-        .navbar-info .madrasah-name {
-            font-weight: 600;
-            font-size: 20px;
-            color: #2d3748;
-            line-height: 1.3;
+        .navbar-brand-logo {
+            width: 36px;
+            height: 36px;
+            object-fit: contain;
+            margin-right: 10px;
+        }
+        
+        .navbar-brand-text {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.2;
+        }
+        
+        .navbar-brand-text .app-name-full {
+            font-weight: 700;
+            font-size: 18px;
+            color: #4c51bf;
+        }
+        
+        .navbar-brand-text .app-name-short {
+            font-weight: 700;
+            font-size: 16px;
+            color: #4c51bf;
+            display: none;
+        }
+        
+        .navbar-brand-text .school-name {
+            font-size: 13px;
+            color: #4a5568;
         }
         
         .navbar-info .tahun-ajaran {
-            font-size: 16px;
+            font-size: 14px;
             color: #667eea;
             font-weight: 600;
-            margin-top: 3px;
+            margin-top: 2px;
         }
         
-        @media (max-width: 991px) {
-            .navbar-info {
-                display: none !important;
-            }
-        }
-        
-        @media (max-width: 768px) {
-            .navbar-info {
-                display: none !important;
-            }
-        }
-        
-        /* Modern Clock Style */
         .datetime-display {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             white-space: nowrap;
@@ -327,73 +347,45 @@ cleanupOldActivities($conn);
             font-weight: 600;
         }
         
-        @media (max-width: 991px) {
-            .datetime-display {
-                padding: 8px 15px;
-                gap: 12px;
-            }
-            
-            .datetime-display .date-part {
-                font-size: 14px;
-            }
-            
-            .datetime-display .time-part {
-                font-size: 18px;
-            }
-        }
-        
         @media (max-width: 768px) {
-            .datetime-display {
-                padding: 6px 12px;
-                gap: 10px;
-                margin-right: 10px;
+            .navbar-info {
+                justify-content: flex-start;
+                padding-left: 8px;
             }
             
-            .datetime-display .date-part {
-                font-size: 13px;
+            .navbar-brand-logo {
+                width: 30px;
+                height: 30px;
+                margin-right: 8px;
             }
             
-            .datetime-display .time-part {
-                font-size: 16px;
+            .navbar-brand-text {
+                text-align: left;
             }
             
-            .datetime-display .date-part::before,
-            .datetime-display .time-part::before {
-                display: none;
-            }
-            
-            /* Responsive navbar user dropdown */
-            .navbar-nav.navbar-right {
-                gap: 10px;
-            }
-            
-            .nav-link-user {
-                padding: 0.5rem 0.75rem;
-            }
-            
-            .nav-link-user .d-sm-none.d-lg-inline-block {
-                display: none !important;
-            }
-            
-            .user-img {
-                width: 32px;
-                height: 32px;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .datetime-display {
-                padding: 4px 8px;
-                gap: 8px;
-                margin-right: 5px;
-            }
-            
-            .datetime-display .date-part {
+            .navbar-brand-text .school-name {
                 font-size: 11px;
             }
             
-            .datetime-display .time-part {
-                font-size: 14px;
+            .navbar-brand-text .app-name-full {
+                display: none;
+            }
+            
+            .navbar-brand-text .app-name-short {
+                display: inline-block;
+                font-size: 15px;
+            }
+            
+            .navbar-info .tahun-ajaran {
+                display: none;
+            }
+            
+            .navbar-nav.navbar-right .user-dropdown-top {
+                display: none !important;
+            }
+            
+            .datetime-display {
+                display: none;
             }
             
             .main-navbar {
@@ -418,14 +410,96 @@ cleanupOldActivities($conn);
                 opacity: 1 !important;
             }
         }
+        
+        .mobile-bottom-nav {
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            height: 56px;
+            background: #ffffff;
+            border-top: 1px solid rgba(0, 0, 0, 0.08);
+            display: none;
+            align-items: center;
+            justify-content: space-around;
+            z-index: 1030;
+            box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.08);
+        }
+        
+        .mobile-bottom-nav .mobile-nav-item {
+            flex: 1;
+            text-align: center;
+            font-size: 11px;
+            color: #4a5568;
+            text-decoration: none;
+        }
+        
+        .mobile-bottom-nav .mobile-nav-item i {
+            display: block;
+            font-size: 18px;
+            margin-bottom: 2px;
+            color: #6777ef;
+        }
+        
+        .mobile-bottom-nav .mobile-nav-item button {
+            background: transparent;
+            border: none;
+            padding: 0;
+            margin: 0;
+            width: 100%;
+            height: 100%;
+            color: inherit;
+        }
+        
+        .mobile-nav-item-user {
+            position: relative;
+        }
+        
+        .mobile-user-menu {
+            position: absolute;
+            right: 8px;
+            bottom: 56px;
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+            padding: 6px 0;
+            min-width: 140px;
+            display: none;
+            z-index: 1040;
+        }
+        
+        .mobile-user-menu.open {
+            display: block;
+        }
+        
+        .mobile-user-menu a {
+            display: block;
+            padding: 6px 12px;
+            font-size: 13px;
+            color: #4a5568;
+            text-decoration: none;
+        }
+        
+        .mobile-user-menu a:hover {
+            background: #f7fafc;
+            color: #2d3748;
+        }
+        
+        @media (max-width: 768px) {
+            .mobile-bottom-nav {
+                display: flex;
+            }
+            
+            body {
+                padding-bottom: 56px;
+            }
+        }
     </style>
     
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet">
     
-    <!-- Initialize Clock Immediately -->
     <script>
-        // Initialize clock immediately and update every second
         (function() {
             var clockInterval = null;
             
@@ -454,23 +528,45 @@ cleanupOldActivities($conn);
             }
             
             function initClock() {
-                // Update immediately
                 updateClock();
                 
-                // Clear any existing interval
                 if (clockInterval) {
                     clearInterval(clockInterval);
                 }
                 
-                // Update every second (1000ms)
                 clockInterval = setInterval(updateClock, 1000);
             }
             
-            // Try to initialize immediately
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', initClock);
-            } else {
+            function initMobileUserMenu() {
+                var toggle = document.querySelector('.mobile-user-toggle');
+                var menu = document.getElementById('mobile-user-menu');
+                
+                if (!toggle || !menu) {
+                    return;
+                }
+                
+                toggle.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    menu.classList.toggle('open');
+                });
+                
+                document.addEventListener('click', function(e) {
+                    if (!menu.contains(e.target) && !toggle.contains(e.target)) {
+                        menu.classList.remove('open');
+                    }
+                });
+            }
+            
+            function initAll() {
                 initClock();
+                initMobileUserMenu();
+            }
+            
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initAll);
+            } else {
+                initAll();
             }
         })();
     </script>
@@ -486,20 +582,21 @@ cleanupOldActivities($conn);
                     </ul>
                 </form>
                 <div class="navbar-nav mr-auto navbar-info">
-                    <div>
-                        <div class="madrasah-name">
-                            Madrasah Ibtidaiyah Sultan Fattah Sukosono
-                        </div>
-                        <div class="tahun-ajaran">
-                            Tahun Ajaran <?php echo htmlspecialchars($tahun_ajaran ?? ''); ?>
-                        </div>
+                    <?php if (!empty($navbar_logo_url)): ?>
+                        <img src="<?php echo $navbar_logo_url; ?>" alt="Logo" class="navbar-brand-logo">
+                    <?php endif; ?>
+                    <div class="navbar-brand-text">
+                        <span class="app-name-full">Sistem Informasi Gaji</span>
+                        <span class="app-name-short">SIGAJI</span>
+                        <span class="school-name"><?php echo htmlspecialchars($nama_madrasah ?? 'Madrasah Ibtidaiyah'); ?></span>
+                        <span class="tahun-ajaran">Tahun Ajaran <?php echo htmlspecialchars($tahun_ajaran ?? ''); ?></span>
                     </div>
                 </div>
                 <ul class="navbar-nav navbar-right" style="display: flex; align-items: center; gap: 20px;">
-                    <li class="dropdown" style="margin-right: 0;">
+                    <li class="dropdown">
                         <div id="current-datetime" class="datetime-display"></div>
                     </li>
-                    <li class="dropdown">
+                    <li class="dropdown user-dropdown-top">
                         <a href="#" data-toggle="dropdown" class="nav-link dropdown-toggle nav-link-lg nav-link-user">
                             <?php 
                             if ($has_foto && !empty($foto)) {
@@ -528,5 +625,23 @@ cleanupOldActivities($conn);
                     </li>
                 </ul>
             </nav>
-
-
+            <nav class="mobile-bottom-nav">
+                <a href="#" class="mobile-nav-item" data-toggle="sidebar">
+                    <i class="fas fa-bars"></i>
+                    <span>Menu</span>
+                </a>
+                <a href="<?php echo BASE_URL; ?>pages/dashboard.php" class="mobile-nav-item">
+                    <i class="fas fa-home"></i>
+                    <span>Home</span>
+                </a>
+                <div class="mobile-nav-item mobile-nav-item-user">
+                    <button type="button" class="mobile-user-toggle">
+                        <i class="fas fa-user"></i>
+                        <span>User</span>
+                    </button>
+                    <div class="mobile-user-menu" id="mobile-user-menu">
+                        <a href="<?php echo BASE_URL; ?>pages/pengguna/profile.php">Profile</a>
+                        <a href="#" onclick="confirmLogout(event)">Logout</a>
+                    </div>
+                </div>
+            </nav>

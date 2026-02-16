@@ -10,16 +10,10 @@ if (empty($potongan_id) || !is_numeric($potongan_id)) {
     exit();
 }
 
-// Get current period
-$sql = "SELECT periode_aktif FROM settings LIMIT 1";
-$result = $conn->query($sql);
-$settings = $result->fetch_assoc();
-$periode_aktif = $settings['periode_aktif'] ?? date('Y-m');
-
-// Get guru IDs that have this potongan
-$sql = "SELECT DISTINCT guru_id FROM potongan_detail WHERE potongan_id = ? AND periode = ?";
+// Get semua guru yang pernah memiliki potongan ini (dari periode manapun)
+$sql = "SELECT DISTINCT guru_id FROM potongan_detail WHERE potongan_id = ?";
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("is", $potongan_id, $periode_aktif);
+$stmt->bind_param("i", $potongan_id);
 $stmt->execute();
 $result = $stmt->get_result();
 
@@ -32,4 +26,3 @@ $stmt->close();
 
 echo json_encode(['guru_ids' => $guru_ids]);
 ?>
-

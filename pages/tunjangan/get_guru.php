@@ -10,16 +10,10 @@ if (empty($tunjangan_id) || !is_numeric($tunjangan_id)) {
     exit();
 }
 
-// Get current period
-$sql = "SELECT periode_aktif FROM settings LIMIT 1";
-$result = $conn->query($sql);
-$settings = $result->fetch_assoc();
-$periode_aktif = $settings['periode_aktif'] ?? date('Y-m');
-
-// Get guru IDs that have this tunjangan
-$sql = "SELECT DISTINCT guru_id FROM tunjangan_detail WHERE tunjangan_id = ? AND periode = ?";
+// Get semua guru yang pernah memiliki tunjangan ini (dari periode manapun)
+$sql = "SELECT DISTINCT guru_id FROM tunjangan_detail WHERE tunjangan_id = ?";
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("is", $tunjangan_id, $periode_aktif);
+$stmt->bind_param("i", $tunjangan_id);
 $stmt->execute();
 $result = $stmt->get_result();
 
