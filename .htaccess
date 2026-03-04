@@ -1,32 +1,51 @@
 RewriteEngine On
+
+# ===================================================================
+# KONFIGURASI LINGKUNGAN
+# Pilih salah satu blok (LOKAL atau HOSTING) sesuai kebutuhan.
+# ===================================================================
+
+# --- UNTUK LOKAL (misal: localhost/sistem_gaji) ---
+# Konfigurasi ini aktif sekarang.
 RewriteBase /sistem_gaji/
+ErrorDocument 404 /sistem_gaji/404.php
+ErrorDocument 403 /sistem_gaji/403.php
 
-# Redirect index.php or index to /
-RewriteCond %{THE_REQUEST} ^[A-Z]{3,}\s(.*)/index(\.php)? [NC]
-RewriteRule ^ %1/ [R=301,L]
+# --- UNTUK HOSTING (misal: domainanda.com) ---
+# Saat deploy ke hosting, beri komentar pada 3 baris di atas (blok LOKAL),
+# dan hapus komentar dari 3 baris di bawah ini.
+#
+# RewriteBase /
+# ErrorDocument 404 /404.php
+# ErrorDocument 403 /403.php
 
-# Remove .php extension from other files
-RewriteCond %{THE_REQUEST} ^[A-Z]{3,}\s([^.]+)\.php [NC]
+
+# ===================================================================
+# ATURAN URL REWRITE (Umumnya tidak perlu diubah)
+# ===================================================================
+
+# Hapus "index.php" dari URL
+RewriteRule ^index\.php$ / [R=301,L]
+
+# Hapus ekstensi .php dari URL yang terlihat di browser
+RewriteCond %{THE_REQUEST} ^[A-Z]{3,9}\s([^\s]+)\.php [NC]
 RewriteRule ^ %1 [R=301,L]
 
-# Internally rewrite to .php
+# Arahkan permintaan dari "halaman" ke "halaman.php" secara internal
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME}.php -f
 RewriteRule ^(.*)$ $1.php [L]
 
-# Prevent directory listing
+
+# ===================================================================
+# PENGATURAN KEAMANAN
+# ===================================================================
+
+# Mencegah listing isi direktori
 Options -Indexes
 
-# Protect sensitive files
+# Melindungi file-file sensitif
 <FilesMatch "\.(sql|log|ini)$">
     Order allow,deny
     Deny from all
 </FilesMatch>
-
-# Error pages
-ErrorDocument 404 /404.php
-ErrorDocument 403 /403.php
-
-
-
-
