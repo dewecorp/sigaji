@@ -24,8 +24,8 @@ Options -Indexes
 </FilesMatch>
 
 # Error pages
-ErrorDocument 404 /sistem_gaji/404.php
-ErrorDocument 403 /sistem_gaji/403.php
+ErrorDocument 404 /404.php
+ErrorDocument 403 /403.php
 
 
 
