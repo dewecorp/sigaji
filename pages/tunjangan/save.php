@@ -5,9 +5,20 @@ requireLogin();
 // Set JSON header for AJAX response
 header('Content-Type: application/json');
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+$method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+$request = $_POST;
+
+if ($method !== 'POST') {
+    echo json_encode([
+        'success' => false,
+        'message' => 'Invalid request method'
+    ]);
+    exit();
+}
+
+if (!empty($request)) {
     // Parse ID - handle both string and integer
-    $id_raw = $_POST['id'] ?? null;
+    $id_raw = $request['id'] ?? null;
     $id = null;
     if ($id_raw !== null && $id_raw !== '' && $id_raw !== '0') {
         $id = intval($id_raw);
@@ -16,10 +27,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
     }
     
-    $nama_tunjangan = trim($_POST['nama_tunjangan'] ?? '');
+    $nama_tunjangan = trim($request['nama_tunjangan'] ?? '');
     
     // Get jumlah_tunjangan from hidden input first, fallback to regular input
-    $jumlah_tunjangan_raw = $_POST['jumlah_tunjangan_hidden'] ?? $_POST['jumlah_tunjangan'] ?? '0';
+    $jumlah_tunjangan_raw = $request['jumlah_tunjangan_hidden'] ?? $request['jumlah_tunjangan'] ?? '0';
     
     // Clean and convert to float
     // Remove all non-numeric characters except dot
@@ -29,7 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Convert to float
     $jumlah_tunjangan = floatval($jumlah_tunjangan_cleaned);
     
-    $aktif = isset($_POST['aktif']) ? 1 : 0;
+    $aktif = isset($request['aktif']) ? 1 : 0;
     
     // Validation
     if (empty($nama_tunjangan)) {
@@ -93,19 +104,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $tunjangan_id = $id ? $id : $conn->insert_id;
         
         // Get periode from request (do not depend on settings.periode_aktif)
-        $periode = $_POST['periode'] ?? date('Y-m');
+        $periode = $request['periode'] ?? date('Y-m');
         
         // Get selected guru IDs - handle both array and indexed array formats
         $guru_ids = [];
         
         // Check for guru_ids[] array format (standard PHP array)
-        if (isset($_POST['guru_ids']) && is_array($_POST['guru_ids'])) {
-            $guru_ids = $_POST['guru_ids'];
+        if (isset($request['guru_ids']) && is_array($request['guru_ids'])) {
+            $guru_ids = $request['guru_ids'];
         }
         
         // If still empty, try to find any guru_ids keys
         if (empty($guru_ids)) {
-            foreach ($_POST as $key => $value) {
+            foreach ($request as $key => $value) {
                 if (strpos($key, 'guru_ids') !== false) {
                     if (is_array($value)) {
                         $guru_ids = array_merge($guru_ids, $value);

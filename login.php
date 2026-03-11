@@ -1,17 +1,6 @@
 <?php
 require_once 'config/config.php';
 
-// Get school logo from settings
-$logo_sekolah = '';
-$sql_logo = "SELECT logo FROM settings WHERE id = 1";
-$result_logo = $conn->query($sql_logo);
-if ($result_logo && $result_logo->num_rows > 0) {
-    $settings = $result_logo->fetch_assoc();
-    if (!empty($settings['logo'])) {
-        $logo_sekolah = BASE_URL . 'assets/img/' . $settings['logo'];
-    }
-}
-
 // If already logged in, redirect to dashboard
 if (isLoggedIn()) {
     header('Location: ' . BASE_URL . 'pages/dashboard.php');
@@ -70,18 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     <meta charset="UTF-8">
                     <meta content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" name="viewport">
                     <title>Login - <?php echo APP_NAME; ?></title>
-
-    <!-- Favicon -->
-    <?php if (!empty($logo_sekolah)) : ?>
-        <link rel="icon" href="<?php echo $logo_sekolah; ?>">
-    <?php endif; ?>
-                    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
                     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-                    <style>
-                        .swal2-popup {
-                            font-family: 'Nunito', sans-serif;
-                        }
-                    </style>
                 </head>
                 <body>
                     <script>
@@ -92,7 +70,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                             icon: 'success',
                             title: 'Selamat Datang!',
                             html: '<p style="font-size: 18px; margin-bottom: 10px;">Halo, <strong>' + welcomeName + '</strong></p><p style="color: #666;">Selamat datang di Sistem Informasi Gaji</p>',
-                            showConfirmButton: false,
+                            confirmButtonText: 'Mulai',
+                            confirmButtonColor: '#667eea',
                             timer: 3000,
                             timerProgressBar: true,
                             allowOutsideClick: false,
@@ -122,12 +101,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <meta charset="UTF-8">
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" name="viewport">
     <title>Login - <?php echo APP_NAME; ?></title>
-
-    <!-- Favicon -->
-    <?php if (!empty($logo_sekolah)) : ?>
-        <link rel="icon" href="<?php echo $logo_sekolah; ?>">
-    <?php endif; ?>
-
+    
     <!-- General CSS Files -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css">
@@ -222,9 +196,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <div class="row no-gutters">
                 <div class="col-md-6 d-none d-md-block">
                     <div class="login-image">
-                        <?php if (!empty($logo_sekolah)): ?>
-                            <img src="<?php echo $logo_sekolah; ?>" alt="Logo Sekolah" style="max-width: 250px; height: auto; border-radius: 10px; filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.7));">
-                        <?php else: ?>
                         <svg width="400" height="400" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <circle cx="200" cy="200" r="180" fill="rgba(255,255,255,0.1)"/>
                             <path d="M150 150 L250 150 L250 200 L200 250 L150 200 Z" fill="rgba(255,255,255,0.3)" stroke="white" stroke-width="3"/>
@@ -233,7 +204,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                             <text x="200" y="320" text-anchor="middle" fill="white" font-size="24" font-weight="bold">SIGaji</text>
                             <text x="200" y="350" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-size="16">Sistem Informasi Gaji</text>
                         </svg>
-                        <?php endif; ?>
                     </div>
                 </div>
                 <div class="col-md-6">
