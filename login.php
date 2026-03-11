@@ -7,6 +7,27 @@ if (isLoggedIn()) {
     exit();
 }
 
+$settings = [];
+$nama_madrasah = 'Madrasah Ibtidaiyah';
+$logo_url = '';
+$logo_exists = false;
+try {
+    $settings_result = $conn->query("SELECT nama_madrasah, logo FROM settings LIMIT 1");
+    if ($settings_result) {
+        $settings = $settings_result->fetch_assoc() ?: [];
+        $nama_madrasah = $settings['nama_madrasah'] ?? $nama_madrasah;
+        $logo_filename = !empty($settings['logo']) ? basename($settings['logo']) : '';
+        if ($logo_filename !== '') {
+            $logo_path = __DIR__ . '/assets/img/' . $logo_filename;
+            if (file_exists($logo_path)) {
+                $logo_exists = true;
+                $logo_url = BASE_URL . 'assets/img/' . rawurlencode($logo_filename);
+            }
+        }
+    }
+} catch (Throwable $e) {
+}
+
 $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -59,6 +80,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     <meta charset="UTF-8">
                     <meta content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" name="viewport">
                     <title>Login - <?php echo APP_NAME; ?></title>
+                    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet">
+                    <style>
+                        body { font-family: 'Nunito', sans-serif; }
+                        .swal2-popup { font-family: 'Nunito', sans-serif !important; }
+                    </style>
                     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
                 </head>
                 <body>
@@ -70,8 +96,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                             icon: 'success',
                             title: 'Selamat Datang!',
                             html: '<p style="font-size: 18px; margin-bottom: 10px;">Halo, <strong>' + welcomeName + '</strong></p><p style="color: #666;">Selamat datang di Sistem Informasi Gaji</p>',
-                            confirmButtonText: 'Mulai',
-                            confirmButtonColor: '#667eea',
+                            showConfirmButton: false,
                             timer: 3000,
                             timerProgressBar: true,
                             allowOutsideClick: false,
@@ -101,6 +126,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <meta charset="UTF-8">
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" name="viewport">
     <title>Login - <?php echo APP_NAME; ?></title>
+    <?php
+    $favicon_url = $logo_exists && $logo_url ? $logo_url : (BASE_URL . 'assets/img/logo.png');
+    ?>
+    <link rel="icon" href="<?php echo $favicon_url; ?>?v=<?php echo time(); ?>" type="image/png">
     
     <!-- General CSS Files -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
@@ -144,11 +173,34 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             height: auto;
             filter: drop-shadow(0 10px 20px rgba(0,0,0,.3));
         }
+        .login-brand {
+            text-align: center;
+            color: #fff;
+        }
+        .login-logo {
+            width: 180px;
+            height: 180px;
+            object-fit: contain;
+            margin-bottom: 18px;
+        }
+        .login-brand-title {
+            font-size: 28px;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+        .login-brand-subtitle {
+            margin-top: 6px;
+            font-size: 15px;
+            opacity: 0.85;
+        }
         .login-form {
             padding: 40px;
             display: flex;
             flex-direction: column;
             justify-content: center;
+        }
+        .login-heading {
+            text-align: center;
         }
         .login-title {
             font-size: 2rem;
@@ -196,6 +248,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <div class="row no-gutters">
                 <div class="col-md-6 d-none d-md-block">
                     <div class="login-image">
+                        <?php if ($logo_exists && $logo_url): ?>
+                            <div class="login-brand">
+                                <img src="<?php echo $logo_url; ?>?v=<?php echo time(); ?>" alt="Logo <?php echo htmlspecialchars($nama_madrasah, ENT_QUOTES); ?>" class="login-logo">
+                                <div class="login-brand-title">SIGaji</div>
+                                <div class="login-brand-subtitle"><?php echo htmlspecialchars($nama_madrasah); ?></div>
+                            </div>
+                        <?php else: ?>
                         <svg width="400" height="400" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <circle cx="200" cy="200" r="180" fill="rgba(255,255,255,0.1)"/>
                             <path d="M150 150 L250 150 L250 200 L200 250 L150 200 Z" fill="rgba(255,255,255,0.3)" stroke="white" stroke-width="3"/>
@@ -204,12 +263,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                             <text x="200" y="320" text-anchor="middle" fill="white" font-size="24" font-weight="bold">SIGaji</text>
                             <text x="200" y="350" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-size="16">Sistem Informasi Gaji</text>
                         </svg>
+                        <?php endif; ?>
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="login-form">
-                        <h1 class="login-title">Selamat Datang</h1>
-                        <p class="login-subtitle">Silakan login untuk mengakses sistem</p>
+                        <div class="login-heading">
+                            <h1 class="login-title">Selamat Datang</h1>
+                            <p class="login-subtitle">Silakan login untuk mengakses sistem</p>
+                        </div>
                         
                         <?php if ($error): ?>
                             <div class="alert alert-danger" role="alert">
@@ -256,4 +318,3 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <?php endif; ?>
 </body>
 </html>
-

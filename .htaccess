@@ -1,22 +1,26 @@
 <IfModule mod_rewrite.c>
 RewriteEngine On
 
-# Redirect index.php or index to /
+# Bypass rewrite jika file atau folder fisik ada
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Redirect index.php to folder root
 RewriteCond %{REQUEST_METHOD} =GET [OR]
 RewriteCond %{REQUEST_METHOD} =HEAD
-RewriteCond %{THE_REQUEST} \s/+(.*/)?index(?:\.php)?[\s?] [NC]
-RewriteRule ^(.*/)?index(?:\.php)?$ $1 [R=301,L]
+RewriteCond %{THE_REQUEST} \s/+(.*/)?index\.php[\s?] [NC]
+RewriteRule ^(.*/)?index\.php$ $1 [R=301,L]
 
-# Remove .php extension from other files
+# Remove .php extension (redirect) - hanya GET/HEAD agar POST tidak berubah jadi GET
 RewriteCond %{REQUEST_METHOD} =GET [OR]
 RewriteCond %{REQUEST_METHOD} =HEAD
 RewriteCond %{THE_REQUEST} \s/+([^\s?]+?)\.php[\s?] [NC]
 RewriteRule ^(.+)\.php$ $1 [R=301,L]
 
-# Internally rewrite to .php
-RewriteCond %{REQUEST_FILENAME} !-d
+# Internally rewrite extensionless ke .php (dinamis di root/subfolder)
 RewriteCond %{REQUEST_FILENAME}.php -f
-RewriteRule ^(.*)$ $1.php [L]
+RewriteRule ^(.+?)/?$ $1.php [L]
 </IfModule>
 
 # Prevent directory listing
