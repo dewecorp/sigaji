@@ -70,7 +70,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 
                 // Store welcome data for JavaScript
                 $welcome_name = $user['nama_lengkap'] ?? $user['username'];
-                $redirect_url = BASE_URL . 'pages/dashboard.php';
+                $redirect_url = BASE_URL . 'pages/dashboard';
                 
                 // Show welcome message before redirect
                 ?>

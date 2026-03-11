@@ -1,24 +1,25 @@
 <IfModule mod_rewrite.c>
+DirectoryIndex index.php
 RewriteEngine On
 
-# Bypass rewrite jika file atau folder fisik ada
+# Redirect index.php ke folder (GET/HEAD saja)
+RewriteCond %{REQUEST_METHOD} =GET [OR]
+RewriteCond %{REQUEST_METHOD} =HEAD
+RewriteCond %{THE_REQUEST} \s/+(.*/)?index\.php[\s?] [NC]
+RewriteRule ^(.*/)?index\.php$ $1 [R=302,L]
+
+# Hilangkan ekstensi .php (GET/HEAD saja)
+RewriteCond %{REQUEST_METHOD} =GET [OR]
+RewriteCond %{REQUEST_METHOD} =HEAD
+RewriteCond %{THE_REQUEST} \s/+([^\s?]+?)\.php[\s?] [NC]
+RewriteRule ^(.+)\.php$ $1 [R=302,L]
+
+# Lewati jika file/folder fisik ada (agar DirectoryIndex memuat index.php)
 RewriteCond %{REQUEST_FILENAME} -f [OR]
 RewriteCond %{REQUEST_FILENAME} -d
 RewriteRule ^ - [L]
 
-# Redirect index.php to folder root
-RewriteCond %{REQUEST_METHOD} =GET [OR]
-RewriteCond %{REQUEST_METHOD} =HEAD
-RewriteCond %{THE_REQUEST} \s/+(.*/)?index\.php[\s?] [NC]
-RewriteRule ^(.*/)?index\.php$ $1 [R=301,L]
-
-# Remove .php extension (redirect) - hanya GET/HEAD agar POST tidak berubah jadi GET
-RewriteCond %{REQUEST_METHOD} =GET [OR]
-RewriteCond %{REQUEST_METHOD} =HEAD
-RewriteCond %{THE_REQUEST} \s/+([^\s?]+?)\.php[\s?] [NC]
-RewriteRule ^(.+)\.php$ $1 [R=301,L]
-
-# Internally rewrite extensionless ke .php (dinamis di root/subfolder)
+# Rewrite internal: URL tanpa ekstensi → file .php
 RewriteCond %{REQUEST_FILENAME}.php -f
 RewriteRule ^(.+?)/?$ $1.php [L]
 </IfModule>

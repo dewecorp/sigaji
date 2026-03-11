@@ -1,7 +1,7 @@
 <?php
 $current_page = basename($_SERVER['PHP_SELF']);
 $menu_items = [
-    'dashboard' => ['icon' => 'fas fa-home', 'url' => 'dashboard.php', 'label' => 'Dashboard', 'parent' => null],
+    'dashboard' => ['icon' => 'fas fa-home', 'url' => 'dashboard', 'label' => 'Dashboard', 'parent' => null],
     'gaji_guru' => [
         'icon' => 'fas fa-chalkboard-teacher', 
         'url' => '#', 
@@ -47,13 +47,11 @@ function isActive($url, $current_page) {
     $url_file = end($url_parts);
     $url_dir = count($url_parts) > 1 ? $url_parts[0] : '';
     
-    // Special handling for dashboard
-    if ($url === 'dashboard.php') {
-        if ($current_page === 'dashboard.php') {
-            if (preg_match('#/pages/dashboard\.php(\?|$)#', $script_path) && 
-                !preg_match('#/pages/[^/]+/dashboard\.php#', $script_path)) {
-                return true;
-            }
+    // Special handling for dashboard (support extensionless or .php)
+    if ($url === 'dashboard' || $url === 'dashboard.php') {
+        if (preg_match('#/pages/dashboard(\.php)?(\?|$)#', $script_path) && 
+            !preg_match('#/pages/[^/]+/dashboard(\.php)?#', $script_path)) {
+            return true;
         }
         return false;
     }
@@ -72,12 +70,12 @@ function isActive($url, $current_page) {
             <div class="main-sidebar sidebar-style-2">
                 <aside id="sidebar-wrapper">
                     <div class="sidebar-brand">
-                        <a href="<?php echo BASE_URL; ?>pages/dashboard.php">
+                        <a href="<?php echo BASE_URL; ?>pages/dashboard">
                             <i class="fas fa-money-bill-wave mr-2"></i><?php echo APP_NAME; ?>
                         </a>
                     </div>
                     <div class="sidebar-brand sidebar-brand-sm">
-                        <a href="<?php echo BASE_URL; ?>pages/dashboard.php">
+                        <a href="<?php echo BASE_URL; ?>pages/dashboard">
                             <i class="fas fa-money-bill-wave mr-1"></i>SG
                         </a>
                     </div>
