@@ -41,7 +41,7 @@ if ($logo_exists) {
     <style>
         @page {
             size: F4;
-            margin: 10mm 8mm 8mm 8mm; /* top: 1cm (10mm), right: 8mm, bottom: 8mm, left: 8mm */
+            margin: 10mm 5mm 0 5mm; /* top: 1cm (10mm), right: 5mm, bottom: 0, left: 5mm */
         }
         
         * {
@@ -55,48 +55,57 @@ if ($logo_exists) {
             font-size: 12px;
             padding: 0;
             margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
+            overflow: visible;
         }
         
-        @media print {
-            body {
-                margin: 0;
-                padding: 0;
-                display: flex;
-                justify-content: center;
-                align-items: flex-start;
-            }
+        .page {
+            width: 210mm;
+            min-height: auto;
+            height: auto;
+            padding: 0.5mm 0.5mm 0 0.5mm;
+            margin: 0;
+            margin-bottom: 0;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-auto-rows: auto;
+            gap: 5mm;
+            box-sizing: border-box;
+            align-content: start;
+        }
+        
+        .page.page-last {
+            page-break-after: auto !important;
+            margin-bottom: 0 !important;
         }
         
         .slip {
-            width: calc((210mm - 8mm * 2 - 4mm * 2 - 3mm) / 2);
-            height: calc((330mm - 8mm * 2 - 4mm * 2 - 3mm) / 2);
             border: 1px solid #000;
-            padding: 4mm;
+            padding: 3mm 2mm 2mm 2mm;
             display: flex;
             flex-direction: column;
+            width: 100%;
+            height: auto;
+            min-height: auto;
+            max-height: none;
             page-break-inside: avoid;
+            break-inside: avoid;
             overflow: hidden;
             box-sizing: border-box;
-            min-height: 0;
         }
         
         .header {
             display: flex;
             align-items: center;
-            margin-bottom: 3mm;
+            margin-bottom: 3.5mm;
             border-bottom: 1px solid #000;
-            padding-bottom: 2mm;
+            padding-bottom: 0.5mm;
             flex-shrink: 0;
         }
         
         .header-logo {
-            max-width: 40px;
-            max-height: 40px;
-            margin-right: 2mm;
+            max-width: 20px;
+            max-height: 20px;
+            margin-right: 0.3mm;
             object-fit: contain;
             flex-shrink: 0;
         }
@@ -108,44 +117,39 @@ if ($logo_exists) {
         
         .header-content h2 {
             font-size: 16px;
-            margin: 0 0 1mm 0;
+            margin: 0;
             font-weight: bold;
-            line-height: 1.2;
+            line-height: 1.1;
         }
         
         .header-content p {
             font-size: 12px;
             margin: 0;
-            line-height: 1.2;
+            line-height: 1.1;
         }
         
         .info-table {
-            margin: 0.5mm 0 0 0;
+            margin: 1mm 0 0 0;
             border: none;
             width: 100%;
             table-layout: fixed;
             font-size: 12px;
             flex-shrink: 0;
-            border-collapse: collapse;
-            border-spacing: 0;
         }
         .info-table tr {
             border: none;
-            margin: 0;
-            padding: 0;
-            line-height: 1;
         }
         .info-table td {
             border: none;
-            padding: 0;
+            padding: 0.3mm 0;
             vertical-align: top;
             font-size: 12px;
-            line-height: 1;
+            line-height: 1.1;
         }
         .info-table td:first-child {
             width: 120px;
             white-space: nowrap;
-            padding-right: 2mm;
+            padding-right: 1mm;
         }
         .info-table td:nth-child(2) {
             width: 5px;
@@ -159,18 +163,16 @@ if ($logo_exists) {
         table {
             width: 100%;
             border-collapse: collapse;
-            margin: 2mm 0;
+            margin: 2mm 0 0 0;
             font-size: 12px;
-            flex: 1;
-            min-height: 0;
-            display: table;
+            flex-shrink: 0;
         }
         
         th, td {
             border: 1px solid #000;
-            padding: 0.8mm;
+            padding: 1mm 0.5mm;
             text-align: left;
-            line-height: 1.1;
+            line-height: 1.3;
             word-wrap: break-word;
         }
         
@@ -189,8 +191,8 @@ if ($logo_exists) {
         }
         
         .signature-row {
-            margin-top: auto;
-            padding-top: 2mm;
+            margin-top: 15mm;
+            padding-top: 0.5mm;
             border-top: 1px solid #000;
             font-size: 12px;
             flex-shrink: 0;
@@ -203,19 +205,18 @@ if ($logo_exists) {
             width: 50%;
             text-align: center;
             vertical-align: top;
-            padding: 0 2mm;
+            padding: 0 0.1mm;
         }
         
         .signature-col p {
-            margin: 0.5mm 0 0 0;
-            line-height: 1.2;
+            margin: 0;
+            line-height: 1.1;
         }
         
         .signature-line {
-            width: 70%;
-            margin: 15px auto 1mm auto;
-            min-height: 20px;
-            border-top: none;
+            width: 55%;
+            margin: 3px auto 0 auto;
+            min-height: 5px;
             text-align: center;
         }
         
@@ -225,10 +226,11 @@ if ($logo_exists) {
         }
         
         .tempat-tanggal {
-            margin-top: 1mm;
+            margin-top: 4mm;
+            margin-bottom: 6mm;
             text-align: right;
             font-size: 12px;
-            padding-right: 2mm;
+            padding-right: 0.1mm;
             flex-shrink: 0;
         }
         
@@ -236,14 +238,31 @@ if ($logo_exists) {
             body {
                 margin: 0;
                 padding: 0;
-                display: flex;
-                justify-content: center;
-                align-items: center;
+            }
+            
+            .page {
+                margin: 0;
+                margin-bottom: 0 !important;
+                padding: 0.5mm 0.5mm 0 0.5mm !important;
+                width: 210mm !important;
+                min-height: auto !important;
+                height: auto !important;
+                display: grid !important;
+                grid-template-columns: 1fr 1fr !important;
+                grid-auto-rows: auto !important;
+                gap: 5mm !important;
+                align-content: start !important;
+            }
+            
+            .page.page-last {
+                page-break-after: auto !important;
             }
             
             .slip {
-                width: calc((210mm - 8mm * 2 - 4mm * 2 - 3mm) / 2);
-                height: calc((330mm - 8mm * 2 - 4mm * 2 - 3mm) / 2);
+                width: 100% !important;
+                height: auto !important;
+                min-height: auto !important;
+                max-height: none !important;
                 page-break-inside: avoid;
                 break-inside: avoid;
             }
@@ -253,13 +272,14 @@ if ($logo_exists) {
             }
             
             .header-logo {
-                max-width: 40px;
-                max-height: 40px;
+                max-width: 20px;
+                max-height: 20px;
             }
         }
     </style>
 </head>
 <body>
+    <div class="page page-last">
     <div class="slip">
         <div class="header">
             <?php if ($logo_exists): ?>
@@ -345,6 +365,7 @@ if ($logo_exists) {
                 <p><?php echo htmlspecialchars($settings['nama_bendahara'] ?? ''); ?></p>
             </div>
         </div>
+    </div>
     </div>
     <script>
         window.onload = function() {

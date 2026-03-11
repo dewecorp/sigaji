@@ -37,7 +37,7 @@ $details = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     <style>
         @page {
             size: F4;
-            margin: 10mm 8mm 8mm 8mm; /* top: 1cm, right: 8mm, bottom: 8mm, left: 8mm */
+            margin: 10mm 5mm 5mm 5mm; /* top: 1cm, right: 5mm, bottom: 5mm, left: 5mm */
         }
         
         * {
@@ -46,45 +46,66 @@ $details = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             box-sizing: border-box;
         }
         
+        table, table *, table th, table td {
+            box-sizing: border-box;
+        }
+        
+        table tbody tr td,
+        table thead tr th {
+            box-sizing: border-box !important;
+        }
+        
         body {
             font-family: Arial, sans-serif;
-            font-size: 10px;
-            padding: 5mm;
             margin: 0;
-            background: white;
+            padding: 0;
+            overflow: visible;
+        }
+        
+        body:empty {
+            display: none;
+        }
+        
+        .page {
+            width: 100%;
+            max-width: 200mm; /* 210mm - 5mm left - 5mm right */
+            height: auto;
+            min-height: 150mm;
+            page-break-inside: avoid;
+            break-inside: avoid;
+            display: flex;
+            flex-direction: row;
+            gap: 3mm;
+            padding: 2mm;
+            margin: 0;
+            box-sizing: border-box;
+            align-items: flex-start;
+            justify-content: flex-start;
         }
         
         .slip {
-            width: calc((210mm - 8mm * 2 - 4mm * 2 - 3mm) / 2);
-            max-width: 96mm;
-            min-height: calc((330mm - 8mm * 2 - 4mm * 2 - 3mm) / 2);
-            max-height: calc((330mm - 8mm * 2 - 4mm * 2 - 3mm) / 2);
+            width: calc((200mm - 3mm - 4mm) / 2);
             border: 1px solid #000;
-            padding: 4mm;
+            padding: 3mm;
             display: flex;
             flex-direction: column;
-            page-break-inside: avoid !important;
-            break-inside: avoid !important;
             overflow: hidden;
             box-sizing: border-box;
-            margin: 0 auto;
         }
         
         .header {
             display: flex;
             align-items: center;
-            margin-bottom: 3mm;
+            margin-bottom: 1mm;
             border-bottom: 1px solid #000;
             padding-bottom: 2mm;
             flex-shrink: 0;
-            page-break-inside: avoid !important;
-            break-inside: avoid !important;
         }
         
         .header-logo {
-            max-width: 40px;
-            max-height: 40px;
-            margin-right: 2mm;
+            max-width: 35px;
+            max-height: 35px;
+            margin-right: 5mm;
             object-fit: contain;
             flex-shrink: 0;
         }
@@ -94,22 +115,23 @@ $details = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             text-align: center;
         }
         
-        .header-content h2 {
-            font-size: 11px;
-            margin: 0 0 1mm 0;
+        .header-content h3 {
+            font-size: 16px;
+            margin: 0;
             font-weight: bold;
-            line-height: 1.2;
+            line-height: 1.3;
+            letter-spacing: 0.5px;
         }
         
         .header-content p {
-            font-size: 9px;
-            margin: 0;
-            line-height: 1.2;
+            font-size: 12px;
+            margin: 3px 0 0 0;
+            line-height: 1.3;
         }
         
         .info {
             margin: 2mm 0;
-            font-size: 9px;
+            font-size: 14px;
             flex-shrink: 0;
         }
         
@@ -117,55 +139,78 @@ $details = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             font-weight: bold;
         }
         
-        table {
+        .table-wrapper {
             width: 100%;
-            border-collapse: collapse;
+            width: 100%;
             margin: 2mm 0;
-            font-size: 7px;
             flex: 1;
             min-height: 0;
-            display: table;
-            page-break-inside: avoid !important;
-            break-inside: avoid !important;
-        }
-        
-        table tr {
-            page-break-inside: avoid !important;
-            break-inside: avoid !important;
-        }
-        
-        th, td {
             border: 1px solid #000;
-            padding: 0.8mm;
-            text-align: left;
-            line-height: 1.1;
-            word-wrap: break-word;
+            border-bottom: 1px solid #000;
+            box-sizing: border-box;
+            overflow: visible;
         }
         
-        th {
+        .table-row {
+            display: flex;
+            width: 100%;
+            height: 22px;
+            line-height: 22px;
+            box-sizing: border-box;
+        }
+        
+        .table-cell {
+            flex: 1;
+            height: 22px;
+            line-height: 22px;
+            font-size: 14px;
+            padding: 0 5px;
+            display: flex;
+            align-items: center;
+            border-right: 1px solid #000;
+            border-bottom: 1px solid #000;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            box-sizing: border-box;
+        }
+        
+        .table-cell:last-child {
+            border-right: none;
+        }
+        
+        .table-header {
+            flex: 1;
+            height: 22px;
+            line-height: 22px;
+            font-size: 14px;
+            padding: 0 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-right: 1px solid #000;
+            border-bottom: 1px solid #000;
             background-color: #f0f0f0;
             font-weight: bold;
-            font-size: 7px;
+            text-transform: uppercase;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            box-sizing: border-box;
         }
         
-        .text-right {
-            text-align: right;
-        }
-        
-        .total {
-            font-weight: bold;
+        .table-header:last-child {
+            border-right: none;
         }
         
         .signature-row {
-            margin-top: auto;
-            padding-top: 2mm;
+            margin-top: 2mm;
+            padding-top: 1mm;
             border-top: 1px solid #000;
-            font-size: 7px;
+            font-size: 11px;
             flex-shrink: 0;
             display: table;
             width: 100%;
-            page-break-inside: avoid !important;
-            break-inside: avoid !important;
         }
         
         .signature-col {
@@ -173,18 +218,22 @@ $details = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             width: 50%;
             text-align: center;
             vertical-align: top;
-            padding: 0 2mm;
+            padding: 0 5mm;
         }
         
         .signature-col p {
-            margin: 0.5mm 0;
+            margin: 0;
             line-height: 1.2;
         }
         
+        .signature-col p:last-child {
+            margin-top: 1.5mm;
+        }
+        
         .signature-line {
-            width: 70%;
-            margin: 15px auto 1mm auto;
-            min-height: 20px;
+            width: 55%;
+            margin: 3px auto 0 auto;
+            min-height: 5px;
             text-align: center;
             display: flex;
             flex-direction: column;
@@ -202,9 +251,10 @@ $details = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         }
         
         .tempat-tanggal {
-            margin-top: 1mm;
+            margin-top: 0;
+            margin-bottom: 2mm;
             text-align: right;
-            font-size: 6px;
+            font-size: 11px;
             padding-right: 2mm;
             flex-shrink: 0;
         }
@@ -212,43 +262,50 @@ $details = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         @media print {
             body {
                 margin: 0;
-                padding: 5mm;
+                padding: 0;
+                overflow: visible;
             }
             
             .slip {
-                width: calc((210mm - 8mm * 2 - 4mm * 2 - 3mm) / 2);
-                max-width: 96mm;
-                page-break-inside: avoid !important;
-                break-inside: avoid !important;
+                width: calc((200mm - 3mm - 4mm) / 2);
             }
             
-            .header {
+            .page {
+                width: 100% !important;
+                max-width: 200mm !important;
+                min-height: 150mm !important;
+                height: auto !important;
                 page-break-inside: avoid !important;
                 break-inside: avoid !important;
+                display: flex !important;
+                flex-direction: row !important;
+                gap: 3mm !important;
+                padding: 2mm !important;
+                margin: 0 !important;
+                box-sizing: border-box !important;
+                align-items: flex-start !important;
+                justify-content: flex-start !important;
             }
             
             .signature-col p {
-                margin: 0 !important;
-                line-height: 1.1 !important;
+                line-height: 1.2 !important;
             }
             
             .signature-name {
-                position: static !important;
-                margin-top: 1mm !important;
-                margin-bottom: 0 !important;
                 white-space: nowrap !important;
             }
         }
     </style>
 </head>
 <body>
+    <div class="page page-last">
     <div class="slip">
         <div class="header">
             <?php if ($logo_exists): ?>
             <img src="<?php echo $logo_base64; ?>" alt="Logo Madrasah" class="header-logo" onerror="this.src='<?php echo $logo_path; ?>'">
             <?php endif; ?>
             <div class="header-content">
-                <h2><?php echo strtoupper(htmlspecialchars($settings['nama_madrasah'])); ?></h2>
+                <h3><?php echo strtoupper(htmlspecialchars($settings['nama_madrasah'])); ?></h3>
                 <p>Slip Gaji 
                     <?php 
                     $jumlah_periode = $settings['jumlah_periode'] ?? 1;
@@ -267,16 +324,16 @@ $details = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         <div class="info">
             <p><strong>Nama:</strong> <?php echo htmlspecialchars($legger['nama_lengkap']); ?></p>
         </div>
-        <table>
-            <tr>
-                <th>Keterangan</th>
-                <th class="text-right">Jumlah</th>
-            </tr>
+        <div class="table-wrapper">
+            <div class="table-row">
+                <div class="table-header" style="flex: 2;">Keterangan</div>
+                <div class="table-header" style="flex: 1;">Jumlah</div>
+            </div>
             <?php if ($legger['gaji_pokok'] > 0): ?>
-            <tr>
-                <td>Gaji Pokok</td>
-                <td class="text-right"><?php echo formatRupiah($legger['gaji_pokok']); ?></td>
-            </tr>
+            <div class="table-row">
+                <div class="table-cell" style="flex: 2; font-weight: bold;">Gaji Pokok</div>
+                <div class="table-cell" style="flex: 1; justify-content: center; font-weight: bold;"><?php echo formatRupiah($legger['gaji_pokok']); ?></div>
+            </div>
             <?php endif; ?>
             <?php 
             $tunjangan_items = [];
@@ -288,16 +345,16 @@ $details = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             
             foreach ($tunjangan_items as $d):
             ?>
-                <tr>
-                    <td>Tunjangan <?php echo htmlspecialchars($d['nama_item']); ?></td>
-                    <td class="text-right"><?php echo formatRupiah($d['jumlah']); ?></td>
-                </tr>
+                <div class="table-row">
+                    <div class="table-cell" style="flex: 2;">Tunjangan <?php echo htmlspecialchars($d['nama_item']); ?></div>
+                    <div class="table-cell" style="flex: 1; justify-content: center;"><?php echo formatRupiah($d['jumlah']); ?></div>
+                </div>
             <?php endforeach; ?>
             <?php if ($legger['total_tunjangan'] > 0): ?>
-            <tr>
-                <td class="total">Total Tunjangan</td>
-                <td class="text-right total"><?php echo formatRupiah($legger['total_tunjangan']); ?></td>
-            </tr>
+            <div class="table-row">
+                <div class="table-cell" style="flex: 2; font-weight: bold;">Total Tunjangan</div>
+                <div class="table-cell" style="flex: 1; justify-content: center; font-weight: bold;"><?php echo formatRupiah($legger['total_tunjangan']); ?></div>
+            </div>
             <?php endif; ?>
             <?php 
             $potongan_items = [];
@@ -309,22 +366,22 @@ $details = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             
             foreach ($potongan_items as $d):
             ?>
-                <tr>
-                    <td>Potongan <?php echo htmlspecialchars($d['nama_item']); ?></td>
-                    <td class="text-right"><?php echo formatRupiah($d['jumlah']); ?></td>
-                </tr>
+                <div class="table-row">
+                    <div class="table-cell" style="flex: 2;">Potongan <?php echo htmlspecialchars($d['nama_item']); ?></div>
+                    <div class="table-cell" style="flex: 1; justify-content: center;"><?php echo formatRupiah($d['jumlah']); ?></div>
+                </div>
             <?php endforeach; ?>
             <?php if ($legger['total_potongan'] > 0): ?>
-            <tr>
-                <td class="total">Total Potongan</td>
-                <td class="text-right total"><?php echo formatRupiah($legger['total_potongan']); ?></td>
-            </tr>
+            <div class="table-row">
+                <div class="table-cell" style="flex: 2; font-weight: bold;">Total Potongan</div>
+                <div class="table-cell" style="flex: 1; justify-content: center; font-weight: bold;"><?php echo formatRupiah($legger['total_potongan']); ?></div>
+            </div>
             <?php endif; ?>
-            <tr>
-                <td class="total">Gaji Bersih</td>
-                <td class="text-right total"><?php echo formatRupiah($legger['gaji_bersih']); ?></td>
-            </tr>
-        </table>
+            <div class="table-row">
+                <div class="table-cell" style="flex: 2; font-weight: bold;">Gaji Bersih</div>
+                <div class="table-cell" style="flex: 1; justify-content: center; font-weight: bold;"><?php echo formatRupiah($legger['gaji_bersih']); ?></div>
+            </div>
+        </div>
         <?php if (!empty($settings['tempat']) || !empty($settings['hari_tanggal'])): ?>
         <div class="tempat-tanggal">
             <?php if (!empty($settings['tempat'])): ?>
@@ -351,6 +408,7 @@ $details = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                 </div>
             </div>
         </div>
+    </div>
     </div>
     <script>
         window.onload = function() {

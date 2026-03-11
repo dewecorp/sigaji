@@ -106,7 +106,7 @@ $legger_list = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         
         .slip {
             border: 1px solid #000;
-            padding: 2mm 0.8mm 0.3mm 0.3mm;
+            padding: 4mm 3mm 3mm 3mm;
             display: flex;
             flex-direction: column;
             width: 100%;

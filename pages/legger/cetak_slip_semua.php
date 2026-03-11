@@ -552,8 +552,8 @@ foreach ($legger_list as $l) {
                 </div>
                 <?php if ($legger['gaji_pokok'] > 0): ?>
                 <div class="table-row">
-                    <div class="table-cell" style="flex: 2;">Gaji Pokok</div>
-                    <div class="table-cell" style="flex: 1; justify-content: center;"><?php echo formatRupiah($legger['gaji_pokok']); ?></div>
+                    <div class="table-cell" style="flex: 2; font-weight: bold;">Gaji Pokok</div>
+                    <div class="table-cell" style="flex: 1; justify-content: center; font-weight: bold;"><?php echo formatRupiah($legger['gaji_pokok']); ?></div>
                 </div>
                 <?php endif; ?>
                 <?php 
