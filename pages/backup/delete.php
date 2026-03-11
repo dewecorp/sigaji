@@ -55,7 +55,6 @@ try {
     $_SESSION['backup_error'] = "Gagal menghapus backup: " . $e->getMessage();
 }
 
-header('Location: ' . BASE_URL . 'pages/backup/index.php');
+header('Location: ' . BASE_URL . 'pages/backup');
 exit();
 ?>
-

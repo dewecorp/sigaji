@@ -85,7 +85,7 @@ function formatFileSize($bytes) {
                     <div class="section-header">
                         <h1>Backup & Restore</h1>
                         <div class="section-header-breadcrumb">
-                            <div class="breadcrumb-item"><a href="<?php echo BASE_URL; ?>pages/dashboard.php">Dashboard</a></div>
+                            <div class="breadcrumb-item"><a href="<?php echo BASE_URL; ?>pages/dashboard">Dashboard</a></div>
                             <div class="breadcrumb-item active">Backup & Restore</div>
                         </div>
                     </div>
@@ -401,6 +401,5 @@ function formatFileSize($bytes) {
 </script>
 
 <?php require_once __DIR__ . '/../../includes/footer.php'; ?>
-
 
 

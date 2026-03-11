@@ -6,7 +6,7 @@ $ids = $_GET['ids'] ?? '';
 
 if (empty($ids)) {
     $_SESSION['error'] = 'Tidak ada data yang dipilih';
-    header('Location: ' . BASE_URL . 'pages/guru/index.php');
+    header('Location: ' . BASE_URL . 'pages/guru');
     exit();
 }
 
@@ -16,7 +16,7 @@ $id_array = array_filter($id_array);
 
 if (empty($id_array)) {
     $_SESSION['error'] = 'ID tidak valid';
-    header('Location: ' . BASE_URL . 'pages/guru/index.php');
+    header('Location: ' . BASE_URL . 'pages/guru');
     exit();
 }
 
@@ -45,7 +45,7 @@ if ($stmt->execute()) {
     $_SESSION['error'] = "Gagal menghapus data: " . $conn->error;
 }
 
-header('Location: ' . BASE_URL . 'pages/guru/index.php');
+header('Location: ' . BASE_URL . 'pages/guru');
 exit();
 ?>
 

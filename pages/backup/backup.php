@@ -109,7 +109,7 @@ try {
     
     // Set success message and redirect to index page
     $_SESSION['success'] = "Backup database berhasil dibuat: " . $filename;
-    header('Location: ' . BASE_URL . 'pages/backup/index.php');
+    header('Location: ' . BASE_URL . 'pages/backup');
     exit();
     
 } catch (Exception $e) {
@@ -123,10 +123,9 @@ try {
     $_SESSION['backup_error'] = "Gagal membuat backup: " . $e->getMessage();
     // Clear any success messages that might be lingering
     unset($_SESSION['success']);
-    header('Location: ' . BASE_URL . 'pages/backup/index.php');
+    header('Location: ' . BASE_URL . 'pages/backup');
     exit();
 }
 ?>
-
 
 

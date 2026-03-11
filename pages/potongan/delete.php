@@ -22,7 +22,7 @@ if ($potongan) {
 } else {
     $_SESSION['error'] = "Data tidak ditemukan";
 }
-header('Location: ' . BASE_URL . 'pages/potongan/index.php');
+header('Location: ' . BASE_URL . 'pages/potongan');
 exit();
 ?>
 

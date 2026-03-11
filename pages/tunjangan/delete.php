@@ -22,7 +22,7 @@ if ($tunjangan) {
 } else {
     $_SESSION['error'] = "Data tidak ditemukan";
 }
-header('Location: ' . BASE_URL . 'pages/tunjangan/index.php');
+header('Location: ' . BASE_URL . 'pages/tunjangan');
 exit();
 ?>
 

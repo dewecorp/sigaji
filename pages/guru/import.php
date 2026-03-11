@@ -122,7 +122,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['excel_file'])) {
     $_SESSION['error'] = "File tidak ditemukan";
 }
 
-header('Location: ' . BASE_URL . 'pages/guru/index.php');
+header('Location: ' . BASE_URL . 'pages/guru');
 exit();
 ?>
-

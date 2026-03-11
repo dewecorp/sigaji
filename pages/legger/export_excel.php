@@ -21,7 +21,7 @@ if (empty($periode)) {
 $vendorPath = __DIR__ . '/../../vendor/autoload.php';
 if (!file_exists($vendorPath)) {
     $_SESSION['error'] = 'PhpSpreadsheet tidak ditemukan. Silakan install dengan: composer require phpoffice/phpspreadsheet';
-    header('Location: ' . BASE_URL . 'pages/legger/index.php');
+    header('Location: ' . BASE_URL . 'pages/legger');
     exit();
 }
 
@@ -414,8 +414,7 @@ try {
     
     // Fallback: redirect with error
     $_SESSION['error'] = 'Gagal export Excel: ' . $e->getMessage();
-    header('Location: ' . BASE_URL . 'pages/legger/index.php');
+    header('Location: ' . BASE_URL . 'pages/legger');
     exit();
 }
 ?>
-

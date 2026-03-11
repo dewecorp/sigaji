@@ -27,7 +27,7 @@ if ($id > 0) {
     $stmt->close();
 }
 
-header('Location: ' . BASE_URL . 'pages/ekstrakurikuler/index.php');
+header('Location: ' . BASE_URL . 'pages/ekstrakurikuler');
 exit();
 ?>
 

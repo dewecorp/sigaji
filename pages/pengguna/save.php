@@ -13,9 +13,39 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $foto = null;
     if (isset($_FILES['foto']) && $_FILES['foto']['error'] == 0) {
         $upload_dir = __DIR__ . '/../../assets/img/users/';
-        $file_ext = pathinfo($_FILES['foto']['name'], PATHINFO_EXTENSION);
-        $foto = uniqid() . '.' . $file_ext;
-        move_uploaded_file($_FILES['foto']['tmp_name'], $upload_dir . $foto);
+        if (!is_dir($upload_dir)) {
+            mkdir($upload_dir, 0755, true);
+        }
+        
+        $allowed_extensions = ['jpg', 'jpeg', 'png', 'gif'];
+        $file_ext = strtolower(pathinfo($_FILES['foto']['name'], PATHINFO_EXTENSION));
+        
+        if (!in_array($file_ext, $allowed_extensions, true)) {
+            $_SESSION['error'] = "Format file tidak didukung. Gunakan JPG, PNG, atau GIF";
+            header('Location: ' . BASE_URL . 'pages/pengguna');
+            exit();
+        }
+        
+        if ($_FILES['foto']['size'] > 2 * 1024 * 1024) {
+            $_SESSION['error'] = "Ukuran file terlalu besar. Maksimal 2MB";
+            header('Location: ' . BASE_URL . 'pages/pengguna');
+            exit();
+        }
+        
+        if (@getimagesize($_FILES['foto']['tmp_name']) === false) {
+            $_SESSION['error'] = "File bukan gambar yang valid";
+            header('Location: ' . BASE_URL . 'pages/pengguna');
+            exit();
+        }
+        
+        $foto = uniqid('', true) . '.' . $file_ext;
+        $upload_path = $upload_dir . $foto;
+        
+        if (!move_uploaded_file($_FILES['foto']['tmp_name'], $upload_path)) {
+            $_SESSION['error'] = "Gagal mengupload foto";
+            header('Location: ' . BASE_URL . 'pages/pengguna');
+            exit();
+        }
     }
     
     if ($id) {
@@ -47,7 +77,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         // Insert
         if (empty($password)) {
             $_SESSION['error'] = "Password harus diisi";
-            header('Location: ' . BASE_URL . 'pages/pengguna/index.php');
+            header('Location: ' . BASE_URL . 'pages/pengguna');
             exit();
         }
         $password_hash = password_hash($password, PASSWORD_DEFAULT);
@@ -82,9 +112,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 }
 
-header('Location: ' . BASE_URL . 'pages/pengguna/index.php');
+header('Location: ' . BASE_URL . 'pages/pengguna');
 exit();
 ?>
-
-
 

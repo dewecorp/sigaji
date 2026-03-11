@@ -26,7 +26,7 @@ if ($guru) {
     $_SESSION['error'] = "Data tidak ditemukan";
 }
 
-header('Location: ' . BASE_URL . 'pages/guru/index.php');
+header('Location: ' . BASE_URL . 'pages/guru');
 exit();
 ?>
 

@@ -25,7 +25,7 @@ if ($id > 0) {
     $stmt->close();
 }
 
-header('Location: ' . BASE_URL . 'pages/honor/index.php');
+header('Location: ' . BASE_URL . 'pages/honor');
 exit();
 ?>
 

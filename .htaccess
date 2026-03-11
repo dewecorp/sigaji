@@ -1,34 +1,35 @@
-<IfModule mod_rewrite.c>
+Options -Indexes -MultiViews
 DirectoryIndex index.php
+
+RedirectMatch 302 ^/[A-Za-z]:/.*/sistem_gaji/(.*)$ /$1
+
+<IfModule mod_headers.c>
+Header always set X-Content-Type-Options "nosniff"
+Header always set Referrer-Policy "strict-origin-when-cross-origin"
+Header always set X-Frame-Options "SAMEORIGIN"
+Header always set Permissions-Policy "geolocation=(), microphone=(), camera=()"
+</IfModule>
+
+<IfModule mod_rewrite.c>
 RewriteEngine On
 
-# Redirect index.php ke folder (GET/HEAD saja)
-RewriteCond %{REQUEST_METHOD} =GET [OR]
-RewriteCond %{REQUEST_METHOD} =HEAD
-RewriteCond %{THE_REQUEST} \s/+(.*/)?index\.php[\s?] [NC]
-RewriteRule ^(.*/)?index\.php$ $1 [R=302,L]
+RewriteCond %{REQUEST_URI} ^/[A-Za-z]:/.*/sistem_gaji/(.*)$ [NC]
+RewriteRule ^ %1 [R=302,L]
 
-# Hilangkan ekstensi .php (GET/HEAD saja)
-RewriteCond %{REQUEST_METHOD} =GET [OR]
-RewriteCond %{REQUEST_METHOD} =HEAD
-RewriteCond %{THE_REQUEST} \s/+([^\s?]+?)\.php[\s?] [NC]
-RewriteRule ^(.+)\.php$ $1 [R=302,L]
+RewriteRule ^(?:config|database|vendor|backup)/ - [F,L,NC]
+RewriteRule ^(?:\.git|\.svn|\.hg)/ - [F,L,NC]
+RewriteRule ^(?:composer\.(?:json|lock)|\.env|\.gitignore|_cookies\.txt|.*\.(?:bat|sh|ps1))$ - [F,L,NC]
 
-# Lewati jika file/folder fisik ada (agar DirectoryIndex memuat index.php)
 RewriteCond %{REQUEST_FILENAME} -f [OR]
 RewriteCond %{REQUEST_FILENAME} -d
 RewriteRule ^ - [L]
 
-# Rewrite internal: URL tanpa ekstensi → file .php
 RewriteCond %{REQUEST_FILENAME}.php -f
 RewriteRule ^(.+?)/?$ $1.php [L]
 </IfModule>
 
-# Prevent directory listing
-Options -Indexes
-
 # Protect sensitive files
-<FilesMatch "\.(sql|log|ini)$">
+<FilesMatch "\.(sql|log|ini|bak|dist|old|env|phar|phtml)$">
     <IfModule mod_authz_core.c>
         Require all denied
     </IfModule>
@@ -38,10 +39,12 @@ Options -Indexes
     </IfModule>
 </FilesMatch>
 
-# Error pages
-ErrorDocument 404 404.php
-ErrorDocument 403 403.php
-
-
-
-
+<FilesMatch "^(composer\.(json|lock)|\.env|\.gitignore|_cookies\.txt|.*\.(bat|sh|ps1))$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>

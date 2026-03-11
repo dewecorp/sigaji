@@ -6,13 +6,13 @@ $id = isset($_GET['id']) ? intval($_GET['id']) : 0;
 
 if ($id <= 0) {
     $_SESSION['error'] = "ID tidak valid";
-    header('Location: ' . BASE_URL . 'pages/pengguna/index.php');
+    header('Location: ' . BASE_URL . 'pages/pengguna');
     exit();
 }
 
 if ($id == $_SESSION['user_id']) {
     $_SESSION['error'] = "Tidak dapat menghapus akun sendiri";
-    header('Location: ' . BASE_URL . 'pages/pengguna/index.php');
+    header('Location: ' . BASE_URL . 'pages/pengguna');
     exit();
 }
 
@@ -27,7 +27,7 @@ if ($user) {
     // Cek apakah user adalah administrator
     if ($user['role'] == 'admin') {
         $_SESSION['error'] = "Akun administrator tidak dapat dihapus";
-        header('Location: ' . BASE_URL . 'pages/pengguna/index.php');
+        header('Location: ' . BASE_URL . 'pages/pengguna');
         exit();
     }
     
@@ -44,10 +44,9 @@ if ($user) {
     $_SESSION['error'] = "Data tidak ditemukan";
 }
 
-header('Location: ' . BASE_URL . 'pages/pengguna/index.php');
+header('Location: ' . BASE_URL . 'pages/pengguna');
 exit();
 ?>
-
 
 
 

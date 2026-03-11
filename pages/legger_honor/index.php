@@ -34,7 +34,7 @@ if ($stmt) {
                     <div class="section-header">
                         <h1>Legger Honor</h1>
                         <div class="section-header-breadcrumb">
-                            <div class="breadcrumb-item"><a href="<?php echo BASE_URL; ?>pages/dashboard.php">Dashboard</a></div>
+                            <div class="breadcrumb-item"><a href="<?php echo BASE_URL; ?>pages/dashboard">Dashboard</a></div>
                             <div class="breadcrumb-item active">Legger Honor</div>
                         </div>
                     </div>
@@ -236,4 +236,3 @@ if ($stmt) {
     }, 500);
 })();
 </script>
-

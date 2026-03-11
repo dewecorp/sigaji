@@ -12,7 +12,7 @@ $users = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
                     <div class="section-header">
                         <h1>Data Pengguna</h1>
                         <div class="section-header-breadcrumb">
-                            <div class="breadcrumb-item"><a href="<?php echo BASE_URL; ?>pages/dashboard.php">Dashboard</a></div>
+                            <div class="breadcrumb-item"><a href="<?php echo BASE_URL; ?>pages/dashboard">Dashboard</a></div>
                             <div class="breadcrumb-item active">Pengguna</div>
                         </div>
                     </div>
@@ -457,5 +457,4 @@ function resetFormPengguna() {
 </style>
 
 <?php require_once __DIR__ . '/../../includes/footer.php'; ?>
-
 

@@ -6,7 +6,7 @@ requireLogin();
 $vendorPath = __DIR__ . '/../../vendor/autoload.php';
 if (!file_exists($vendorPath)) {
     $_SESSION['error'] = 'PhpSpreadsheet tidak ditemukan. Silakan install dengan: composer require phpoffice/phpspreadsheet';
-    header('Location: ' . BASE_URL . 'pages/guru/index.php');
+    header('Location: ' . BASE_URL . 'pages/guru');
     exit();
 }
 
@@ -101,8 +101,7 @@ try {
 } catch (Exception $e) {
     // Fallback: redirect with error
     $_SESSION['error'] = 'Gagal membuat template: ' . $e->getMessage();
-    header('Location: ' . BASE_URL . 'pages/guru/index.php');
+    header('Location: ' . BASE_URL . 'pages/guru');
     exit();
 }
 ?>
-

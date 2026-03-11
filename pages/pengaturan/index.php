@@ -34,7 +34,7 @@ $settings['periode_akhir'] = isset($settings['periode_akhir']) ? $settings['peri
                     <div class="section-header">
                         <h1>Pengaturan</h1>
                         <div class="section-header-breadcrumb">
-                            <span class="breadcrumb-item"><a href="<?php echo BASE_URL; ?>pages/dashboard.php">Dashboard</a></span>
+                            <span class="breadcrumb-item"><a href="<?php echo BASE_URL; ?>pages/dashboard">Dashboard</a></span>
                             <span class="breadcrumb-item active">Pengaturan</span>
                         </div>
                     </div>
@@ -474,5 +474,4 @@ $settings['periode_akhir'] = isset($settings['periode_akhir']) ? $settings['peri
     initPengaturanScripts();
 })();
 </script>
-
 

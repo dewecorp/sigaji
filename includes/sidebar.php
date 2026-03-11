@@ -8,11 +8,11 @@ $menu_items = [
         'label' => 'Gaji Guru', 
         'parent' => null,
         'children' => [
-            'guru' => ['icon' => 'fas fa-users', 'url' => 'guru/index.php', 'label' => 'Data Guru'],
-            'gaji_pokok' => ['icon' => 'fas fa-money-bill-wave', 'url' => 'gaji_pokok/index.php', 'label' => 'Data Gaji Pokok'],
-            'tunjangan' => ['icon' => 'fas fa-hand-holding-usd', 'url' => 'tunjangan/index.php', 'label' => 'Data Tunjangan'],
-            'potongan' => ['icon' => 'fas fa-minus-circle', 'url' => 'potongan/index.php', 'label' => 'Data Potongan'],
-            'legger' => ['icon' => 'fas fa-file-invoice-dollar', 'url' => 'legger/index.php', 'label' => 'Legger Gaji'],
+            'guru' => ['icon' => 'fas fa-users', 'url' => 'guru', 'label' => 'Data Guru'],
+            'gaji_pokok' => ['icon' => 'fas fa-money-bill-wave', 'url' => 'gaji_pokok', 'label' => 'Data Gaji Pokok'],
+            'tunjangan' => ['icon' => 'fas fa-hand-holding-usd', 'url' => 'tunjangan', 'label' => 'Data Tunjangan'],
+            'potongan' => ['icon' => 'fas fa-minus-circle', 'url' => 'potongan', 'label' => 'Data Potongan'],
+            'legger' => ['icon' => 'fas fa-file-invoice-dollar', 'url' => 'legger', 'label' => 'Legger Gaji'],
         ]
     ],
     'honor_ekstrakurikuler' => [
@@ -21,16 +21,51 @@ $menu_items = [
         'label' => 'Honor Ekstrakurikuler', 
         'parent' => null,
         'children' => [
-            'ekstrakurikuler' => ['icon' => 'fas fa-list', 'url' => 'ekstrakurikuler/index.php', 'label' => 'Data Ekstrakurikuler'],
-            'pembina' => ['icon' => 'fas fa-user-tie', 'url' => 'pembina/index.php', 'label' => 'Data Pembina'],
-            'honor' => ['icon' => 'fas fa-money-check-alt', 'url' => 'honor/index.php', 'label' => 'Data Honor'],
-            'legger_honor' => ['icon' => 'fas fa-file-alt', 'url' => 'legger_honor/index.php', 'label' => 'Legger Honor'],
+            'ekstrakurikuler' => ['icon' => 'fas fa-list', 'url' => 'ekstrakurikuler', 'label' => 'Data Ekstrakurikuler'],
+            'pembina' => ['icon' => 'fas fa-user-tie', 'url' => 'pembina', 'label' => 'Data Pembina'],
+            'honor' => ['icon' => 'fas fa-money-check-alt', 'url' => 'honor', 'label' => 'Data Honor'],
+            'legger_honor' => ['icon' => 'fas fa-file-alt', 'url' => 'legger_honor', 'label' => 'Legger Honor'],
         ]
     ],
-    'pengaturan' => ['icon' => 'fas fa-cog', 'url' => 'pengaturan/index.php', 'label' => 'Pengaturan', 'parent' => null],
-    'backup' => ['icon' => 'fas fa-database', 'url' => 'backup/index.php', 'label' => 'Backup & Restore', 'parent' => null],
-    'pengguna' => ['icon' => 'fas fa-user-shield', 'url' => 'pengguna/index.php', 'label' => 'Pengguna', 'parent' => null]
+    'pengaturan' => ['icon' => 'fas fa-cog', 'url' => 'pengaturan', 'label' => 'Pengaturan', 'parent' => null],
+    'backup' => ['icon' => 'fas fa-database', 'url' => 'backup', 'label' => 'Backup & Restore', 'parent' => null],
+    'pengguna' => ['icon' => 'fas fa-user-shield', 'url' => 'pengguna', 'label' => 'Pengguna', 'parent' => null]
 ];
+
+function normalizeMenuUrl($url) {
+    $url = trim((string)$url);
+    if (stripos($url, 'file:') === 0) {
+        $url = preg_replace('#^file:/+#i', '', $url);
+    }
+    if (preg_match('#^[a-z][a-z0-9+.-]*://#i', $url)) {
+        $parts = parse_url($url);
+        if (!empty($parts['path'])) {
+            $url = $parts['path'];
+        }
+    }
+    $url = str_replace('\\', '/', $url);
+    $url = preg_replace('#/+#', '/', $url);
+
+    $projectDir = basename(dirname(__DIR__));
+    if (preg_match('#^[A-Za-z]:/#', $url)) {
+        $marker = '/' . $projectDir . '/';
+        $pos = stripos($url, $marker);
+        if ($pos !== false) {
+            $url = substr($url, $pos + strlen($marker));
+        }
+    }
+
+    $url = ltrim($url, '/');
+    if (strpos($url, 'pages/') === 0) {
+        $url = substr($url, strlen('pages/'));
+    }
+
+    $url = preg_replace('#/index\.php$#i', '', $url);
+    $url = preg_replace('#\.php$#i', '', $url);
+    $url = trim($url, '/');
+
+    return $url;
+}
 
 function isActive($url, $current_page) {
     // Skip if URL is '#' (parent menu)
@@ -42,18 +77,25 @@ function isActive($url, $current_page) {
     $current_script = $_SERVER['PHP_SELF'];
     $script_path = str_replace('\\', '/', $current_script);
     
+    $url = normalizeMenuUrl($url);
+
     // Parse menu URL
     $url_parts = explode('/', $url);
     $url_file = end($url_parts);
     $url_dir = count($url_parts) > 1 ? $url_parts[0] : '';
     
     // Special handling for dashboard (support extensionless or .php)
-    if ($url === 'dashboard' || $url === 'dashboard.php') {
+    if ($url === 'dashboard') {
         if (preg_match('#/pages/dashboard(\.php)?(\?|$)#', $script_path) && 
             !preg_match('#/pages/[^/]+/dashboard(\.php)?#', $script_path)) {
             return true;
         }
         return false;
+    }
+
+    if ($url_dir === '' && $url !== '') {
+        $pattern = '#/pages/' . preg_quote($url, '#') . '(/|/index\.php|/[^/]*\.php|\?|$)#';
+        return preg_match($pattern, $script_path) === 1;
     }
     
     // For menu items with subdirectories
@@ -95,7 +137,7 @@ function isActive($url, $current_page) {
                                             $child_active_class = $child_is_active ? 'active' : '';
                                         ?>
                                             <li class="submenu-item <?php echo $child_active_class; ?>">
-                                                <a class="nav-link <?php echo $child_active_class; ?>" href="<?php echo BASE_URL; ?>pages/<?php echo $child['url']; ?>">
+                                                <a class="nav-link <?php echo $child_active_class; ?>" href="<?php echo BASE_URL; ?>pages/<?php echo normalizeMenuUrl($child['url']); ?>">
                                                     <i class="<?php echo $child['icon']; ?>"></i>
                                                     <span><?php echo $child['label']; ?></span>
                                                 </a>
@@ -109,7 +151,7 @@ function isActive($url, $current_page) {
                                 $active_class = $is_active ? 'active' : '';
                                 ?>
                                 <li class="<?php echo $active_class; ?>">
-                                    <a class="nav-link <?php echo $active_class; ?>" href="<?php echo BASE_URL; ?>pages/<?php echo $item['url']; ?>">
+                                    <a class="nav-link <?php echo $active_class; ?>" href="<?php echo BASE_URL; ?>pages/<?php echo normalizeMenuUrl($item['url']); ?>">
                                         <i class="<?php echo $item['icon']; ?>"></i>
                                         <span><?php echo $item['label']; ?></span>
                                     </a>
@@ -245,3 +287,16 @@ function isActive($url, $current_page) {
     color: #ffffff;
 }
 </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var links = document.querySelectorAll('.sidebar-menu a.nav-link[href^="/pages/"]');
+    links.forEach(function(link) {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            var href = link.getAttribute('href');
+            if (href) { window.location.assign(href); }
+        });
+    });
+});
+</script>

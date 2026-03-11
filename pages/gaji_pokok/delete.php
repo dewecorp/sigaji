@@ -11,7 +11,7 @@ if ($stmt->execute()) {
 } else {
     $_SESSION['error'] = "Gagal menghapus data gaji pokok";
 }
-header('Location: ' . BASE_URL . 'pages/gaji_pokok/index.php');
+header('Location: ' . BASE_URL . 'pages/gaji_pokok');
 exit();
 ?>
 

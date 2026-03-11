@@ -15,9 +15,9 @@ if ($stmt->execute()) {
 }
 
 if ($potongan_id) {
-    header('Location: ' . BASE_URL . 'pages/potongan/detail.php?potongan_id=' . $potongan_id);
+    header('Location: ' . BASE_URL . 'pages/potongan/detail?potongan_id=' . $potongan_id);
 } else {
-    header('Location: ' . BASE_URL . 'pages/potongan/index.php');
+    header('Location: ' . BASE_URL . 'pages/potongan');
 }
 exit();
 ?>

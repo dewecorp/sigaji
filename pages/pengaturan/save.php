@@ -138,8 +138,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 }
 
-header('Location: ' . BASE_URL . 'pages/pengaturan/index.php');
+header('Location: ' . BASE_URL . 'pages/pengaturan');
 exit();
 ?>
-
 

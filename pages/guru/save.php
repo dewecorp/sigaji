@@ -90,7 +90,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $stmt = $conn->prepare($sql);
         if (!$stmt) {
             $_SESSION['error'] = "Error preparing query: " . $conn->error;
-            header('Location: ' . BASE_URL . 'pages/guru/index.php');
+            header('Location: ' . BASE_URL . 'pages/guru');
             exit();
         }
         $stmt->bind_param("siissi", $nama_lengkap, $tmt, $jumlah_jam_mengajar, $jabatan, $status_pegawai, $id);
@@ -101,7 +101,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $stmt = $conn->prepare($sql);
         if (!$stmt) {
             $_SESSION['error'] = "Error preparing query: " . $conn->error;
-            header('Location: ' . BASE_URL . 'pages/guru/index.php');
+            header('Location: ' . BASE_URL . 'pages/guru');
             exit();
         }
         $stmt->bind_param("siiss", $nama_lengkap, $tmt, $jumlah_jam_mengajar, $jabatan, $status_pegawai);
@@ -116,8 +116,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 }
 
-header('Location: ' . BASE_URL . 'pages/guru/index.php');
+header('Location: ' . BASE_URL . 'pages/guru');
 exit();
 ?>
-
 

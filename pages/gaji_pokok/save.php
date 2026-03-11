@@ -45,10 +45,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 }
 
-header('Location: ' . BASE_URL . 'pages/gaji_pokok/index.php');
+header('Location: ' . BASE_URL . 'pages/gaji_pokok');
 exit();
 ?>
-
 
 
 

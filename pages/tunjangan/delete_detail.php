@@ -15,9 +15,9 @@ if ($stmt->execute()) {
 }
 
 if ($tunjangan_id) {
-    header('Location: ' . BASE_URL . 'pages/tunjangan/detail.php?tunjangan_id=' . $tunjangan_id);
+    header('Location: ' . BASE_URL . 'pages/tunjangan/detail?tunjangan_id=' . $tunjangan_id);
 } else {
-    header('Location: ' . BASE_URL . 'pages/tunjangan/index.php');
+    header('Location: ' . BASE_URL . 'pages/tunjangan');
 }
 exit();
 ?>

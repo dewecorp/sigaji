@@ -55,7 +55,7 @@ unset($g);
                     <div class="section-header">
                         <h1>Data Gaji Pokok</h1>
                         <div class="section-header-breadcrumb">
-                            <span class="breadcrumb-item"><a href="<?php echo BASE_URL; ?>pages/dashboard.php">Dashboard</a></span>
+                            <span class="breadcrumb-item"><a href="<?php echo BASE_URL; ?>pages/dashboard">Dashboard</a></span>
                             <span class="breadcrumb-item active">Data Gaji Pokok</span>
                         </div>
                     </div>
@@ -250,4 +250,3 @@ unset($g);
 </script>
 
 <?php require_once __DIR__ . '/../../includes/footer.php'; ?>
-

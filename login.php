@@ -3,7 +3,7 @@ require_once 'config/config.php';
 
 // If already logged in, redirect to dashboard
 if (isLoggedIn()) {
-    header('Location: ' . BASE_URL . 'pages/dashboard.php');
+    header('Location: ' . BASE_URL . 'pages/dashboard');
     exit();
 }
 

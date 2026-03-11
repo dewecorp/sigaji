@@ -34,7 +34,6 @@ try {
     $_SESSION['error'] = "Gagal mengunduh backup: " . $e->getMessage();
 }
 
-header('Location: ' . BASE_URL . 'pages/backup/index.php');
+header('Location: ' . BASE_URL . 'pages/backup');
 exit();
 ?>
-

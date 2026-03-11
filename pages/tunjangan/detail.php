@@ -31,8 +31,8 @@ $guru = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
                     <div class="section-header">
                         <h1>Detail Tunjangan: <?php echo htmlspecialchars($tunjangan['nama_tunjangan']); ?></h1>
                         <div class="section-header-breadcrumb">
-                            <div class="breadcrumb-item"><a href="<?php echo BASE_URL; ?>pages/dashboard.php">Dashboard</a></div>
-                            <div class="breadcrumb-item"><a href="<?php echo BASE_URL; ?>pages/tunjangan/index.php">Tunjangan</a></div>
+                            <div class="breadcrumb-item"><a href="<?php echo BASE_URL; ?>pages/dashboard">Dashboard</a></div>
+                            <div class="breadcrumb-item"><a href="<?php echo BASE_URL; ?>pages/tunjangan">Tunjangan</a></div>
                             <div class="breadcrumb-item active">Detail</div>
                         </div>
                     </div>

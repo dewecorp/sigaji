@@ -630,7 +630,7 @@ cleanupOldActivities($conn);
                     <i class="fas fa-bars"></i>
                     <span>Menu</span>
                 </a>
-                <a href="<?php echo BASE_URL; ?>pages/dashboard.php" class="mobile-nav-item">
+                <a href="<?php echo BASE_URL; ?>pages/dashboard" class="mobile-nav-item">
                     <i class="fas fa-home"></i>
                     <span>Home</span>
                 </a>

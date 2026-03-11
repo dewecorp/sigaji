@@ -77,9 +77,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['backup_file'])) {
     $_SESSION['error'] = "File backup tidak ditemukan";
 }
 
-header('Location: ' . BASE_URL . 'pages/backup/index.php');
+header('Location: ' . BASE_URL . 'pages/backup');
 exit();
 ?>
-
 
 

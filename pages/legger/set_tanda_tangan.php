@@ -12,7 +12,7 @@ if ($stmt->execute()) {
 } else {
     $_SESSION['error'] = "Gagal menandatangani legger gaji";
 }
-header('Location: ' . BASE_URL . 'pages/legger/index.php');
+header('Location: ' . BASE_URL . 'pages/legger');
 exit();
 ?>
 

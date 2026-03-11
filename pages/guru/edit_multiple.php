@@ -7,7 +7,7 @@ $ids = $_GET['ids'] ?? '';
 
 if (empty($ids)) {
     $_SESSION['error'] = 'Tidak ada data yang dipilih';
-    header('Location: ' . BASE_URL . 'pages/guru/index.php');
+    header('Location: ' . BASE_URL . 'pages/guru');
     exit();
 }
 
@@ -17,7 +17,7 @@ $id_array = array_filter($id_array);
 
 if (empty($id_array)) {
     $_SESSION['error'] = 'ID tidak valid';
-    header('Location: ' . BASE_URL . 'pages/guru/index.php');
+    header('Location: ' . BASE_URL . 'pages/guru');
     exit();
 }
 
@@ -36,8 +36,8 @@ $guru_list = $result->fetch_all(MYSQLI_ASSOC);
         <div class="section-header">
             <h1>Edit Multiple Guru</h1>
             <div class="section-header-breadcrumb">
-                <div class="breadcrumb-item"><a href="<?php echo BASE_URL; ?>pages/dashboard.php">Dashboard</a></div>
-                <div class="breadcrumb-item"><a href="<?php echo BASE_URL; ?>pages/guru/index.php">Data Guru</a></div>
+                <div class="breadcrumb-item"><a href="<?php echo BASE_URL; ?>pages/dashboard">Dashboard</a></div>
+                <div class="breadcrumb-item"><a href="<?php echo BASE_URL; ?>pages/guru">Data Guru</a></div>
                 <div class="breadcrumb-item active">Edit Multiple</div>
             </div>
         </div>
@@ -109,7 +109,7 @@ $guru_list = $result->fetch_all(MYSQLI_ASSOC);
                             <button type="submit" class="btn btn-primary">
                                 <i class="fas fa-save"></i> Simpan Perubahan
                             </button>
-                            <a href="<?php echo BASE_URL; ?>pages/guru/index.php" class="btn btn-secondary">
+                            <a href="<?php echo BASE_URL; ?>pages/guru" class="btn btn-secondary">
                                 <i class="fas fa-times"></i> Batal
                             </a>
                         </div>
@@ -147,5 +147,3 @@ function calculateMasaBakti() {
 </script>
 
 <?php require_once __DIR__ . '/../../includes/footer.php'; ?>
-
-

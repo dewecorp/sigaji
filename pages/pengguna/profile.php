@@ -14,7 +14,7 @@ $user = $result->fetch_assoc();
 
 if (!$user) {
     $_SESSION['error'] = "Data pengguna tidak ditemukan";
-    header('Location: ' . BASE_URL . 'pages/dashboard.php');
+    header('Location: ' . BASE_URL . 'pages/dashboard');
     exit();
 }
 
@@ -34,7 +34,7 @@ if (!file_exists($foto_path) || empty($user['foto'])) {
                     <div class="section-header">
                         <h1>Profile Saya</h1>
                         <div class="section-header-breadcrumb">
-                            <div class="breadcrumb-item"><a href="<?php echo BASE_URL; ?>pages/dashboard.php">Dashboard</a></div>
+                            <div class="breadcrumb-item"><a href="<?php echo BASE_URL; ?>pages/dashboard">Dashboard</a></div>
                             <div class="breadcrumb-item active">Profile</div>
                         </div>
                     </div>

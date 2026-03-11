@@ -25,7 +25,7 @@ $tunjangan_list = $result_tunjangan ? $result_tunjangan->fetch_all(MYSQLI_ASSOC)
                     <div class="section-header">
                         <h1>Data Guru</h1>
                         <div class="section-header-breadcrumb">
-                            <span class="breadcrumb-item"><a href="<?php echo BASE_URL; ?>pages/dashboard.php">Dashboard</a></span>
+                            <span class="breadcrumb-item"><a href="<?php echo BASE_URL; ?>pages/dashboard">Dashboard</a></span>
                             <span class="breadcrumb-item active">Data Guru</span>
                         </div>
                     </div>
@@ -1367,5 +1367,4 @@ var selectedIds = new Set();
 </style>
 
 <?php require_once __DIR__ . '/../../includes/footer.php'; ?>
-
 
