@@ -185,6 +185,13 @@ if ($logo_exists) {
         .text-right {
             text-align: right;
         }
+
+        table:not(.info-table) th:last-child,
+        table:not(.info-table) td:last-child {
+            text-align: right !important;
+            padding-right: 2mm;
+            white-space: nowrap;
+        }
         
         .total {
             font-weight: bold;

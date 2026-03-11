@@ -177,6 +177,8 @@ $details = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         
         .table-cell:last-child {
             border-right: none;
+            justify-content: flex-end;
+            padding-right: 8px;
         }
         
         .table-header {
@@ -332,7 +334,7 @@ $details = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             <?php if ($legger['gaji_pokok'] > 0): ?>
             <div class="table-row">
                 <div class="table-cell" style="flex: 2; font-weight: bold;">Gaji Pokok</div>
-                <div class="table-cell" style="flex: 1; justify-content: center; font-weight: bold;"><?php echo formatRupiah($legger['gaji_pokok']); ?></div>
+                <div class="table-cell" style="flex: 1; font-weight: bold;"><?php echo formatRupiah($legger['gaji_pokok']); ?></div>
             </div>
             <?php endif; ?>
             <?php 
@@ -347,13 +349,13 @@ $details = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             ?>
                 <div class="table-row">
                     <div class="table-cell" style="flex: 2;">Tunjangan <?php echo htmlspecialchars($d['nama_item']); ?></div>
-                    <div class="table-cell" style="flex: 1; justify-content: center;"><?php echo formatRupiah($d['jumlah']); ?></div>
+                    <div class="table-cell" style="flex: 1;"><?php echo formatRupiah($d['jumlah']); ?></div>
                 </div>
             <?php endforeach; ?>
             <?php if ($legger['total_tunjangan'] > 0): ?>
             <div class="table-row">
                 <div class="table-cell" style="flex: 2; font-weight: bold;">Total Tunjangan</div>
-                <div class="table-cell" style="flex: 1; justify-content: center; font-weight: bold;"><?php echo formatRupiah($legger['total_tunjangan']); ?></div>
+                <div class="table-cell" style="flex: 1; font-weight: bold;"><?php echo formatRupiah($legger['total_tunjangan']); ?></div>
             </div>
             <?php endif; ?>
             <?php 
@@ -368,18 +370,18 @@ $details = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             ?>
                 <div class="table-row">
                     <div class="table-cell" style="flex: 2;">Potongan <?php echo htmlspecialchars($d['nama_item']); ?></div>
-                    <div class="table-cell" style="flex: 1; justify-content: center;"><?php echo formatRupiah($d['jumlah']); ?></div>
+                    <div class="table-cell" style="flex: 1;"><?php echo formatRupiah($d['jumlah']); ?></div>
                 </div>
             <?php endforeach; ?>
             <?php if ($legger['total_potongan'] > 0): ?>
             <div class="table-row">
                 <div class="table-cell" style="flex: 2; font-weight: bold;">Total Potongan</div>
-                <div class="table-cell" style="flex: 1; justify-content: center; font-weight: bold;"><?php echo formatRupiah($legger['total_potongan']); ?></div>
+                <div class="table-cell" style="flex: 1; font-weight: bold;"><?php echo formatRupiah($legger['total_potongan']); ?></div>
             </div>
             <?php endif; ?>
             <div class="table-row">
                 <div class="table-cell" style="flex: 2; font-weight: bold;">Gaji Bersih</div>
-                <div class="table-cell" style="flex: 1; justify-content: center; font-weight: bold;"><?php echo formatRupiah($legger['gaji_bersih']); ?></div>
+                <div class="table-cell" style="flex: 1; font-weight: bold;"><?php echo formatRupiah($legger['gaji_bersih']); ?></div>
             </div>
         </div>
         <?php if (!empty($settings['tempat']) || !empty($settings['hari_tanggal'])): ?>
