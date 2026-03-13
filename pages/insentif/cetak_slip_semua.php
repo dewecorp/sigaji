@@ -41,12 +41,15 @@ $conn->query("CREATE TABLE IF NOT EXISTS insentif_detail (
 $sql = "SELECT DISTINCT g.id AS guru_id, g.nama_lengkap
         FROM insentif_detail idt
         JOIN guru g ON idt.guru_id = g.id
+        JOIN insentif i ON idt.insentif_id = i.id
+        WHERE i.aktif = 1
         ORDER BY LOWER(TRIM(g.nama_lengkap)) ASC, g.nama_lengkap ASC";
 $guru_list = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
 
 $sql = "SELECT idt.guru_id, i.nama_insentif, SUM(idt.jumlah) AS jumlah
         FROM insentif_detail idt
         JOIN insentif i ON idt.insentif_id = i.id
+        WHERE i.aktif = 1
         GROUP BY idt.guru_id, i.id, i.nama_insentif
         HAVING SUM(idt.jumlah) > 0
         ORDER BY i.nama_insentif ASC";

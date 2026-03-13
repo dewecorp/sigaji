@@ -59,6 +59,7 @@ $sql = "SELECT i.nama_insentif, SUM(idt.jumlah) AS jumlah
         FROM insentif_detail idt
         JOIN insentif i ON idt.insentif_id = i.id
         WHERE idt.guru_id = ?
+        AND i.aktif = 1
         GROUP BY i.id, i.nama_insentif
         HAVING SUM(idt.jumlah) > 0
         ORDER BY i.nama_insentif ASC";

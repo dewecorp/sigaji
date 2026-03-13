@@ -94,7 +94,12 @@ if ($legger_exists && $legger_stats) {
 $stats['total_insentif'] = 0;
 $check_insentif = $conn->query("SHOW TABLES LIKE 'insentif_detail'");
 if ($check_insentif && ($check_insentif->num_rows ?? 0) > 0) {
-    $result_insentif = $conn->query("SELECT COALESCE(SUM(jumlah), 0) as total FROM insentif_detail");
+    $check_insentif_master = $conn->query("SHOW TABLES LIKE 'insentif'");
+    if ($check_insentif_master && ($check_insentif_master->num_rows ?? 0) > 0) {
+        $result_insentif = $conn->query("SELECT COALESCE(SUM(idt.jumlah), 0) as total FROM insentif_detail idt JOIN insentif i ON idt.insentif_id = i.id WHERE i.aktif = 1");
+    } else {
+        $result_insentif = $conn->query("SELECT COALESCE(SUM(jumlah), 0) as total FROM insentif_detail");
+    }
     if ($result_insentif) {
         $stats['total_insentif'] = floatval($result_insentif->fetch_assoc()['total'] ?? 0);
     }

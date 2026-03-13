@@ -39,21 +39,24 @@ $conn->query("CREATE TABLE IF NOT EXISTS insentif_detail (
     CONSTRAINT fk_insentif_detail_insentif FOREIGN KEY (insentif_id) REFERENCES insentif(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
 
-$sql = "SELECT DISTINCT i.*
+$sql = "SELECT i.*
         FROM insentif i
         WHERE i.aktif = 1
-        OR EXISTS (SELECT 1 FROM insentif_detail idt WHERE idt.insentif_id = i.id)
         ORDER BY i.nama_insentif ASC";
 $insentif_list = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
 
 $sql = "SELECT DISTINCT g.id AS guru_id, g.nama_lengkap
         FROM insentif_detail idt
         JOIN guru g ON idt.guru_id = g.id
+        JOIN insentif i ON idt.insentif_id = i.id
+        WHERE i.aktif = 1
         ORDER BY LOWER(TRIM(g.nama_lengkap)) ASC, g.nama_lengkap ASC";
 $guru_list = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
 
 $sql = "SELECT guru_id, insentif_id, SUM(jumlah) AS jumlah
-        FROM insentif_detail
+        FROM insentif_detail idt
+        JOIN insentif i ON idt.insentif_id = i.id
+        WHERE i.aktif = 1
         GROUP BY guru_id, insentif_id";
 $detail_rows = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
 

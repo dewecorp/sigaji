@@ -46,12 +46,18 @@ $sql = "SELECT i.*,
 $result = $conn->query($sql);
 $insentif = $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
 
+$sql = "SELECT * FROM insentif WHERE aktif = 1 ORDER BY nama_insentif ASC";
+$result = $conn->query($sql);
+$insentif_aktif = $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
+
 $sql = "SELECT id, nama_lengkap FROM guru ORDER BY nama_lengkap ASC";
 $all_guru = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
 
 $sql = "SELECT DISTINCT g.id AS guru_id, g.nama_lengkap
         FROM insentif_detail idt
         JOIN guru g ON idt.guru_id = g.id
+        JOIN insentif i ON idt.insentif_id = i.id
+        WHERE i.aktif = 1
         GROUP BY g.id, g.nama_lengkap
         HAVING COALESCE(SUM(idt.jumlah), 0) > 0
         ORDER BY LOWER(TRIM(g.nama_lengkap)) ASC, g.nama_lengkap ASC";
@@ -59,7 +65,9 @@ $result = $conn->query($sql);
 $legger_guru = $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
 
 $sql = "SELECT guru_id, insentif_id, SUM(jumlah) AS jumlah
-        FROM insentif_detail
+        FROM insentif_detail idt
+        JOIN insentif i ON idt.insentif_id = i.id
+        WHERE i.aktif = 1
         GROUP BY guru_id, insentif_id";
 $result = $conn->query($sql);
 $legger_detail_rows = $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
@@ -166,7 +174,7 @@ foreach ($legger_detail_rows as $row) {
                                             <tr>
                                                 <th>No</th>
                                                 <th>Nama Guru</th>
-                                                <?php foreach ($insentif as $i): ?>
+                                                <?php foreach ($insentif_aktif as $i): ?>
                                                     <th><?php echo htmlspecialchars($i['nama_insentif']); ?></th>
                                                 <?php endforeach; ?>
                                                 <th>Total Insentif</th>
@@ -176,7 +184,7 @@ foreach ($legger_detail_rows as $row) {
                                         <tbody>
                                             <?php if (empty($legger_guru)): ?>
                                                 <tr>
-                                                    <td colspan="<?php echo 4 + count($insentif); ?>" class="text-center">
+                                                    <td colspan="<?php echo 4 + count($insentif_aktif); ?>" class="text-center">
                                                         <p class="text-muted mb-0">Tidak ada data leger insentif.</p>
                                                     </td>
                                                 </tr>
@@ -189,7 +197,7 @@ foreach ($legger_detail_rows as $row) {
                                                     <tr>
                                                         <td><?php echo $no2++; ?></td>
                                                         <td><strong><?php echo htmlspecialchars($l['nama_lengkap']); ?></strong></td>
-                                                        <?php foreach ($insentif as $i): ?>
+                                                        <?php foreach ($insentif_aktif as $i): ?>
                                                             <?php
                                                             $iid = intval($i['id']);
                                                             $val = floatval($legger_detail_map[$gid][$iid] ?? 0);
