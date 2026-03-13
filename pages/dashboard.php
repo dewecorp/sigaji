@@ -68,7 +68,11 @@ if ($legger_exists && $legger_stats) {
     $stmt->close();
     
     // Total Tunjangan
-    $sql = "SELECT COALESCE(SUM(jumlah), 0) as total FROM tunjangan_detail WHERE periode = ?";
+    $sql = "SELECT COALESCE(SUM(td.jumlah), 0) as total
+            FROM tunjangan_detail td
+            JOIN tunjangan t ON td.tunjangan_id = t.id
+            WHERE td.periode = ?
+            AND t.aktif = 1";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("s", $periode_aktif);
     $stmt->execute();
@@ -78,7 +82,11 @@ if ($legger_exists && $legger_stats) {
     $stmt->close();
     
     // Total Potongan
-    $sql = "SELECT COALESCE(SUM(jumlah), 0) as total FROM potongan_detail WHERE periode = ?";
+    $sql = "SELECT COALESCE(SUM(pd.jumlah), 0) as total
+            FROM potongan_detail pd
+            JOIN potongan p ON pd.potongan_id = p.id
+            WHERE pd.periode = ?
+            AND p.aktif = 1";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("s", $periode_aktif);
     $stmt->execute();

@@ -24,11 +24,31 @@ if ($logo_exists) {
     $logo_base64 = 'data:' . mime_content_type($logo_file) . ';base64,' . base64_encode($image_data);
 }
 
-$sql = "SELECT * FROM legger_detail WHERE legger_id = ?";
+$sql = "SELECT ld.* FROM legger_detail ld
+        LEFT JOIN tunjangan t ON ld.jenis = 'tunjangan' AND ld.item_id = t.id
+        LEFT JOIN potongan p ON ld.jenis = 'potongan' AND ld.item_id = p.id
+        WHERE ld.legger_id = ?
+        AND (
+            (ld.jenis = 'tunjangan' AND COALESCE(t.aktif, 0) = 1)
+            OR
+            (ld.jenis = 'potongan' AND COALESCE(p.aktif, 0) = 1)
+        )";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $id);
 $stmt->execute();
 $details = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+
+$total_tunjangan_calc = 0;
+$total_potongan_calc = 0;
+foreach ($details as $d) {
+    if (($d['jenis'] ?? '') === 'tunjangan') {
+        $total_tunjangan_calc += floatval($d['jumlah'] ?? 0);
+    } elseif (($d['jenis'] ?? '') === 'potongan') {
+        $total_potongan_calc += floatval($d['jumlah'] ?? 0);
+    }
+}
+$gaji_pokok_calc = floatval($legger['gaji_pokok'] ?? 0);
+$gaji_bersih_calc = $gaji_pokok_calc + $total_tunjangan_calc - $total_potongan_calc;
 ?>
 <!DOCTYPE html>
 <html>
@@ -352,10 +372,10 @@ $details = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                     <div class="table-cell" style="flex: 1;"><?php echo formatRupiah($d['jumlah']); ?></div>
                 </div>
             <?php endforeach; ?>
-            <?php if ($legger['total_tunjangan'] > 0): ?>
+            <?php if ($total_tunjangan_calc > 0): ?>
             <div class="table-row">
                 <div class="table-cell" style="flex: 2; font-weight: bold;">Total Tunjangan</div>
-                <div class="table-cell" style="flex: 1; font-weight: bold;"><?php echo formatRupiah($legger['total_tunjangan']); ?></div>
+                <div class="table-cell" style="flex: 1; font-weight: bold;"><?php echo formatRupiah($total_tunjangan_calc); ?></div>
             </div>
             <?php endif; ?>
             <?php 
@@ -373,15 +393,15 @@ $details = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                     <div class="table-cell" style="flex: 1;"><?php echo formatRupiah($d['jumlah']); ?></div>
                 </div>
             <?php endforeach; ?>
-            <?php if ($legger['total_potongan'] > 0): ?>
+            <?php if ($total_potongan_calc > 0): ?>
             <div class="table-row">
                 <div class="table-cell" style="flex: 2; font-weight: bold;">Total Potongan</div>
-                <div class="table-cell" style="flex: 1; font-weight: bold;"><?php echo formatRupiah($legger['total_potongan']); ?></div>
+                <div class="table-cell" style="flex: 1; font-weight: bold;"><?php echo formatRupiah($total_potongan_calc); ?></div>
             </div>
             <?php endif; ?>
             <div class="table-row">
                 <div class="table-cell" style="flex: 2; font-weight: bold;">Gaji Bersih</div>
-                <div class="table-cell" style="flex: 1; font-weight: bold;"><?php echo formatRupiah($legger['gaji_bersih']); ?></div>
+                <div class="table-cell" style="flex: 1; font-weight: bold;"><?php echo formatRupiah($gaji_bersih_calc); ?></div>
             </div>
         </div>
         <?php if (!empty($settings['tempat']) || !empty($settings['hari_tanggal'])): ?>

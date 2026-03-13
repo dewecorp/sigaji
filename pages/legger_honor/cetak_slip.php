@@ -103,9 +103,9 @@ if ($logo_exists) {
         }
         
         .header-logo {
-            max-width: 20px;
-            max-height: 20px;
-            margin-right: 0.3mm;
+            max-width: 35px;
+            max-height: 35px;
+            margin-right: 2mm;
             object-fit: contain;
             flex-shrink: 0;
         }
@@ -279,8 +279,8 @@ if ($logo_exists) {
             }
             
             .header-logo {
-                max-width: 20px;
-                max-height: 20px;
+                max-width: 35px;
+                max-height: 35px;
             }
         }
     </style>

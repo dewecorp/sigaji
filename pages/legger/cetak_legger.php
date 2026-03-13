@@ -56,44 +56,18 @@ $stmt->bind_param("s", $periode);
 $stmt->execute();
 $legger = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 
-// Get tunjangan: ambil yang aktif, PLUS yang ada datanya di legger_detail untuk periode ini
-// Ini memastikan tunjangan yang ada datanya tetap ditampilkan meskipun tidak aktif
 $sql = "SELECT DISTINCT t.* FROM tunjangan t 
-        WHERE t.aktif = 1 
-        OR EXISTS (
-            SELECT 1 FROM legger_detail ld 
-            INNER JOIN legger_gaji lg ON ld.legger_id = lg.id 
-            WHERE lg.periode = ? 
-            AND ld.jenis = 'tunjangan' 
-            AND ld.item_id = t.id
-        )
+        WHERE t.aktif = 1
         ORDER BY t.nama_tunjangan";
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("s", $periode);
 $stmt->execute();
 $tunjangan = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 $stmt->close();
 
-// Get potongan: ambil SEMUA potongan aktif, PLUS yang ada datanya di legger_detail untuk periode ini
-// PLUS yang ada datanya di potongan_detail untuk periode ini (untuk memastikan inpassing muncul)
-// Ini memastikan semua potongan yang ada datanya muncul, termasuk inpassing yang tidak aktif
 $sql = "SELECT DISTINCT p.* FROM potongan p 
-        WHERE p.aktif = 1 
-        OR EXISTS (
-            SELECT 1 FROM legger_detail ld 
-            INNER JOIN legger_gaji lg ON ld.legger_id = lg.id 
-            WHERE lg.periode = ? 
-            AND ld.jenis = 'potongan' 
-            AND ld.item_id = p.id
-        )
-        OR EXISTS (
-            SELECT 1 FROM potongan_detail pd 
-            WHERE pd.potongan_id = p.id 
-            AND pd.periode = ?
-        )
+        WHERE p.aktif = 1
         ORDER BY p.nama_potongan";
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("ss", $periode, $periode);
 $stmt->execute();
 $potongan = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 $stmt->close();
@@ -674,9 +648,17 @@ $stmt->close();
                 }
                 
                 $gaji_pokok_per_bulan = $l['gaji_pokok'] / $jumlah_periode;
-                $total_tunjangan_per_bulan = $l['total_tunjangan'] / $jumlah_periode;
-                $total_potongan_per_bulan = $l['total_potongan'] / $jumlah_periode;
-                $gaji_bersih_per_bulan = $l['gaji_bersih'] / $jumlah_periode;
+                $total_tunjangan_raw = 0;
+                foreach ($tunjangan_month as $t) {
+                    $total_tunjangan_raw += floatval($tunjangan_data[$t['id']] ?? 0);
+                }
+                $total_potongan_raw = 0;
+                foreach ($potongan_month as $p) {
+                    $total_potongan_raw += floatval($potongan_data[$p['id']] ?? 0);
+                }
+                $total_tunjangan_per_bulan = $total_tunjangan_raw / $jumlah_periode;
+                $total_potongan_per_bulan = $total_potongan_raw / $jumlah_periode;
+                $gaji_bersih_per_bulan = $gaji_pokok_per_bulan + $total_tunjangan_per_bulan - $total_potongan_per_bulan;
                 
                 $total_gaji_pokok_month += $gaji_pokok_per_bulan;
                 $total_tunjangan_all_month += $total_tunjangan_per_bulan;

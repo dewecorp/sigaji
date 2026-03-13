@@ -20,14 +20,9 @@ try {
     $periode_mulai = isset($settings['periode_mulai']) ? $settings['periode_mulai'] : '';
     $periode_akhir = isset($settings['periode_akhir']) ? $settings['periode_akhir'] : '';
     
-    // Get tunjangan: ambil yang aktif, PLUS yang pernah ada datanya di tunjangan_detail (dari periode manapun)
-    // Ini memastikan tunjangan yang pernah punya data tetap di-generate meskipun tidak aktif atau tidak ada di periode aktif
-    $sql = "SELECT DISTINCT t.* FROM tunjangan t 
-            WHERE t.aktif = 1 
-            OR EXISTS (
-                SELECT 1 FROM tunjangan_detail td 
-                WHERE td.tunjangan_id = t.id
-            )
+    // Get tunjangan: hanya yang aktif
+    $sql = "SELECT t.* FROM tunjangan t 
+            WHERE t.aktif = 1
             ORDER BY t.nama_tunjangan";
     $result_tunjangan = $conn->query($sql);
     if (!$result_tunjangan) {
@@ -35,26 +30,14 @@ try {
     }
     $tunjangan = $result_tunjangan->fetch_all(MYSQLI_ASSOC);
     
-    // Get potongan: ambil yang aktif, PLUS yang ada datanya di potongan_detail untuk periode ini, 
-    // PLUS yang pernah ada datanya di potongan_detail (dari periode manapun)
-    // Ini memastikan potongan yang baru ditambahkan atau pernah punya data tetap di-generate meskipun tidak aktif
-    $sql = "SELECT DISTINCT p.* FROM potongan p 
-            WHERE p.aktif = 1 
-            OR EXISTS (
-                SELECT 1 FROM potongan_detail pd 
-                WHERE pd.potongan_id = p.id 
-                AND pd.periode = ?
-            )
-            OR EXISTS (
-                SELECT 1 FROM potongan_detail pd 
-                WHERE pd.potongan_id = p.id
-            )
+    // Get potongan: hanya yang aktif
+    $sql = "SELECT p.* FROM potongan p 
+            WHERE p.aktif = 1
             ORDER BY p.nama_potongan";
     $stmt_potongan = $conn->prepare($sql);
     if (!$stmt_potongan) {
         throw new Exception('Gagal prepare query potongan: ' . $conn->error);
     }
-    $stmt_potongan->bind_param("s", $periode);
     $stmt_potongan->execute();
     $result_potongan = $stmt_potongan->get_result();
     if (!$result_potongan) {
@@ -240,6 +223,32 @@ try {
                     while ($row = $result->fetch_assoc()) {
                         $old_legger_details[$row['jenis']][$row['item_id']] = $row;
                     }
+                    $stmt->close();
+                }
+            }
+
+            if ($legger_id) {
+                $sql = "DELETE ld FROM legger_detail ld
+                        INNER JOIN tunjangan t ON ld.item_id = t.id
+                        WHERE ld.legger_id = ?
+                        AND ld.jenis = 'tunjangan'
+                        AND t.aktif = 0";
+                $stmt = $conn->prepare($sql);
+                if ($stmt) {
+                    $stmt->bind_param("i", $legger_id);
+                    $stmt->execute();
+                    $stmt->close();
+                }
+
+                $sql = "DELETE ld FROM legger_detail ld
+                        INNER JOIN potongan p ON ld.item_id = p.id
+                        WHERE ld.legger_id = ?
+                        AND ld.jenis = 'potongan'
+                        AND p.aktif = 0";
+                $stmt = $conn->prepare($sql);
+                if ($stmt) {
+                    $stmt->bind_param("i", $legger_id);
+                    $stmt->execute();
                     $stmt->close();
                 }
             }

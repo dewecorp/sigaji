@@ -12,25 +12,15 @@ $periode_akhir = $settings['periode_akhir'] ?? '';
 // Periode leger mengikuti periode_aktif dari settings, tidak bisa difilter per bulan
 $periode = $periode_aktif;
 
-// Get tunjangan: ambil yang aktif, PLUS yang pernah ada datanya di tunjangan_detail (dari periode manapun)
-// Ini memastikan tunjangan yang pernah punya data tetap ditampilkan meskipun tidak aktif atau tidak ada di periode aktif
-$sql = "SELECT DISTINCT t.* FROM tunjangan t 
-        WHERE t.aktif = 1 
-        OR EXISTS (
-            SELECT 1 FROM tunjangan_detail td 
-            WHERE td.tunjangan_id = t.id
-        )
+// Get tunjangan: hanya yang aktif
+$sql = "SELECT t.* FROM tunjangan t 
+        WHERE t.aktif = 1
         ORDER BY t.nama_tunjangan";
 $tunjangan = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
 
-// Get potongan: ambil yang aktif, PLUS yang pernah ada datanya di potongan_detail (dari periode manapun)
-// Ini memastikan potongan yang pernah punya data tetap ditampilkan meskipun tidak aktif atau tidak ada di periode aktif
-$sql = "SELECT DISTINCT p.* FROM potongan p 
-        WHERE p.aktif = 1 
-        OR EXISTS (
-            SELECT 1 FROM potongan_detail pd 
-            WHERE pd.potongan_id = p.id
-        )
+// Get potongan: hanya yang aktif
+$sql = "SELECT p.* FROM potongan p 
+        WHERE p.aktif = 1
         ORDER BY p.nama_potongan";
 $potongan = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
 
@@ -163,14 +153,17 @@ $legger = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                                                 // Gaji pokok sudah dikalikan jumlah_periode saat generate
                                                 $gaji_pokok_display = floatval($l['gaji_pokok']);
                                                 
-                                                // Total tunjangan sudah dikalikan jumlah_periode saat generate
-                                                $total_tunjangan_display = floatval($l['total_tunjangan']);
+                                                $total_tunjangan_display = 0;
+                                                foreach ($tunjangan as $t) {
+                                                    $total_tunjangan_display += floatval($tunjangan_data[$t['id']] ?? 0);
+                                                }
                                                 
-                                                // Total potongan sudah dikalikan jumlah_periode saat generate
-                                                $total_potongan_display = floatval($l['total_potongan']);
+                                                $total_potongan_display = 0;
+                                                foreach ($potongan as $p) {
+                                                    $total_potongan_display += floatval($potongan_data[$p['id']] ?? 0);
+                                                }
                                                 
-                                                // Gaji bersih sudah dikalikan jumlah_periode saat generate
-                                                $gaji_bersih_display = floatval($l['gaji_bersih']);
+                                                $gaji_bersih_display = $gaji_pokok_display + $total_tunjangan_display - $total_potongan_display;
                                                 ?>
                                                 <tr>
                                                     <td style="text-align: center;"><?php echo $no++; ?></td>
