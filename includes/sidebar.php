@@ -11,6 +11,7 @@ $menu_items = [
             'guru' => ['icon' => 'fas fa-users', 'url' => 'guru', 'label' => 'Data Guru'],
             'gaji_pokok' => ['icon' => 'fas fa-money-bill-wave', 'url' => 'gaji_pokok', 'label' => 'Data Gaji Pokok'],
             'tunjangan' => ['icon' => 'fas fa-hand-holding-usd', 'url' => 'tunjangan', 'label' => 'Data Tunjangan'],
+            'insentif' => ['icon' => 'fas fa-coins', 'url' => 'insentif', 'label' => 'Data Insentif'],
             'potongan' => ['icon' => 'fas fa-minus-circle', 'url' => 'potongan', 'label' => 'Data Potongan'],
             'legger' => ['icon' => 'fas fa-file-invoice-dollar', 'url' => 'legger', 'label' => 'Legger Gaji'],
         ]

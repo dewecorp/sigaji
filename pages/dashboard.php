@@ -91,6 +91,17 @@ if ($legger_exists && $legger_stats) {
     $stats['total_gaji_bersih'] = $stats['total_gaji_pokok'] + $stats['total_tunjangan'] - $stats['total_potongan'];
 }
 
+$stats['total_insentif'] = 0;
+$check_insentif = $conn->query("SHOW TABLES LIKE 'insentif_detail'");
+if ($check_insentif && ($check_insentif->num_rows ?? 0) > 0) {
+    $result_insentif = $conn->query("SELECT COALESCE(SUM(jumlah), 0) as total FROM insentif_detail");
+    if ($result_insentif) {
+        $stats['total_insentif'] = floatval($result_insentif->fetch_assoc()['total'] ?? 0);
+    }
+}
+
+$stats['total_pengeluaran'] = floatval($stats['total_gaji_bersih'] ?? 0) + floatval($stats['total_insentif'] ?? 0);
+
 // Delete activities older than 24 hours
 $delete_sql = "DELETE FROM activities WHERE created_at < DATE_SUB(NOW(), INTERVAL 24 HOUR)";
 $conn->query($delete_sql);
@@ -179,8 +190,24 @@ $activities = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
                         </div>
 
                         <div class="row g-3">
-                            <div class="col-lg-12 col-md-12 col-sm-12 col-12">
-                                <div class="card stat-card stat-card-danger stat-card-large">
+                            <div class="col-lg-4 col-md-6 col-sm-12 col-12">
+                                <div class="card stat-card stat-card-info">
+                                    <div class="card-body">
+                                        <div class="stat-icon-wrapper">
+                                            <div class="stat-icon">
+                                                <i class="fas fa-coins"></i>
+                                            </div>
+                                        </div>
+                                        <div class="stat-content">
+                                            <h3 class="stat-value"><?php echo formatRupiah($stats['total_insentif']); ?></h3>
+                                            <p class="stat-label">Total Insentif</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-4 col-md-6 col-sm-12 col-12">
+                                <div class="card stat-card stat-card-primary">
                                     <div class="card-body">
                                         <div class="stat-icon-wrapper">
                                             <div class="stat-icon">
@@ -190,6 +217,22 @@ $activities = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
                                         <div class="stat-content">
                                             <h3 class="stat-value"><?php echo formatRupiah($stats['total_gaji_bersih']); ?></h3>
                                             <p class="stat-label">Total Gaji Bersih</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-4 col-md-6 col-sm-12 col-12">
+                                <div class="card stat-card stat-card-danger">
+                                    <div class="card-body">
+                                        <div class="stat-icon-wrapper">
+                                            <div class="stat-icon">
+                                                <i class="fas fa-wallet"></i>
+                                            </div>
+                                        </div>
+                                        <div class="stat-content">
+                                            <h3 class="stat-value"><?php echo formatRupiah($stats['total_pengeluaran']); ?></h3>
+                                            <p class="stat-label">Total Pengeluaran</p>
                                         </div>
                                     </div>
                                 </div>
@@ -760,5 +803,3 @@ function getTimeAgo(timestamp) {
 </script>
 
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>
-
-
