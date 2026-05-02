@@ -51,6 +51,11 @@ $tunjangan_list = $result_tunjangan ? $result_tunjangan->fetch_all(MYSQLI_ASSOC)
                                         <button type="button" class="btn btn-success btn-sm" data-toggle="modal" data-target="#modalImport">
                                             <i class="fas fa-file-upload"></i> Import Excel
                                         </button>
+                                        <form action="sync_simad.php" method="post" class="d-inline" id="formSyncSimad">
+                                            <button type="button" class="btn btn-secondary btn-sm" id="btnSyncSimad" title="URL API dibentuk otomatis di config/simad.php (nama folder SIMAD / override manual)">
+                                                <i class="fas fa-sync-alt"></i> Sinkron SIMAD
+                                            </button>
+                                        </form>
                                         <button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#modalTambah">
                                             <i class="fas fa-plus"></i> Tambah Guru
                                         </button>
@@ -990,6 +995,28 @@ var selectedIds = new Set();
         e.preventDefault();
         // Download template Excel dari server
         window.location.href = 'download_template.php';
+    });
+
+    $(document).on('click', '#btnSyncSimad', function(e) {
+        e.preventDefault();
+        var form = $('#formSyncSimad');
+        if (!form.length) {
+            return;
+        }
+        Swal.fire({
+            title: 'Sinkron nama dari SIMAD?',
+            text: 'Nama guru yang sudah tertaut akan ditimpa dengan nama dari SIMAD. Baru akan ditambah.',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#6c757d',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Ya, sinkronkan',
+            cancelButtonText: 'Batal'
+        }).then(function(result) {
+            if (result.isConfirmed) {
+                form[0].submit();
+            }
+        });
     });
     
     // Bulk delete - use event delegation

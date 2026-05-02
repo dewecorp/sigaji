@@ -33,6 +33,7 @@ CREATE TABLE IF NOT EXISTS settings (
 -- Table: guru
 CREATE TABLE IF NOT EXISTS guru (
     id INT AUTO_INCREMENT PRIMARY KEY,
+    simad_id_guru INT NULL DEFAULT NULL,
     nama_lengkap VARCHAR(100) NOT NULL,
     jenis_kelamin ENUM('L', 'P') NOT NULL,
     tmt INT,
@@ -43,7 +44,8 @@ CREATE TABLE IF NOT EXISTS guru (
     status_pegawai ENUM('PNS', 'Honor', 'Kontrak') DEFAULT 'Honor',
     foto VARCHAR(255) DEFAULT 'default.jpg',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uk_guru_simad_id (simad_id_guru)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Table: gaji_pokok

@@ -74,7 +74,6 @@
                 timer: 3000,
                 showConfirmButton: false
             });
-            toastr.success('<?php echo addslashes($_SESSION['success']); ?>');
         </script>
         <?php unset($_SESSION['success']); ?>
     <?php endif; ?>
@@ -88,7 +87,6 @@
                 timer: 3000,
                 showConfirmButton: false
             });
-            toastr.error('<?php echo addslashes($_SESSION['error']); ?>');
         </script>
         <?php unset($_SESSION['error']); ?>
     <?php endif; ?>
