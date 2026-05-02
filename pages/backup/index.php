@@ -224,7 +224,6 @@ function formatFileSize($bytes) {
                         timer: 5000,
                         timerProgressBar: true
                     });
-                    if (typeof toastr !== 'undefined') toastr.success(msg);
                 } else if (typeof msg === 'string' && msg.indexOf('Backup berhasil dihapus') !== -1) {
                     Swal.fire({
                         title: 'Berhasil!',
@@ -235,7 +234,6 @@ function formatFileSize($bytes) {
                         timer: 3000,
                         timerProgressBar: true
                     });
-                    if (typeof toastr !== 'undefined') toastr.success(msg);
                 } else if (typeof msg === 'string') {
                     Swal.fire({
                         title: 'Berhasil!',
@@ -244,7 +242,6 @@ function formatFileSize($bytes) {
                         confirmButtonColor: '#3085d6',
                         confirmButtonText: 'OK'
                     });
-                    if (typeof toastr !== 'undefined') toastr.success(msg);
                 }
             }
             
@@ -257,7 +254,6 @@ function formatFileSize($bytes) {
                     confirmButtonText: '<i class="fas fa-times"></i> OK',
                     allowOutsideClick: false
                 });
-                if (typeof toastr !== 'undefined') toastr.error(backupErrorMsg);
             }
             
             // Initialize DataTable
