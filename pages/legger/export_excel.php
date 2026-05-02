@@ -19,13 +19,9 @@ if (empty($periode)) {
 
 // Load PhpSpreadsheet
 $vendorPath = __DIR__ . '/../../vendor/autoload.php';
-if (!file_exists($vendorPath)) {
-    $_SESSION['error'] = 'PhpSpreadsheet tidak ditemukan. Silakan install dengan: composer require phpoffice/phpspreadsheet';
-    header('Location: ' . BASE_URL . 'pages/legger');
-    exit();
+if (file_exists($vendorPath)) {
+    require_once $vendorPath;
 }
-
-require_once $vendorPath;
 
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
@@ -33,6 +29,123 @@ use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
+
+function exportLeggerCsv($conn, $periode) {
+    if (ob_get_level()) {
+        ob_end_clean();
+    }
+
+    $sql = "SELECT lg.*, g.nama_lengkap
+            FROM legger_gaji lg
+            JOIN guru g ON lg.guru_id = g.id
+            WHERE lg.periode = ?
+            ORDER BY g.nama_lengkap";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("s", $periode);
+    $stmt->execute();
+    $legger = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    $stmt->close();
+
+    $result = $conn->query("SELECT t.* FROM tunjangan t WHERE t.aktif = 1 ORDER BY t.nama_tunjangan");
+    $tunjangan = $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
+
+    $result = $conn->query("SELECT p.* FROM potongan p WHERE p.aktif = 1 ORDER BY p.nama_potongan");
+    $potongan = $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
+
+    $detail_map = [];
+    $sql = "SELECT ld.legger_id, ld.jenis, ld.item_id, ld.jumlah
+            FROM legger_detail ld
+            INNER JOIN legger_gaji lg ON ld.legger_id = lg.id
+            LEFT JOIN tunjangan t ON ld.jenis = 'tunjangan' AND ld.item_id = t.id
+            LEFT JOIN potongan p ON ld.jenis = 'potongan' AND ld.item_id = p.id
+            WHERE lg.periode = ?
+            AND (
+                (ld.jenis = 'tunjangan' AND COALESCE(t.aktif, 0) = 1)
+                OR
+                (ld.jenis = 'potongan' AND COALESCE(p.aktif, 0) = 1)
+            )";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("s", $periode);
+    $stmt->execute();
+    $details = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    $stmt->close();
+
+    foreach ($details as $d) {
+        $legger_id = intval($d['legger_id']);
+        $jenis = $d['jenis'] ?? '';
+        $item_id = intval($d['item_id']);
+        $jumlah = floatval($d['jumlah'] ?? 0);
+        if (!isset($detail_map[$legger_id])) {
+            $detail_map[$legger_id] = ['tunjangan' => [], 'potongan' => []];
+        }
+        if ($jenis === 'tunjangan') {
+            $detail_map[$legger_id]['tunjangan'][$item_id] = $jumlah;
+        } elseif ($jenis === 'potongan') {
+            $detail_map[$legger_id]['potongan'][$item_id] = $jumlah;
+        }
+    }
+
+    $filename = 'Legger_Gaji_' . preg_replace('/[^0-9\-]/', '', $periode) . '.csv';
+    header('Content-Type: text/csv; charset=utf-8');
+    header('Content-Disposition: attachment; filename="' . $filename . '"');
+    header('Pragma: no-cache');
+    header('Expires: 0');
+
+    echo "\xEF\xBB\xBF";
+    $out = fopen('php://output', 'w');
+
+    $header = ['No', 'Nama', 'Gaji Pokok'];
+    foreach ($tunjangan as $t) {
+        $header[] = $t['nama_tunjangan'] ?? '';
+    }
+    $header[] = 'Total Tunjangan';
+    foreach ($potongan as $p) {
+        $header[] = $p['nama_potongan'] ?? '';
+    }
+    $header[] = 'Total Potongan';
+    $header[] = 'Gaji Bersih';
+    fputcsv($out, $header, ';');
+
+    $no = 1;
+    foreach ($legger as $l) {
+        $legger_id = intval($l['id']);
+        $gaji_pokok = floatval($l['gaji_pokok'] ?? 0);
+        $tunjangan_data = $detail_map[$legger_id]['tunjangan'] ?? [];
+        $potongan_data = $detail_map[$legger_id]['potongan'] ?? [];
+
+        $total_tunjangan = 0;
+        foreach ($tunjangan as $t) {
+            $total_tunjangan += floatval($tunjangan_data[intval($t['id'])] ?? 0);
+        }
+        $total_potongan = 0;
+        foreach ($potongan as $p) {
+            $total_potongan += floatval($potongan_data[intval($p['id'])] ?? 0);
+        }
+        $gaji_bersih = $gaji_pokok + $total_tunjangan - $total_potongan;
+
+        $row = [];
+        $row[] = $no++;
+        $row[] = $l['nama_lengkap'] ?? '';
+        $row[] = formatRupiahTanpaRp($gaji_pokok);
+        foreach ($tunjangan as $t) {
+            $row[] = formatRupiahTanpaRp(floatval($tunjangan_data[intval($t['id'])] ?? 0));
+        }
+        $row[] = formatRupiahTanpaRp($total_tunjangan);
+        foreach ($potongan as $p) {
+            $row[] = formatRupiahTanpaRp(floatval($potongan_data[intval($p['id'])] ?? 0));
+        }
+        $row[] = formatRupiahTanpaRp($total_potongan);
+        $row[] = formatRupiahTanpaRp($gaji_bersih);
+        fputcsv($out, $row, ';');
+    }
+
+    fclose($out);
+}
+
+if (!class_exists(Spreadsheet::class)) {
+    exportLeggerCsv($conn, $periode);
+    exit();
+}
 
 // Function to get list of months
 function getMonthList($periode_mulai, $periode_akhir, $jumlah_periode) {
@@ -99,42 +212,13 @@ try {
     $stmt->close();
     
     // Get tunjangan and potongan
-    $sql = "SELECT DISTINCT t.* FROM tunjangan t 
-            WHERE t.aktif = 1 
-            OR EXISTS (
-                SELECT 1 FROM legger_detail ld 
-                INNER JOIN legger_gaji lg ON ld.legger_id = lg.id 
-                WHERE lg.periode = ? 
-                AND ld.jenis = 'tunjangan' 
-                AND ld.item_id = t.id
-            )
-            ORDER BY t.nama_tunjangan";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("s", $periode);
-    $stmt->execute();
-    $tunjangan = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
-    $stmt->close();
+    $sql = "SELECT t.* FROM tunjangan t WHERE t.aktif = 1 ORDER BY t.nama_tunjangan";
+    $result = $conn->query($sql);
+    $tunjangan = $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
     
-    $sql = "SELECT DISTINCT p.* FROM potongan p 
-            WHERE p.aktif = 1 
-            OR EXISTS (
-                SELECT 1 FROM legger_detail ld 
-                INNER JOIN legger_gaji lg ON ld.legger_id = lg.id 
-                WHERE lg.periode = ? 
-                AND ld.jenis = 'potongan' 
-                AND ld.item_id = p.id
-            )
-            OR EXISTS (
-                SELECT 1 FROM potongan_detail pd 
-                WHERE pd.potongan_id = p.id 
-                AND pd.periode = ?
-            )
-            ORDER BY p.nama_potongan";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("ss", $periode, $periode);
-    $stmt->execute();
-    $potongan = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
-    $stmt->close();
+    $sql = "SELECT p.* FROM potongan p WHERE p.aktif = 1 ORDER BY p.nama_potongan";
+    $result = $conn->query($sql);
+    $potongan = $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
     
     // Validate month list
     if (empty($month_list)) {

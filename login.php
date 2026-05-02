@@ -68,46 +68,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 
                 logActivity($conn, "User {$user['username']} berhasil login", 'success');
                 
-                // Store welcome data for JavaScript
-                $welcome_name = $user['nama_lengkap'] ?? $user['username'];
-                $redirect_url = BASE_URL . 'pages/dashboard';
-                
-                // Show welcome message before redirect
-                ?>
-                <!DOCTYPE html>
-                <html lang="id">
-                <head>
-                    <meta charset="UTF-8">
-                    <meta content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" name="viewport">
-                    <title>Login - <?php echo APP_NAME; ?></title>
-                    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet">
-                    <style>
-                        body { font-family: 'Nunito', sans-serif; }
-                        .swal2-popup { font-family: 'Nunito', sans-serif !important; }
-                    </style>
-                    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-                </head>
-                <body>
-                    <script>
-                        const welcomeName = <?php echo json_encode($welcome_name); ?>;
-                        const redirectUrl = <?php echo json_encode($redirect_url); ?>;
-                        
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Selamat Datang!',
-                            html: '<p style="font-size: 18px; margin-bottom: 10px;">Halo, <strong>' + welcomeName + '</strong></p><p style="color: #666;">Selamat datang di Sistem Informasi Gaji</p>',
-                            showConfirmButton: false,
-                            timer: 3000,
-                            timerProgressBar: true,
-                            allowOutsideClick: false,
-                            allowEscapeKey: false
-                        }).then(() => {
-                            window.location.href = redirectUrl;
-                        });
-                    </script>
-                </body>
-                </html>
-                <?php
+                // Direct redirect without welcome message
+                header('Location: ' . BASE_URL . 'pages/dashboard.php');
                 exit();
             } else {
                 $error = 'Username atau password salah!';

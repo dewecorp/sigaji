@@ -16,19 +16,61 @@ if (empty($periode)) {
 
 // Load PhpSpreadsheet
 $vendorPath = __DIR__ . '/../../vendor/autoload.php';
-if (!file_exists($vendorPath)) {
-    $_SESSION['error'] = 'PhpSpreadsheet tidak ditemukan. Silakan install dengan: composer require phpoffice/phpspreadsheet';
-    header('Location: ' . BASE_URL . 'pages/legger_honor');
-    exit();
+if (file_exists($vendorPath)) {
+    require_once $vendorPath;
 }
-
-require_once $vendorPath;
 
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
+
+function exportLeggerHonorCsv($conn, $periode) {
+    $sql = "SELECT lh.*, p.nama_pembina, e.jenis_ekstrakurikuler, h.jabatan, h.jumlah_honor as honor_per_pertemuan
+            FROM legger_honor lh
+            JOIN pembina p ON lh.pembina_id = p.id
+            JOIN ekstrakurikuler e ON lh.ekstrakurikuler_id = e.id
+            JOIN honor h ON lh.honor_id = h.id
+            WHERE lh.periode = ?
+            ORDER BY p.nama_pembina ASC";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("s", $periode);
+    $stmt->execute();
+    $legger = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    $stmt->close();
+
+    $filename = 'Legger_Honor_' . preg_replace('/[^0-9\-]/', '', $periode) . '.csv';
+    header('Content-Type: text/csv; charset=utf-8');
+    header('Content-Disposition: attachment; filename="' . $filename . '"');
+    header('Pragma: no-cache');
+    header('Expires: 0');
+
+    echo "\xEF\xBB\xBF";
+    $out = fopen('php://output', 'w');
+
+    fputcsv($out, ['No', 'Nama Pembina', 'Ekstrakurikuler', 'Jabatan', 'Honor per Pertemuan', 'Jumlah Pertemuan', 'Total Honor'], ';');
+    $no = 1;
+    foreach ($legger as $l) {
+        $row = [
+            $no++,
+            $l['nama_pembina'] ?? '',
+            $l['jenis_ekstrakurikuler'] ?? '',
+            $l['jabatan'] ?? '',
+            formatRupiahTanpaRp(floatval($l['honor_per_pertemuan'] ?? 0)),
+            $l['jumlah_pertemuan'] ?? ($l['jumlah_pertemuan_honor'] ?? ''),
+            formatRupiahTanpaRp(floatval($l['total_honor'] ?? 0)),
+        ];
+        fputcsv($out, $row, ';');
+    }
+
+    fclose($out);
+}
+
+if (!class_exists(Spreadsheet::class)) {
+    exportLeggerHonorCsv($conn, $periode);
+    exit();
+}
 
 try {
     // Get legger_honor data

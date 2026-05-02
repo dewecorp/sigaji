@@ -137,7 +137,7 @@ $activities = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
                     <div class="section-body">
                         <!-- Statistics Widgets -->
                         <div class="row g-3">
-                            <div class="col-lg-3 col-md-6 col-sm-6 col-12">
+                            <div class="col-lg-3 col-md-6 col-sm-6 col-6">
                                 <div class="card stat-card stat-card-primary">
                                     <div class="card-body">
                                         <div class="stat-icon-wrapper">
@@ -153,7 +153,7 @@ $activities = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
                                 </div>
                             </div>
 
-                            <div class="col-lg-3 col-md-6 col-sm-6 col-12">
+                            <div class="col-lg-3 col-md-6 col-sm-6 col-6">
                                 <div class="card stat-card stat-card-success">
                                     <div class="card-body">
                                         <div class="stat-icon-wrapper">
@@ -169,7 +169,7 @@ $activities = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
                                 </div>
                             </div>
 
-                            <div class="col-lg-3 col-md-6 col-sm-6 col-12">
+                            <div class="col-lg-3 col-md-6 col-sm-6 col-6">
                                 <div class="card stat-card stat-card-info">
                                     <div class="card-body">
                                         <div class="stat-icon-wrapper">
@@ -185,7 +185,7 @@ $activities = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
                                 </div>
                             </div>
 
-                            <div class="col-lg-3 col-md-6 col-sm-6 col-12">
+                            <div class="col-lg-3 col-md-6 col-sm-6 col-6">
                                 <div class="card stat-card stat-card-warning">
                                     <div class="card-body">
                                         <div class="stat-icon-wrapper">
@@ -203,7 +203,7 @@ $activities = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
                         </div>
 
                         <div class="row g-3">
-                            <div class="col-lg-4 col-md-6 col-sm-12 col-12">
+                            <div class="col-lg-4 col-md-6 col-sm-6 col-6">
                                 <div class="card stat-card stat-card-info">
                                     <div class="card-body">
                                         <div class="stat-icon-wrapper">
@@ -219,7 +219,7 @@ $activities = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
                                 </div>
                             </div>
 
-                            <div class="col-lg-4 col-md-6 col-sm-12 col-12">
+                            <div class="col-lg-4 col-md-6 col-sm-6 col-6">
                                 <div class="card stat-card stat-card-primary">
                                     <div class="card-body">
                                         <div class="stat-icon-wrapper">
@@ -235,7 +235,7 @@ $activities = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
                                 </div>
                             </div>
 
-                            <div class="col-lg-4 col-md-6 col-sm-12 col-12">
+                            <div class="col-lg-4 col-md-6 col-sm-6 col-6">
                                 <div class="card stat-card stat-card-danger">
                                     <div class="card-body">
                                         <div class="stat-icon-wrapper">
