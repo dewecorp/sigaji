@@ -123,12 +123,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if ($check_columns->num_rows == 0) {
         $conn->query("ALTER TABLE settings ADD COLUMN hari_tanggal DATE DEFAULT NULL");
     }
-    
+
     // Always update logo field (even if no new upload, keep current logo)
     $sql = "UPDATE settings SET nama_madrasah=?, nama_kepala=?, nama_bendahara=?, periode_aktif=?, jumlah_periode=?, periode_mulai=?, periode_akhir=?, tahun_ajaran=?, honor_per_jam=?, logo=?, tempat=?, hari_tanggal=? WHERE id=1";
     $stmt = $conn->prepare($sql);
-    // Parameter types: s=string, i=integer, d=double, s=string (logo), s=string (tempat), s=string (hari_tanggal)
-    $stmt->bind_param("ssssisssdsss", $nama_madrasah, $nama_kepala, $nama_bendahara, $periode_aktif, $jumlah_periode, $periode_mulai, $periode_akhir, $tahun_ajaran, $honor_per_jam, $logo, $tempat, $hari_tanggal);
+    $stmt->bind_param('ssssisssdsss', $nama_madrasah, $nama_kepala, $nama_bendahara, $periode_aktif, $jumlah_periode, $periode_mulai, $periode_akhir, $tahun_ajaran, $honor_per_jam, $logo, $tempat, $hari_tanggal);
     
     if ($stmt->execute()) {
         logActivity($conn, "Mengubah pengaturan sistem", 'success');

@@ -42,9 +42,6 @@ $tunjangan_list = $result_tunjangan ? $result_tunjangan->fetch_all(MYSQLI_ASSOC)
                                         <strong id="summaryText">Menampilkan: <span id="totalGuru"><?php echo $total_guru; ?></span> guru | Terpilih: <span id="selectedCount">0</span></strong>
                                     </div>
                                     <div class="d-flex flex-wrap" style="gap: 5px;">
-                                        <button type="button" class="btn btn-info btn-sm" id="btnDownloadTemplate">
-                                            <i class="fas fa-download"></i> Download Template
-                                        </button>
                                         <button type="button" class="btn btn-danger btn-sm" id="btnBulkDelete" disabled>
                                             <i class="fas fa-trash"></i> Hapus Terpilih
                                         </button>
@@ -436,6 +433,13 @@ $tunjangan_list = $result_tunjangan ? $result_tunjangan->fetch_all(MYSQLI_ASSOC)
                         </div>
                         <form method="POST" action="import.php" enctype="multipart/form-data">
                             <div class="modal-body">
+                                <div class="form-group pb-3 border-bottom">
+                                    <label class="d-block mb-2"><strong>Template</strong></label>
+                                    <button type="button" class="btn btn-info btn-sm" id="btnDownloadTemplate">
+                                        <i class="fas fa-download"></i> Download Template Excel
+                                    </button>
+                                    <small class="text-muted d-block mt-2 mb-0">Unduh berkas contoh sesuai format kolom di bawah, isi data, lalu unggah pada field berikutnya.</small>
+                                </div>
                                 <div class="form-group">
                                     <label>File Excel (.xlsx, .xls)</label>
                                     <input type="file" class="form-control" name="excel_file" accept=".xlsx,.xls,.csv" required>
