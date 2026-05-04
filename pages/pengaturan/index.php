@@ -27,6 +27,20 @@ $settings['jumlah_periode'] = isset($settings['jumlah_periode']) ? intval($setti
 $settings['periode_aktif'] = isset($settings['periode_aktif']) ? $settings['periode_aktif'] : date('Y-m');
 $settings['periode_mulai'] = isset($settings['periode_mulai']) ? $settings['periode_mulai'] : date('Y-m');
 $settings['periode_akhir'] = isset($settings['periode_akhir']) ? $settings['periode_akhir'] : date('Y-m');
+
+// Tahun ajaran berjalan: Juli-Juni (contoh: Jul 2026 -> 2026/2027, Mar 2026 -> 2025/2026)
+$currentYear = (int)date('Y');
+$currentMonth = (int)date('n');
+$taStartYear = $currentMonth >= 7 ? $currentYear : ($currentYear - 1);
+$tahunAjaranOptions = [];
+for ($i = 0; $i <= 3; $i++) {
+    $start = $taStartYear + $i;
+    $tahunAjaranOptions[] = $start . '/' . ($start + 1);
+}
+$savedTahunAjaran = trim((string)($settings['tahun_ajaran'] ?? ''));
+if ($savedTahunAjaran !== '' && !in_array($savedTahunAjaran, $tahunAjaranOptions, true)) {
+    $tahunAjaranOptions[] = $savedTahunAjaran;
+}
 ?>
 
             <div class="main-content">
@@ -118,18 +132,23 @@ $settings['periode_akhir'] = isset($settings['periode_akhir']) ? $settings['peri
                                         <i class="fas fa-calendar-alt"></i> Periode & Tahun Ajaran
                                     </h6>
                                     <div class="row mb-4">
-                                        <div class="col-md-4">
+                                        <div class="col-md-6">
                                             <div class="form-group">
                                                 <label><strong>Jumlah Periode</strong></label>
                                                 <input type="number" class="form-control" id="jumlah_periode" name="jumlah_periode" value="<?php echo $settings['jumlah_periode'] ?? 1; ?>" min="1" required>
                                                 <small class="text-muted">1 periode = 1 bulan</small>
                                             </div>
                                         </div>
-                                        <div class="col-md-8">
+                                        <div class="col-md-6">
                                             <div class="form-group">
                                                 <label><strong>Tahun Ajaran</strong></label>
-                                                <input type="text" class="form-control" id="tahun_ajaran" name="tahun_ajaran" value="<?php echo htmlspecialchars($settings['tahun_ajaran'] ?? ''); ?>" placeholder="Contoh: 2024/2025" required>
-                                                <small class="text-muted">Format: YYYY/YYYY (contoh: 2024/2025)</small>
+                                                <select class="form-control" id="tahun_ajaran" name="tahun_ajaran" required>
+                                                    <?php foreach ($tahunAjaranOptions as $ta): ?>
+                                                        <option value="<?php echo htmlspecialchars($ta); ?>" <?php echo (($settings['tahun_ajaran'] ?? '') === $ta) ? 'selected' : ''; ?>>
+                                                            <?php echo htmlspecialchars($ta); ?>
+                                                        </option>
+                                                    <?php endforeach; ?>
+                                                </select>
                                             </div>
                                         </div>
                                     </div>
