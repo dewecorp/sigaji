@@ -19,10 +19,16 @@ $conn->query("CREATE TABLE IF NOT EXISTS insentif (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nama_insentif VARCHAR(100) NOT NULL,
     jumlah_insentif DECIMAL(15,2) NOT NULL DEFAULT 0,
+    kali INT UNSIGNED NOT NULL DEFAULT 1,
     aktif TINYINT(1) DEFAULT 1,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+$chk_kali = $conn->query("SHOW COLUMNS FROM insentif LIKE 'kali'");
+if ($chk_kali && $chk_kali->num_rows === 0) {
+    $conn->query("ALTER TABLE insentif ADD COLUMN kali INT UNSIGNED NOT NULL DEFAULT 1 AFTER jumlah_insentif");
+}
 
 $conn->query("CREATE TABLE IF NOT EXISTS insentif_detail (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -60,6 +66,23 @@ $jumlah_insentif_raw = $request['jumlah_insentif_hidden'] ?? $request['jumlah_in
 $jumlah_insentif_cleaned = preg_replace('/[^0-9.]/', '', $jumlah_insentif_raw);
 $jumlah_insentif_cleaned = str_replace(',', '.', $jumlah_insentif_cleaned);
 $jumlah_insentif = floatval($jumlah_insentif_cleaned);
+
+$kali_raw = isset($request['kali_hidden']) ? trim((string)$request['kali_hidden']) : '1';
+$kali_digits = preg_replace('/[^0-9]/', '', $kali_raw);
+$kali = $kali_digits !== '' ? (int)$kali_digits : 1;
+if ($kali < 1) {
+    $kali = 1;
+}
+
+$total_ke_guru = round($jumlah_insentif * (float)$kali, 2);
+if ($total_ke_guru <= 0) {
+    echo json_encode([
+        'success' => false,
+        'message' => 'Total insentif (jumlah × kali) tidak valid'
+    ]);
+    exit();
+}
+
 $aktif = isset($request['aktif']) ? 1 : 0;
 
 if (empty($nama_insentif)) {
@@ -79,7 +102,7 @@ if ($jumlah_insentif <= 0) {
 }
 
 if ($id && $id > 0) {
-    $sql = "UPDATE insentif SET nama_insentif=?, jumlah_insentif=?, aktif=? WHERE id=?";
+    $sql = "UPDATE insentif SET nama_insentif=?, jumlah_insentif=?, kali=?, aktif=? WHERE id=?";
     $stmt = $conn->prepare($sql);
     if (!$stmt) {
         echo json_encode([
@@ -88,10 +111,10 @@ if ($id && $id > 0) {
         ]);
         exit();
     }
-    $stmt->bind_param("sdii", $nama_insentif, $jumlah_insentif, $aktif, $id);
+    $stmt->bind_param("sdiii", $nama_insentif, $jumlah_insentif, $kali, $aktif, $id);
     $action = 'mengubah';
 } else {
-    $sql = "INSERT INTO insentif (nama_insentif, jumlah_insentif, aktif) VALUES (?, ?, ?)";
+    $sql = "INSERT INTO insentif (nama_insentif, jumlah_insentif, kali, aktif) VALUES (?, ?, ?, ?)";
     $stmt = $conn->prepare($sql);
     if (!$stmt) {
         echo json_encode([
@@ -100,7 +123,7 @@ if ($id && $id > 0) {
         ]);
         exit();
     }
-    $stmt->bind_param("sdi", $nama_insentif, $jumlah_insentif, $aktif);
+    $stmt->bind_param("sdii", $nama_insentif, $jumlah_insentif, $kali, $aktif);
     $action = 'menambah';
 }
 
@@ -161,7 +184,7 @@ $detail_stmt = $conn->prepare($sql);
 foreach ($guru_ids as $guru_id) {
     $guru_id = intval($guru_id);
     if ($guru_id > 0) {
-        $detail_stmt->bind_param("iids", $guru_id, $insentif_id, $jumlah_insentif, $periode);
+        $detail_stmt->bind_param("iids", $guru_id, $insentif_id, $total_ke_guru, $periode);
         $detail_stmt->execute();
     }
 }

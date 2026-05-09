@@ -7,10 +7,15 @@ $conn->query("CREATE TABLE IF NOT EXISTS insentif (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nama_insentif VARCHAR(100) NOT NULL,
     jumlah_insentif DECIMAL(15,2) NOT NULL DEFAULT 0,
+    kali INT UNSIGNED NOT NULL DEFAULT 1,
     aktif TINYINT(1) DEFAULT 1,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+$chk_kali_ins = $conn->query("SHOW COLUMNS FROM insentif LIKE 'kali'");
+if ($chk_kali_ins && $chk_kali_ins->num_rows === 0) {
+    $conn->query("ALTER TABLE insentif ADD COLUMN kali INT UNSIGNED NOT NULL DEFAULT 1 AFTER jumlah_insentif");
+}
 
 $conn->query("CREATE TABLE IF NOT EXISTS insentif_detail (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -111,7 +116,9 @@ foreach ($legger_detail_rows as $row) {
                                             <tr>
                                                 <th>No</th>
                                                 <th>Nama Insentif</th>
-                                                <th>Jumlah Insentif</th>
+                                                <th>Jumlah Satuan</th>
+                                                <th>Kali (×)</th>
+                                                <th>Total Insentif</th>
                                                 <th>Nama Guru</th>
                                                 <th>Status</th>
                                                 <th>Aksi</th>
@@ -122,7 +129,14 @@ foreach ($legger_detail_rows as $row) {
                                                 <tr>
                                                     <td><?php echo $no++; ?></td>
                                                     <td><?php echo htmlspecialchars($i['nama_insentif']); ?></td>
-                                                    <td><?php echo formatRupiah($i['jumlah_insentif'] ?? 0); ?></td>
+                                                    <?php
+                                                    $__ji = floatval($i['jumlah_insentif'] ?? 0);
+                                                    $__kali = max(1, (int)($i['kali'] ?? 1));
+                                                    $__tot = $__ji * $__kali;
+                                                    ?>
+                                                    <td><?php echo formatRupiah((int)$__ji); ?></td>
+                                                    <td><?php echo number_format($__kali, 0, ',', '.'); ?></td>
+                                                    <td><strong><?php echo formatRupiah((float)$__tot); ?></strong></td>
                                                     <td class="nama-guru-cell">
                                                         <?php
                                                         $nama_guru = $i['nama_guru_list'] ?? '';
@@ -240,14 +254,35 @@ foreach ($legger_detail_rows as $row) {
                                     <input type="text" class="form-control" name="nama_insentif" id="nama_insentif" required>
                                 </div>
                                 <div class="form-group">
-                                    <label>Jumlah Insentif <span class="text-danger">*</span></label>
+                                    <label>Jumlah Insentif (satuan) <span class="text-danger">*</span></label>
                                     <div class="input-group">
                                         <div class="input-group-prepend">
                                             <span class="input-group-text">Rp</span>
                                         </div>
-                                        <input type="text" class="form-control" name="jumlah_insentif" id="jumlah_insentif" placeholder="0" required>
+                                        <input type="text" class="form-control" name="jumlah_insentif" id="jumlah_insentif" placeholder="0" required autocomplete="off">
                                         <input type="hidden" name="jumlah_insentif_hidden" id="jumlah_insentif_hidden" value="0">
                                     </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Kali (×) <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text">×</span>
+                                        </div>
+                                        <input type="text" class="form-control" id="kali_insentif" placeholder="1" maxlength="14" autocomplete="off">
+                                        <input type="hidden" name="kali_hidden" id="kali_hidden" value="1">
+                                    </div>
+                                    <small class="text-muted">Pengali jumlah satuan untuk setiap guru</small>
+                                </div>
+                                <div class="form-group">
+                                    <label>Total Insentif</label>
+                                    <div class="input-group">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text">Rp</span>
+                                        </div>
+                                        <input type="text" class="form-control bg-light" id="total_insentif_display" value="0" readonly tabindex="-1">
+                                    </div>
+                                    <small class="text-muted">Jumlah satuan × kali</small>
                                 </div>
                                 <div class="form-group">
                                     <label>Nama Guru <span class="text-danger">*</span></label>
@@ -408,6 +443,23 @@ function formatRupiah(angka) {
     return rupiah;
 }
 
+function refreshTotalInsentifModal() {
+    var unitStr = $('#jumlah_insentif_hidden').val() || '0';
+    var unit = parseFloat(unitStr.replace(',', '.'));
+    if (isNaN(unit) || unit < 0) unit = 0;
+    /* Jangan tulis ulang #kali_hidden di sini — itu membatalkan apa yang pengguna tik di field × */
+    var kh = $('#kali_hidden').val();
+    var khTrim = kh === undefined || kh === null ? '' : String(kh).trim();
+    var kali = 1;
+    if (khTrim !== '') {
+        var parsed = parseInt(khTrim, 10);
+        if (!isNaN(parsed) && parsed >= 1) kali = parsed;
+    }
+    var total = Math.round(unit * kali);
+    if (typeof total !== 'number' || isNaN(total) || total < 0) total = 0;
+    $('#total_insentif_display').val(formatRupiah(String(total)));
+}
+
 function unformatRupiah(rupiah) {
     if (!rupiah || rupiah === '') return 0;
     var cleaned = rupiah.toString().replace(/\./g, '').replace(/[^0-9]/g, '');
@@ -441,11 +493,18 @@ function resetInsentifForm() {
     if (hiddenEl) hiddenEl.value = '0';
     var jumlahEl = document.getElementById('jumlah_insentif');
     if (jumlahEl) jumlahEl.value = '';
+    var kaliHidden = document.getElementById('kali_hidden');
+    if (kaliHidden) kaliHidden.value = '1';
+    var kaliIn = document.getElementById('kali_insentif');
+    if (kaliIn) kaliIn.value = '1';
     var checkboxes = document.querySelectorAll('.guru-checkbox');
     checkboxes.forEach(function(cb) { cb.checked = false; });
     var selectAll = document.getElementById('selectAllGuru');
     if (selectAll) selectAll.checked = false;
     updateGuruSelectedText();
+    if (typeof jQuery !== 'undefined') {
+        refreshTotalInsentifModal();
+    }
 }
 
 function editInsentif(id) {
@@ -474,6 +533,11 @@ function editInsentif(id) {
             if (isNaN(jumlah)) jumlah = 0;
             $('#jumlah_insentif_hidden').val(jumlah.toString());
             $('#jumlah_insentif').val(formatRupiah(Math.floor(jumlah).toString()));
+            var kali = parseInt(data.kali, 10);
+            if (isNaN(kali) || kali < 1) kali = 1;
+            $('#kali_hidden').val(kali.toString());
+            $('#kali_insentif').val(formatRupiah(String(kali)));
+            refreshTotalInsentifModal();
             $('#aktif').prop('checked', data.aktif == 1 || data.aktif == '1' || data.aktif === 1);
             $.ajax({
                 url: 'get_guru.php?insentif_id=' + data.id,
@@ -537,6 +601,35 @@ function editInsentif(id) {
                 var raw = unformatRupiah(this.value);
                 $('#jumlah_insentif_hidden').val(raw.toString());
                 this.value = formatRupiah(raw.toString());
+                refreshTotalInsentifModal();
+            });
+
+            $('#kali_insentif').on('input', function() {
+                var digits = ($(this).val() || '').replace(/\./g, '').replace(/[^0-9]/g, '');
+                if (digits === '') {
+                    $('#kali_hidden').val('');
+                    $(this).val('');
+                    refreshTotalInsentifModal();
+                    return;
+                }
+                var kali = parseInt(digits, 10);
+                if (isNaN(kali)) return;
+                if (kali < 1) kali = 1;
+                if (kali > 2147483646) kali = 2147483646;
+                $('#kali_hidden').val(kali.toString());
+                $(this).val(formatRupiah(String(kali)));
+                refreshTotalInsentifModal();
+            });
+
+            $('#kali_insentif').on('blur', function() {
+                var k = ($('#kali_hidden').val() || '').trim();
+                var kali = parseInt(k, 10);
+                if (k === '' || isNaN(kali) || kali < 1) {
+                    kali = 1;
+                    $('#kali_hidden').val('1');
+                }
+                $(this).val(formatRupiah(String(kali)));
+                refreshTotalInsentifModal();
             });
 
             $(document).on('change', '.guru-checkbox', function() {
@@ -569,6 +662,11 @@ function editInsentif(id) {
                 var $form = $(this);
                 var raw = unformatRupiah($('#jumlah_insentif').val() || '');
                 $('#jumlah_insentif_hidden').val(raw.toString());
+                var kHi = $('#kali_hidden').val();
+                var kali = parseInt(kHi || '1', 10);
+                if (isNaN(kali) || kali < 1) kali = 1;
+                $('#kali_hidden').val(kali.toString());
+                refreshTotalInsentifModal();
 
                 Swal.fire({
                     title: 'Menyimpan...',
@@ -649,14 +747,15 @@ function editInsentif(id) {
                     {
                         extend: 'excel',
                         text: '<i class="fas fa-file-excel"></i> Excel',
-                        className: 'btn btn-success btn-sm'
+                        className: 'btn btn-success btn-sm',
+                        exportOptions: { columns: ':not(:last-child)' }
                     },
                     {
                         extend: 'print',
                         text: '<i class="fas fa-file-pdf"></i> PDF',
                         className: 'btn btn-danger btn-sm',
                         title: '',
-                        exportOptions: { columns: [0, 1, 2, 3, 4] },
+                        exportOptions: { columns: ':not(:last-child)' },
                         customize: function(win) {
                             try {
                                 var doc = win.document;
@@ -692,7 +791,7 @@ function editInsentif(id) {
                         text: '<i class="fas fa-print"></i> Print',
                         className: 'btn btn-info btn-sm',
                         title: '',
-                        exportOptions: { columns: [0, 1, 2, 3, 4] },
+                        exportOptions: { columns: ':not(:last-child)' },
                         customize: function(win) {
                             try {
                                 var doc = win.document;
