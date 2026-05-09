@@ -4,6 +4,7 @@ requireLogin();
 
 /** Cegah CDN/browser menyimpan cache HTML/CSS cetakan (biasanya masalah di hosting). */
 if (!headers_sent()) {
+    header('Content-Type: text/html; charset=UTF-8');
     header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
     header('Pragma: no-cache');
     header('Expires: 0');
@@ -30,6 +31,11 @@ if ($jumlah_periode > 1 && $periode_mulai !== '' && $periode_akhir !== '') {
 
 /** Tanggal di baris tempat+tanggal = tanggal sistem saat cetak dibuka (bukan pengaturan) */
 $tanggal_cetak_terformat = formatTanggalTanpaHari(date('Y-m-d'));
+
+/** Style inline pada sel baris data — sama di mana pun (Chrome/PDF/hosting tidak boleh beda dari stylesheet saja). */
+$legger_td_data_style = 'height:11mm;min-height:11mm;padding:2.75pt 2pt;vertical-align:middle;box-sizing:border-box;line-height:1.25;font-size:11pt;';
+$legger_th_style = 'padding:4.5pt 2pt;vertical-align:middle;box-sizing:border-box;line-height:1.2;font-size:11pt;';
+$legger_td_total_style = 'padding:4pt 2pt;vertical-align:middle;box-sizing:border-box;font-size:11pt;';
 
 $logo_file = __DIR__ . '/../../assets/img/' . ($settings['logo'] ?? '');
 $logo_exists = !empty($settings['logo']) && file_exists($logo_file);
@@ -96,8 +102,9 @@ foreach ($detail_rows as $row) {
 }
 ?>
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
+    <meta charset="UTF-8">
     <title>Legger Insentif</title>
     <style>
         @page {
@@ -152,33 +159,39 @@ foreach ($detail_rows as $row) {
             font-size: 12px;
         }
 
-        table {
+        table.legger-insentif {
             width: 100%;
             border-collapse: collapse;
             margin-top: 10px;
             table-layout: fixed;
         }
 
-        table, th, td {
+        table.legger-insentif,
+        table.legger-insentif th,
+        table.legger-insentif td {
             border: 1px solid #000;
         }
 
-        th, td {
+        table.legger-insentif th,
+        table.legger-insentif td {
             padding: 3px;
+            box-sizing: border-box;
         }
 
-        /* Baris data: sedikit lebih tinggi dari teks, proporsional font, cukup ruang tanda tangan */
-        tbody tr:not(.total) td {
-            min-height: 3.35em;
-            padding: 0.5em 0.3em;
+        /*
+         * Tinggi baris: pakai height + pt/mm — banyak engine cetak (Chrome PDF, dll.)
+         * mengabaikan min-height/em pada <td>; min-height/em sering terlihat di local preview
+         * tapi sama di hosting.
+         */
+        table.legger-insentif tbody tr:not(.total) td {
+            height: 11mm;
+            padding: 2.75pt 2pt;
             vertical-align: middle;
+            line-height: 1.25;
         }
 
-        thead th {
-            padding: 0.55em 0.3em;
-        }
-
-        th {
+        table.legger-insentif thead th {
+            padding: 4.5pt 2pt;
             background: #f0f0f0;
             text-align: center;
             font-size: 11pt;
@@ -186,21 +199,21 @@ foreach ($detail_rows as $row) {
             word-break: break-word;
         }
 
-        td {
+        table.legger-insentif td {
             font-size: 11pt;
         }
 
-        td.num {
+        table.legger-insentif td.num {
             text-align: right;
             white-space: nowrap;
         }
 
-        td.name {
+        table.legger-insentif td.name {
             white-space: normal;
             word-break: break-word;
         }
 
-        td.signature {
+        table.legger-insentif td.signature {
             min-width: 80px;
         }
 
@@ -209,8 +222,8 @@ foreach ($detail_rows as $row) {
             background: #fafafa;
         }
 
-        tr.total td {
-            padding: 0.55em 0.3em;
+        table.legger-insentif tbody tr.total td {
+            padding: 4pt 2pt;
             vertical-align: middle;
         }
 
@@ -283,6 +296,14 @@ foreach ($detail_rows as $row) {
             tfoot { display: table-footer-group; }
             tr { page-break-inside: avoid; }
 
+            /* Ulangi eksplisit di print agar host/browser tidak menyederhanakan rule layar */
+            table.legger-insentif tbody tr:not(.total) td {
+                height: 11mm !important;
+                min-height: 11mm !important;
+                padding: 2.75pt 2pt !important;
+                vertical-align: middle !important;
+            }
+
             .signature-section {
                 page-break-inside: avoid !important;
                 break-inside: avoid !important;
@@ -306,16 +327,16 @@ foreach ($detail_rows as $row) {
         </div>
     </div>
 
-    <table>
+    <table class="legger-insentif">
         <thead>
             <tr>
-                <th style="width: 30px;">No</th>
-                <th style="width: 220px;">Nama Guru</th>
+                <th style="width:30px;<?php echo htmlspecialchars($legger_th_style, ENT_COMPAT, 'UTF-8'); ?>">No</th>
+                <th style="width:220px;<?php echo htmlspecialchars($legger_th_style, ENT_COMPAT, 'UTF-8'); ?>">Nama Guru</th>
                 <?php foreach ($insentif_list as $i): ?>
-                    <th style="width: 95px;"><?php echo htmlspecialchars($i['nama_insentif']); ?></th>
+                    <th style="width:95px;<?php echo htmlspecialchars($legger_th_style, ENT_COMPAT, 'UTF-8'); ?>"><?php echo htmlspecialchars($i['nama_insentif']); ?></th>
                 <?php endforeach; ?>
-                <th style="width: 120px;">Total</th>
-                <th style="width: 100px;">Tanda Tangan</th>
+                <th style="width:120px;<?php echo htmlspecialchars($legger_th_style, ENT_COMPAT, 'UTF-8'); ?>">Total</th>
+                <th style="width:100px;<?php echo htmlspecialchars($legger_th_style, ENT_COMPAT, 'UTF-8'); ?>">Tanda Tangan</th>
             </tr>
         </thead>
         <tbody>
@@ -327,27 +348,27 @@ foreach ($detail_rows as $row) {
                 $row_total = 0;
             ?>
             <tr>
-                <td style="text-align: center;"><?php echo $no++; ?></td>
-                <td class="name"><?php echo htmlspecialchars($g['nama_lengkap']); ?></td>
+                <td class="ledger-cell" style="text-align:center;<?php echo htmlspecialchars($legger_td_data_style, ENT_COMPAT, 'UTF-8'); ?>"><?php echo $no++; ?></td>
+                <td class="name ledger-cell" style="<?php echo htmlspecialchars($legger_td_data_style, ENT_COMPAT, 'UTF-8'); ?>"><?php echo htmlspecialchars($g['nama_lengkap']); ?></td>
                 <?php foreach ($insentif_list as $i): ?>
                     <?php
                     $iid = intval($i['id']);
                     $val = floatval($detail_map[$gid][$iid] ?? 0);
                     $row_total += $val;
                     ?>
-                    <td class="num"><?php echo $val > 0 ? formatRupiahTanpaRp($val) : '-'; ?></td>
+                    <td class="num ledger-cell" style="<?php echo htmlspecialchars($legger_td_data_style, ENT_COMPAT, 'UTF-8'); ?>"><?php echo $val > 0 ? formatRupiahTanpaRp($val) : '-'; ?></td>
                 <?php endforeach; ?>
-                <td class="num total"><?php echo formatRupiahTanpaRp($row_total); ?></td>
-                <td class="signature"></td>
+                <td class="num total ledger-cell" style="<?php echo htmlspecialchars($legger_td_data_style, ENT_COMPAT, 'UTF-8'); ?>"><?php echo formatRupiahTanpaRp($row_total); ?></td>
+                <td class="signature ledger-cell" style="<?php echo htmlspecialchars($legger_td_data_style, ENT_COMPAT, 'UTF-8'); ?>"></td>
             </tr>
             <?php
                 $grand_total += $row_total;
             endforeach;
             ?>
             <tr class="total">
-                <td colspan="<?php echo 2 + count($insentif_list); ?>" style="text-align:center;">TOTAL</td>
-                <td class="num"><?php echo formatRupiahTanpaRp($grand_total); ?></td>
-                <td></td>
+                <td colspan="<?php echo 2 + count($insentif_list); ?>" style="text-align:center;<?php echo htmlspecialchars($legger_td_total_style, ENT_COMPAT, 'UTF-8'); ?>">TOTAL</td>
+                <td class="num" style="<?php echo htmlspecialchars($legger_td_total_style, ENT_COMPAT, 'UTF-8'); ?>"><?php echo formatRupiahTanpaRp($grand_total); ?></td>
+                <td style="<?php echo htmlspecialchars($legger_td_total_style, ENT_COMPAT, 'UTF-8'); ?>"></td>
             </tr>
         </tbody>
     </table>
