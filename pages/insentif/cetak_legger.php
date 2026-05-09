@@ -142,6 +142,17 @@ foreach ($detail_rows as $row) {
             padding: 3px;
         }
 
+        /* Baris data: sedikit lebih tinggi dari teks, proporsional font, cukup ruang tanda tangan */
+        tbody tr:not(.total) td {
+            min-height: 3.35em;
+            padding: 0.5em 0.3em;
+            vertical-align: middle;
+        }
+
+        thead th {
+            padding: 0.55em 0.3em;
+        }
+
         th {
             background: #f0f0f0;
             text-align: center;
@@ -171,6 +182,11 @@ foreach ($detail_rows as $row) {
         .total {
             font-weight: bold;
             background: #fafafa;
+        }
+
+        tr.total td {
+            padding: 0.55em 0.3em;
+            vertical-align: middle;
         }
 
         .tempat-tanggal {
@@ -215,6 +231,12 @@ foreach ($detail_rows as $row) {
             height: 18mm;
         }
 
+        /* Tanggal + blok tanda tangan selalu satu kesatuan di satu halaman */
+        .signature-section {
+            page-break-inside: avoid;
+            break-inside: avoid;
+        }
+
         @media print {
             @page {
                 size: 330mm 210mm;
@@ -235,6 +257,11 @@ foreach ($detail_rows as $row) {
             thead { display: table-header-group; }
             tfoot { display: table-footer-group; }
             tr { page-break-inside: avoid; }
+
+            .signature-section {
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+            }
         }
     </style>
 </head>
@@ -300,6 +327,7 @@ foreach ($detail_rows as $row) {
         </tbody>
     </table>
 
+    <div class="signature-section">
     <?php if (!empty($settings['tempat']) || !empty($settings['hari_tanggal'])): ?>
     <div class="tempat-tanggal">
         <?php if (!empty($settings['tempat'])): ?>
@@ -342,6 +370,7 @@ foreach ($detail_rows as $row) {
             </div>
             <p><?php echo htmlspecialchars($settings['nama_bendahara'] ?? ''); ?></p>
         </div>
+    </div>
     </div>
 
     <script>
