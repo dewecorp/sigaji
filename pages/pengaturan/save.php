@@ -9,7 +9,28 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $jumlah_periode = $_POST['jumlah_periode'] ?? 1;
     $tahun_ajaran = $_POST['tahun_ajaran'] ?? '';
     $tempat = $_POST['tempat'] ?? '';
-    $hari_tanggal = $_POST['hari_tanggal'] ?? date('Y-m-d');
+
+    // Nilai tanggal cetak sip: pakai apa yang dikirim form SAJA — jangan isi pakai tanggal sistem
+    // (prior bug: kosong/not set → tertulis "hari ini", jadi cetakan selalu mengikuti tanggal kini)
+    $existing_row = null;
+    $existing_q = $conn->query('SELECT logo, hari_tanggal FROM settings WHERE id=1 LIMIT 1');
+    if ($existing_q && $existing_q->num_rows > 0) {
+        $existing_row = $existing_q->fetch_assoc();
+    }
+    $hari_tanggal_existing = $existing_row !== null ? ($existing_row['hari_tanggal'] ?? null) : null;
+
+    if (array_key_exists('hari_tanggal', $_POST)) {
+        $raw_ht = trim((string)$_POST['hari_tanggal']);
+        if ($raw_ht === '' || $raw_ht === '0000-00-00') {
+            $hari_tanggal = null;
+        } elseif (preg_match('/^\d{4}-\d{2}-\d{2}$/', $raw_ht)) {
+            $hari_tanggal = $raw_ht;
+        } else {
+            $hari_tanggal = $hari_tanggal_existing;
+        }
+    } else {
+        $hari_tanggal = $hari_tanggal_existing;
+    }
     
     // Handle periode based on jumlah_periode
     if ($jumlah_periode == 1) {
@@ -35,13 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
     }
     
-    // Get current logo from database (to keep it if no new logo uploaded)
-    $current_logo = null;
-    $get_logo_sql = "SELECT logo FROM settings WHERE id=1";
-    $logo_result = $conn->query($get_logo_sql);
-    if ($logo_result && $logo_result->num_rows > 0) {
-        $current_logo = $logo_result->fetch_assoc()['logo'];
-    }
+    $current_logo = $existing_row !== null ? ($existing_row['logo'] ?? null) : null;
     
     $logo = $current_logo; // Default to current logo
     

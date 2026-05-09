@@ -2,9 +2,34 @@
 require_once __DIR__ . '/../../config/config.php';
 requireLogin();
 
-$sql = "SELECT * FROM settings LIMIT 1";
-$settings = $conn->query($sql)->fetch_assoc();
-$bulan_aktif = date('Y-m');
+/** Cegah CDN/browser menyimpan cache HTML/CSS cetakan (biasanya masalah di hosting). */
+if (!headers_sent()) {
+    header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+    header('Pragma: no-cache');
+    header('Expires: 0');
+}
+
+$sql = "SELECT * FROM settings WHERE id = 1 LIMIT 1";
+$qr_settings = $conn->query($sql);
+$settings = ($qr_settings && $qr_settings->num_rows > 0) ? $qr_settings->fetch_assoc() : [];
+
+$periode_aktif = trim((string)($settings['periode_aktif'] ?? ''));
+if ($periode_aktif === '') {
+    $periode_aktif = date('Y-m');
+}
+$jumlah_periode = isset($settings['jumlah_periode']) ? (int)$settings['jumlah_periode'] : 1;
+$periode_mulai = trim((string)($settings['periode_mulai'] ?? ''));
+$periode_akhir = trim((string)($settings['periode_akhir'] ?? ''));
+
+/** Label bulan di header mengikuti pengaturan periode aktif / rentang banyak bulan */
+if ($jumlah_periode > 1 && $periode_mulai !== '' && $periode_akhir !== '') {
+    $label_bulan_insentif = getPeriodRangeLabel($periode_mulai, $periode_akhir);
+} else {
+    $label_bulan_insentif = getPeriodLabel($periode_aktif);
+}
+
+/** Tanggal di baris tempat+tanggal = tanggal sistem saat cetak dibuka (bukan pengaturan) */
+$tanggal_cetak_terformat = formatTanggalTanpaHari(date('Y-m-d'));
 
 $logo_file = __DIR__ . '/../../assets/img/' . ($settings['logo'] ?? '');
 $logo_exists = !empty($settings['logo']) && file_exists($logo_file);
@@ -274,7 +299,7 @@ foreach ($detail_rows as $row) {
         <div class="header-content">
             <h2><?php echo strtoupper(htmlspecialchars($settings['nama_madrasah'] ?? 'MADRASAH')); ?></h2>
             <p>LEGGER INSENTIF</p>
-            <p>Bulan <?php echo htmlspecialchars(getPeriodLabel($bulan_aktif)); ?></p>
+            <p>Bulan <?php echo htmlspecialchars($label_bulan_insentif); ?></p>
             <?php if (!empty($settings['tahun_ajaran'])): ?>
                 <p>Tahun Ajaran <?php echo htmlspecialchars($settings['tahun_ajaran']); ?></p>
             <?php endif; ?>
@@ -328,13 +353,13 @@ foreach ($detail_rows as $row) {
     </table>
 
     <div class="signature-section">
-    <?php if (!empty($settings['tempat']) || !empty($settings['hari_tanggal'])): ?>
+    <?php if (!empty($settings['tempat']) || $tanggal_cetak_terformat !== ''): ?>
     <div class="tempat-tanggal">
         <?php if (!empty($settings['tempat'])): ?>
-            <?php echo htmlspecialchars($settings['tempat']); ?><?php if (!empty($settings['hari_tanggal'])): ?>,<?php endif; ?>
+            <?php echo htmlspecialchars($settings['tempat']); ?><?php if ($tanggal_cetak_terformat !== ''): ?>, <?php endif; ?>
         <?php endif; ?>
-        <?php if (!empty($settings['hari_tanggal'])): ?>
-            <?php echo formatTanggalTanpaHari($settings['hari_tanggal']); ?>
+        <?php if ($tanggal_cetak_terformat !== ''): ?>
+            <?php echo htmlspecialchars($tanggal_cetak_terformat); ?>
         <?php endif; ?>
     </div>
     <?php endif; ?>

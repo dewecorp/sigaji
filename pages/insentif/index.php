@@ -159,10 +159,10 @@ foreach ($legger_detail_rows as $row) {
                                 <h4>Legger Insentif</h4>
                                 <div class="card-header-action" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
                                     <div id="tableLeggerInsentif_buttons" style="display: flex; gap: 5px; flex-wrap: wrap;"></div>
-                                    <a href="cetak_slip_semua.php" class="btn btn-warning" target="_blank">
+                                    <a href="cetak_slip_semua.php?v=<?php echo (int)@filemtime(__DIR__ . '/cetak_slip_semua.php'); ?>" class="btn btn-warning" target="_blank">
                                         <i class="fas fa-file-invoice"></i> Cetak Slip Semua
                                     </a>
-                                    <a href="cetak_legger.php" class="btn btn-primary" target="_blank">
+                                    <a href="cetak_legger.php?v=<?php echo (int)@filemtime(__DIR__ . '/cetak_legger.php'); ?>" class="btn btn-primary" target="_blank">
                                         <i class="fas fa-print"></i> Cetak Legger Insentif
                                     </a>
                                 </div>

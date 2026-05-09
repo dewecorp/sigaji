@@ -215,7 +215,7 @@ if ($savedTahunAjaran !== '' && !in_array($savedTahunAjaran, $tahunAjaranOptions
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label><strong>Hari, Tanggal</strong></label>
-                                                <input type="date" class="form-control" name="hari_tanggal" value="<?php echo htmlspecialchars($settings['hari_tanggal'] ?? date('Y-m-d')); ?>">
+                                                <input type="date" class="form-control" name="hari_tanggal" value="<?php echo (!empty($settings['hari_tanggal']) && ($settings['hari_tanggal'] ?? '') !== '0000-00-00') ? htmlspecialchars($settings['hari_tanggal']) : ''; ?>">
                                                 <small class="text-muted">Tanggal untuk slip gaji (akan ditampilkan dalam format Indonesia)</small>
                                             </div>
                                         </div>

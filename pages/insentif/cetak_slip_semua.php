@@ -2,8 +2,9 @@
 require_once __DIR__ . '/../../config/config.php';
 requireLogin();
 
-$sql = "SELECT * FROM settings LIMIT 1";
-$settings = $conn->query($sql)->fetch_assoc();
+$sql = "SELECT * FROM settings WHERE id = 1 LIMIT 1";
+$qr_settings = $conn->query($sql);
+$settings = ($qr_settings && $qr_settings->num_rows > 0) ? $qr_settings->fetch_assoc() : [];
 
 $logo_file = __DIR__ . '/../../assets/img/' . ($settings['logo'] ?? '');
 $logo_exists = !empty($settings['logo']) && file_exists($logo_file);
@@ -309,13 +310,14 @@ foreach ($rows as $row) {
                             </div>
                         </div>
 
-                        <?php if (!empty($settings['tempat']) || !empty($settings['hari_tanggal'])): ?>
+                        <?php $tanggal_cetak_insentif = formatTanggalTanpaHari(date('Y-m-d')); ?>
+                        <?php if (!empty($settings['tempat']) || $tanggal_cetak_insentif !== ''): ?>
                         <div class="tempat-tanggal">
                             <?php if (!empty($settings['tempat'])): ?>
-                                <?php echo htmlspecialchars($settings['tempat']); ?><?php if (!empty($settings['hari_tanggal'])): ?>,<?php endif; ?>
+                                <?php echo htmlspecialchars($settings['tempat']); ?><?php if ($tanggal_cetak_insentif !== ''): ?>, <?php endif; ?>
                             <?php endif; ?>
-                            <?php if (!empty($settings['hari_tanggal'])): ?>
-                                <?php echo formatTanggalTanpaHari($settings['hari_tanggal']); ?>
+                            <?php if ($tanggal_cetak_insentif !== ''): ?>
+                                <?php echo htmlspecialchars($tanggal_cetak_insentif); ?>
                             <?php endif; ?>
                         </div>
                         <?php endif; ?>
