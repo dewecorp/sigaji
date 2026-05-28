@@ -65,7 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['excel_file'])) {
                     $tmt = !empty($row[1]) ? (int)trim($row[1]) : null;
                     $jumlah_jam_mengajar = !empty($row[2]) ? (int)trim($row[2]) : 0;
                     $jabatan = trim($row[3] ?? '');
-                    $status_pegawai = trim($row[4] ?? 'Honor');
+                    $status_pegawai = trim($row[4] ?? 'Honorer');
                     
                     // Validate required fields
                     if (empty($nama_lengkap)) {
@@ -75,8 +75,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['excel_file'])) {
                     }
                     
                     // Validate status_pegawai
-                    if (!in_array($status_pegawai, ['PNS', 'Honor', 'Kontrak'])) {
-                        $status_pegawai = 'Honor';
+                    if (!in_array($status_pegawai, ['PNS', 'Honorer', 'Kontrak'])) {
+                        $status_pegawai = 'Honorer';
                     }
                     
                     // Insert data

@@ -205,10 +205,11 @@ $tunjangan_list = $result_tunjangan ? $result_tunjangan->fetch_all(MYSQLI_ASSOC)
                                                     </td>
                                                     <td style="text-align: center;">
                                                         <span class="badge badge-<?php 
-                                                            echo $g['status_pegawai'] == 'PNS' ? 'success' : 
-                                                                ($g['status_pegawai'] == 'Honor' ? 'warning' : 'info'); 
+                                                            $st = $g['status_pegawai'];
+                                                            echo $st == 'PNS' ? 'success' : 
+                                                                (($st == 'Honorer' || $st == 'Honor') ? 'warning' : 'info'); 
                                                         ?>">
-                                                            <?php echo htmlspecialchars($g['status_pegawai']); ?>
+                                                            <?php echo htmlspecialchars($st); ?>
                                                         </span>
                                                     </td>
                                                     <td style="text-align: center;">
@@ -313,7 +314,7 @@ $tunjangan_list = $result_tunjangan ? $result_tunjangan->fetch_all(MYSQLI_ASSOC)
                                         <div class="form-group">
                                             <label>Status Pegawai</label>
                                             <select class="form-control" name="status_pegawai" id="status_pegawai">
-                                                <option value="Honor">Honor</option>
+                                                <option value="Honorer">Honorer</option>
                                                 <option value="PNS">PNS</option>
                                                 <option value="Kontrak">Kontrak</option>
                                             </select>
@@ -512,7 +513,7 @@ var selectedIds = new Set();
                 $('#nama_lengkap').val(data.nama_lengkap || '');
                 $('#tmt').val(data.tmt || '');
                 $('#jumlah_jam_mengajar').val(data.jumlah_jam_mengajar || 0);
-                $('#status_pegawai').val(data.status_pegawai || 'Honor');
+                $('#status_pegawai').val(data.status_pegawai || 'Honorer');
                 
                 // Handle multiple jabatan
                 $('.jabatan-checkbox').prop('checked', false);
@@ -727,12 +728,13 @@ var selectedIds = new Set();
     
     // Initialize DataTable WITHOUT any sorting capability
     var table = $('#tableGuru').DataTable({
-        dom: '<"row"<"col-sm-12 col-md-6"B><"col-sm-12 col-md-6"f>>rtip',
+        dom: '<"row"<"col-sm-12 col-md-4"l><"col-sm-12 col-md-4 text-center"B><"col-sm-12 col-md-4"f>>rtip',
         paging: true,
         searching: true,
         ordering: false, // CRITICAL: Completely disable ordering
         info: true,
-        pageLength: 10,
+        pageLength: 25,
+        lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "Semua"]],
         stateSave: false,
         stateDuration: -1,
         retrieve: false,
@@ -803,7 +805,7 @@ var selectedIds = new Set();
         drawCallback: function(settings) {
             var api = this.api();
             var pageInfo = api.page.info();
-            api.column(1, {search: 'applied'}).nodes().each(function(cell, i) {
+            api.column(1, {page: 'current', search: 'applied'}).nodes().each(function(cell, i) {
                 cell.innerHTML = pageInfo.start + i + 1;
             });
             // Restore checkbox states after pagination
@@ -1123,7 +1125,7 @@ var selectedIds = new Set();
                             row.append($('<td>').html('<input type="text" class="form-control form-control-sm" name="jabatan[' + guru.id + ']" value="' + escapeHtml(jabatanValue) + '" placeholder="Pisahkan dengan koma untuk multiple jabatan">'));
                             
                             var statusSelect = $('<select>').addClass('form-control form-control-sm').attr('name', 'status_pegawai[' + guru.id + ']');
-                            statusSelect.append($('<option>').attr('value', 'Honor').text('Honor').prop('selected', guru.status_pegawai === 'Honor'));
+                            statusSelect.append($('<option>').attr('value', 'Honorer').text('Honorer').prop('selected', guru.status_pegawai === 'Honorer' || guru.status_pegawai === 'Honor'));
                             statusSelect.append($('<option>').attr('value', 'PNS').text('PNS').prop('selected', guru.status_pegawai === 'PNS'));
                             statusSelect.append($('<option>').attr('value', 'Kontrak').text('Kontrak').prop('selected', guru.status_pegawai === 'Kontrak'));
                             row.append($('<td>').append(statusSelect));

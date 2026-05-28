@@ -78,7 +78,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Save as JSON array
     $jabatan = !empty($jabatan_array) ? json_encode(array_values($jabatan_array)) : '';
     
-    $status_pegawai = $_POST['status_pegawai'] ?? 'Honor';
+    $status_pegawai = $_POST['status_pegawai'] ?? 'Honorer';
     
     // Convert empty strings to null for optional fields
     $tmt = ($tmt === '' || $tmt === null) ? null : (int)$tmt;

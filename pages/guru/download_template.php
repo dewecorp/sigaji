@@ -60,7 +60,7 @@ try {
         2020,
         24,
         'Guru Mata Pelajaran',
-        'Honor'
+        'Honorer'
     ];
     $col = 'A';
     $row = 2;
@@ -82,7 +82,7 @@ try {
     $sheet->setCellValue('A5', '1. Nama Lengkap wajib diisi');
     $sheet->setCellValue('A6', '2. TMT (Tahun Mulai Tugas) format: tahun (contoh: 2020)');
     $sheet->setCellValue('A7', '3. Masa Bakti akan dihitung otomatis dari TMT');
-    $sheet->setCellValue('A8', '4. Status Pegawai: Honor, PNS, atau Kontrak');
+    $sheet->setCellValue('A8', '4. Status Pegawai: Honorer, PNS, atau Kontrak');
     $sheet->setCellValue('A9', '5. Hapus baris contoh sebelum import');
     
     // Set filename
