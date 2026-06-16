@@ -55,6 +55,54 @@
                 }
             });
         }
+
+        function confirmUpdate(event) {
+            event.preventDefault();
+            Swal.fire({
+                title: 'Update Aplikasi?',
+                text: 'Sistem akan mengambil perubahan terbaru dari GitHub.\nPastikan koneksi internet stabil.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#6777ef',
+                cancelButtonColor: '#dc3545',
+                confirmButtonText: 'Ya, Update!',
+                cancelButtonText: 'Batal',
+                showLoaderOnConfirm: true,
+                preConfirm: () => {
+                    return fetch('<?php echo BASE_URL; ?>ajax/update.php', {
+                        method: 'POST'
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(response.statusText);
+                        }
+                        return response.json();
+                    })
+                    .catch(error => {
+                        Swal.showValidationMessage(`Request gagal: ${error}`);
+                    });
+                },
+                allowOutsideClick: () => !Swal.isLoading()
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    if (result.value.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Update Berhasil!',
+                            html: '<pre style="text-align: left; font-size: 12px;">' + result.value.message.replace(/\n/g, '<br>') + '</pre>',
+                        }).then(() => {
+                            window.location.reload();
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Update Gagal!',
+                            html: '<pre style="text-align: left; font-size: 12px;">' + result.value.message.replace(/\n/g, '<br>') + '</pre>',
+                        });
+                    }
+                }
+            });
+        }
     </script>
     
     <!-- Notification Handler -->

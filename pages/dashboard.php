@@ -328,6 +328,9 @@ $activities = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
     height: 100%;
     display: flex;
     flex-direction: column;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
 .stat-card:hover {
@@ -343,7 +346,9 @@ $activities = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
     flex: 1;
     min-height: 120px;
     width: 100%;
+    max-width: 100%;
     box-sizing: border-box;
+    flex-wrap: nowrap;
 }
 
 .stat-card-large .card-body {
@@ -366,6 +371,7 @@ $activities = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
     color: #fff;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     transition: all 0.3s ease;
+    flex-shrink: 0;
 }
 
 .stat-card-large .stat-icon {
@@ -383,7 +389,9 @@ $activities = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
     flex: 1;
     min-width: 0;
     width: 100%;
+    max-width: 100%;
     overflow: hidden;
+    box-sizing: border-box;
 }
 
 .stat-value {
@@ -395,6 +403,7 @@ $activities = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
     word-break: break-word;
     overflow-wrap: break-word;
     hyphens: auto;
+    width: 100%;
 }
 
 .stat-card-large .stat-value {
@@ -408,10 +417,7 @@ $activities = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-}
-
-.stat-card-large .stat-label {
-    font-size: 1rem;
+    word-wrap: break-word;
 }
 
 /* Color Themes */
@@ -743,6 +749,50 @@ $activities = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
     
     .stat-card-large .stat-label {
         font-size: 0.85rem;
+    }
+}
+
+/* Responsive - Projector & Large Display (1024px - 1600px) */
+@media (min-width: 1024px) and (max-width: 1600px) {
+    .stat-card .card-body {
+        padding: 20px;
+        gap: 15px;
+    }
+    
+    .stat-icon {
+        width: 60px;
+        height: 60px;
+        font-size: 24px;
+    }
+    
+    .stat-value {
+        font-size: 1.5rem;
+    }
+    
+    .stat-label {
+        font-size: 0.85rem;
+    }
+}
+
+/* Responsive - Wide Projector & Ultrawide Display (1601px+) */
+@media (min-width: 1601px) {
+    .stat-card .card-body {
+        padding: 25px 30px;
+        gap: 20px;
+    }
+    
+    .stat-icon {
+        width: 70px;
+        height: 70px;
+        font-size: 28px;
+    }
+    
+    .stat-value {
+        font-size: 1.75rem;
+    }
+    
+    .stat-label {
+        font-size: 0.95rem;
     }
 }
 

@@ -617,6 +617,9 @@ cleanupOldActivities($conn);
                             <a href="<?php echo BASE_URL; ?>pages/pengguna/profile.php" class="dropdown-item has-icon">
                                 <i class="far fa-user"></i> Profile
                             </a>
+                            <a href="#" onclick="confirmUpdate(event)" class="dropdown-item has-icon">
+                                <i class="fas fa-sync-alt"></i> Update Sistem
+                            </a>
                             <div class="dropdown-divider"></div>
                             <a href="#" onclick="confirmLogout(event)" class="dropdown-item has-icon text-danger">
                                 <i class="fas fa-sign-out-alt"></i> Logout
@@ -641,6 +644,7 @@ cleanupOldActivities($conn);
                     </button>
                     <div class="mobile-user-menu" id="mobile-user-menu">
                         <a href="<?php echo BASE_URL; ?>pages/pengguna/profile.php">Profile</a>
+                        <a href="#" onclick="confirmUpdate(event)">Update Sistem</a>
                         <a href="#" onclick="confirmLogout(event)">Logout</a>
                     </div>
                 </div>
