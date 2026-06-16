@@ -59,13 +59,13 @@
         function confirmUpdate(event) {
             event.preventDefault();
             Swal.fire({
-                title: 'Update Aplikasi?',
-                text: 'Sistem akan mengambil perubahan terbaru dari GitHub.\nPastikan koneksi internet stabil.',
-                icon: 'warning',
+                title: 'Konfirmasi Update Sistem',
+                html: 'Anda akan memperbarui sistem dari repository GitHub.<br><strong>Pastikan:</strong><ul style="text-align: left; margin-top: 10px; margin-bottom: 0;"><li>Koneksi internet stabil</li><li>Tidak ada perubahan lokal yang belum di-commit</li></ul>',
+                icon: 'info',
                 showCancelButton: true,
                 confirmButtonColor: '#6777ef',
                 cancelButtonColor: '#dc3545',
-                confirmButtonText: 'Ya, Update!',
+                confirmButtonText: 'Lanjutkan Update',
                 cancelButtonText: 'Batal',
                 showLoaderOnConfirm: true,
                 preConfirm: () => {
@@ -79,25 +79,30 @@
                         return response.json();
                     })
                     .catch(error => {
-                        Swal.showValidationMessage(`Request gagal: ${error}`);
+                        Swal.showValidationMessage(`Gagal menghubungi server: ${error}`);
                     });
                 },
                 allowOutsideClick: () => !Swal.isLoading()
             }).then((result) => {
                 if (result.isConfirmed) {
                     if (result.value.success) {
+                        let message = result.value.message;
+                        let isUpToDate = message.toLowerCase().includes('already up to date');
+                        
                         Swal.fire({
-                            icon: 'success',
-                            title: 'Update Berhasil!',
-                            html: '<pre style="text-align: left; font-size: 12px;">' + result.value.message.replace(/\n/g, '<br>') + '</pre>',
+                            icon: isUpToDate ? 'info' : 'success',
+                            title: isUpToDate ? 'Sistem Sudah Versi Terbaru!' : 'Update Berhasil',
+                            text: isUpToDate ? 'Sistem Anda sudah menggunakan versi terbaru dari GitHub.' : 'Sistem telah berhasil diperbarui ke versi terbaru!',
                         }).then(() => {
-                            window.location.reload();
+                            if (!isUpToDate) {
+                                window.location.reload();
+                            }
                         });
                     } else {
                         Swal.fire({
                             icon: 'error',
-                            title: 'Update Gagal!',
-                            html: '<pre style="text-align: left; font-size: 12px;">' + result.value.message.replace(/\n/g, '<br>') + '</pre>',
+                            title: 'Update Gagal',
+                            text: 'Gagal memperbarui sistem. Silakan coba lagi nanti.',
                         });
                     }
                 }
