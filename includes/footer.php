@@ -102,7 +102,7 @@
                         Swal.fire({
                             icon: 'error',
                             title: 'Update Gagal',
-                            text: 'Gagal memperbarui sistem. Silakan coba lagi nanti.',
+                            text: result.value.message || 'Gagal memperbarui sistem. Silakan coba lagi nanti.',
                         });
                     }
                 }
