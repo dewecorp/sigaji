@@ -70,7 +70,8 @@
                 showLoaderOnConfirm: true,
                 preConfirm: () => {
                     return fetch('<?php echo BASE_URL; ?>pages/pengaturan/ajax_update.php', {
-                        method: 'POST'
+                        method: 'POST',
+                        credentials: 'same-origin'
                     })
                     .then(response => {
                         if (!response.ok) {
