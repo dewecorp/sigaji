@@ -69,7 +69,7 @@
                 cancelButtonText: 'Batal',
                 showLoaderOnConfirm: true,
                 preConfirm: () => {
-                    return fetch('<?php echo BASE_URL; ?>ajax/update.php', {
+                    return fetch('<?php echo BASE_URL; ?>pages/pengaturan/ajax_update.php', {
                         method: 'POST'
                     })
                     .then(response => {
