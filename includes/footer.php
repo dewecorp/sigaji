@@ -2,6 +2,22 @@
         </div>
     </div>
 
+    <?php
+    if (!function_exists('csrfToken')) {
+        function csrfToken($key = 'default') {
+            if (empty($_SESSION['csrf_tokens']) || !is_array($_SESSION['csrf_tokens'])) {
+                $_SESSION['csrf_tokens'] = [];
+            }
+
+            if (empty($_SESSION['csrf_tokens'][$key])) {
+                $_SESSION['csrf_tokens'][$key] = bin2hex(random_bytes(32));
+            }
+
+            return $_SESSION['csrf_tokens'][$key];
+        }
+    }
+    ?>
+
     <!-- General JS Scripts -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
@@ -60,10 +76,10 @@
             event.preventDefault();
             Swal.fire({
                 title: 'Konfirmasi Update Sistem',
-                html: 'Anda akan memperbarui sistem dari repository GitHub.<br><strong>Pastikan:</strong><ul style="text-align: left; margin-top: 10px; margin-bottom: 0;"><li>Koneksi internet stabil</li><li>Tidak ada perubahan lokal yang belum di-commit</li></ul>',
+                html: 'Anda akan memperbarui sistem dari paket ZIP GitHub.<br><strong>Pastikan:</strong><ul style="text-align: left; margin-top: 10px; margin-bottom: 0;"><li>Koneksi internet hosting stabil</li><li>Folder aplikasi bisa ditulis oleh PHP</li><li>Extension PHP ZipArchive aktif</li></ul>',
                 icon: 'info',
                 showCancelButton: true,
-                confirmButtonColor: '#6777ef',
+                confirmButtonColor: '#0f766e',
                 cancelButtonColor: '#dc3545',
                 confirmButtonText: 'Lanjutkan Update',
                 cancelButtonText: 'Batal',
@@ -71,7 +87,13 @@
                 preConfirm: () => {
                     return fetch('<?php echo BASE_URL; ?>pages/pengaturan/ajax_update.php', {
                         method: 'POST',
-                        credentials: 'same-origin'
+                        credentials: 'same-origin',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+                        },
+                        body: new URLSearchParams({
+                            csrf_token: '<?php echo htmlspecialchars(csrfToken('system_update'), ENT_QUOTES, 'UTF-8'); ?>'
+                        }).toString()
                     })
                     .then(response => {
                         if (!response.ok) {
@@ -163,4 +185,3 @@
     </footer>
 </body>
 </html>
-
