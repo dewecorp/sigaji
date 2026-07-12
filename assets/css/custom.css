@@ -913,4 +913,13 @@ body .card-body div:not(.card-title):not(.modal-title):not(.stat-value):not(.sta
     font-size: 0.875rem !important;
 }
 
+/* SweetAlert buttons */
+.swal2-popup .swal2-actions .swal2-styled,
+.swal2-popup .swal2-actions .swal2-styled:hover,
+.swal2-popup .swal2-actions .swal2-styled:focus,
+.swal2-popup .swal2-actions .swal2-styled:active {
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
 
