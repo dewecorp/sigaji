@@ -158,7 +158,7 @@ cleanupOldActivities($conn);
             display: inline-block !important;
             visibility: visible !important;
             opacity: 1 !important;
-            color: #6777ef !important;
+            color: #ffffff !important;
             z-index: 999 !important;
             pointer-events: auto !important;
         }
@@ -170,11 +170,11 @@ cleanupOldActivities($conn);
             display: inline-block !important;
             visibility: visible !important;
             opacity: 1 !important;
-            color: #6777ef !important;
+            color: #ffffff !important;
         }
         .main-sidebar,
         .main-sidebar.sidebar-style-2 {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+            background: linear-gradient(135deg, #0ea5e9 0%, #10b981 100%) !important;
         }
         
         .main-sidebar .sidebar-brand a,
@@ -246,24 +246,24 @@ cleanupOldActivities($conn);
         .navbar-brand-text .app-name-full {
             font-weight: 700;
             font-size: 18px;
-            color: #4c51bf;
+            color: #ffffff;
         }
         
         .navbar-brand-text .app-name-short {
             font-weight: 700;
             font-size: 16px;
-            color: #4c51bf;
+            color: #ffffff;
             display: none;
         }
         
         .navbar-brand-text .school-name {
             font-size: 13px;
-            color: #4a5568;
+            color: rgba(255, 255, 255, 0.86);
         }
         
         .navbar-info .tahun-ajaran {
             font-size: 14px;
-            color: #667eea;
+            color: rgba(255, 255, 255, 0.9);
             font-weight: 600;
             margin-top: 2px;
         }
@@ -297,7 +297,7 @@ cleanupOldActivities($conn);
         }
         
         .datetime-display .date-part {
-            color: #495057;
+            color: rgba(255, 255, 255, 0.92);
             font-size: 15px;
             font-weight: 600;
             display: flex;
@@ -310,12 +310,12 @@ cleanupOldActivities($conn);
             content: '\f073';
             font-family: 'Font Awesome 5 Free';
             font-weight: 900;
-            color: #667eea;
+            color: #ffffff;
             font-size: 14px;
         }
         
         .datetime-display .time-part {
-            color: #667eea;
+            color: #ffffff;
             font-weight: 700;
             font-size: 20px;
             letter-spacing: 1.5px;
@@ -330,13 +330,13 @@ cleanupOldActivities($conn);
             content: '\f017';
             font-family: 'Font Awesome 5 Free';
             font-weight: 900;
-            color: #667eea;
+            color: #ffffff;
             font-size: 16px;
             margin-right: 6px;
         }
         
         .datetime-display .separator {
-            color: #667eea;
+            color: #ffffff;
             font-weight: 700;
             margin: 0 2px;
             animation: blink 1s infinite;
@@ -348,7 +348,7 @@ cleanupOldActivities($conn);
         }
         
         .datetime-display .day-name {
-            color: #667eea;
+            color: #ffffff;
             font-weight: 600;
         }
         
@@ -404,7 +404,7 @@ cleanupOldActivities($conn);
                 opacity: 1 !important;
                 font-size: 1.125rem !important;
                 padding: 0.375rem !important;
-                color: #6777ef !important;
+                color: #ffffff !important;
                 z-index: 999 !important;
             }
             
@@ -443,7 +443,7 @@ cleanupOldActivities($conn);
             display: block;
             font-size: 18px;
             margin-bottom: 2px;
-            color: #6777ef;
+            color: #0f766e;
         }
         
         .mobile-bottom-nav .mobile-nav-item button {
@@ -615,8 +615,8 @@ cleanupOldActivities($conn);
                                 $img_src = $avatar_url;
                             }
                             ?>
-                            <img alt="image" src="<?php echo $img_src; ?>" class="user-img mr-2" style="width: 40px; height: 40px; object-fit: cover; border-radius: 50%; border: 2px solid #667eea; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: inline-block !important;">
-                            <div class="d-sm-none d-lg-inline-block" style="font-size: 14px; font-weight: 500; vertical-align: middle;"><?php echo htmlspecialchars($nama_lengkap ?? ''); ?></div>
+                            <img alt="image" src="<?php echo $img_src; ?>" class="user-img mr-2" style="width: 40px; height: 40px; object-fit: cover; border-radius: 50%; border: 2px solid rgba(255,255,255,0.82); box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: inline-block !important;">
+                            <div class="d-sm-none d-lg-inline-block" style="font-size: 14px; font-weight: 600; color: #ffffff; vertical-align: middle;"><?php echo htmlspecialchars($nama_lengkap ?? ''); ?></div>
                         </a>
                         <div class="dropdown-menu dropdown-menu-right">
                             <a href="<?php echo BASE_URL; ?>pages/pengguna/profile.php" class="dropdown-item has-icon">

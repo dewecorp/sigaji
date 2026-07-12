@@ -562,7 +562,7 @@ body .main-content .section .section-body .stat-card .stat-icon svg.dashboard-st
 
 /* Color Themes */
 .stat-card-primary .stat-icon {
-    color: #667eea;
+    color: #0ea5e9;
 }
 
 .stat-card-success .stat-icon {
@@ -623,7 +623,7 @@ body .main-content .section .section-body .stat-card .stat-icon svg.dashboard-st
     background: #f7fafc;
     padding: 18px 20px;
     border-radius: 10px;
-    border-left: 4px solid #667eea;
+    border-left: 4px solid #0f766e;
     transition: all 0.2s ease;
 }
 
@@ -682,7 +682,7 @@ body .main-content .section .section-body .stat-card .stat-icon svg.dashboard-st
     font-size: 0.85rem;
     padding: 4px 10px;
     font-weight: 600;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #0ea5e9 0%, #10b981 100%);
     border: none;
 }
 
@@ -979,9 +979,132 @@ body .main-content .section .section-body .stat-card .stat-icon svg.dashboard-st
 /* Time ago styling */
 .time-ago {
     font-weight: 600;
-    color: #667eea !important;
+    color: #0f766e !important;
     display: block;
     margin-bottom: 4px;
+}
+
+/* Compact dashboard cards, mengikuti contoh card ringkas. */
+.section-body > .row.g-3 {
+    align-items: stretch;
+}
+
+.section-body > .row.g-3 > [class*='col-'] {
+    display: flex;
+}
+
+body .main-content .section .section-body .stat-card {
+    border: 1px solid #d9e2ec !important;
+    border-radius: 8px !important;
+    background: #ffffff !important;
+    box-shadow: 0 2px 5px rgba(15, 23, 42, 0.08) !important;
+    min-height: 82px !important;
+    overflow: visible !important;
+}
+
+body .main-content .section .section-body .stat-card::before {
+    display: none !important;
+}
+
+body .main-content .section .section-body .stat-card:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 14px rgba(15, 23, 42, 0.1) !important;
+}
+
+body .main-content .section .section-body .stat-card .card-body {
+    display: grid !important;
+    grid-template-columns: 44px minmax(0, 1fr) !important;
+    align-items: center !important;
+    gap: 12px !important;
+    min-height: 82px !important;
+    padding: 18px 18px !important;
+}
+
+body .main-content .section .section-body .stat-card .stat-icon-wrapper {
+    width: 44px !important;
+    height: 44px !important;
+}
+
+body .main-content .section .section-body .stat-card .card-body .stat-icon {
+    width: 44px !important;
+    height: 44px !important;
+    border-radius: 8px !important;
+    color: #ffffff !important;
+    box-shadow: none !important;
+}
+
+body .main-content .section .section-body .stat-card .card-body .stat-icon svg.dashboard-stat-icon {
+    width: 23px !important;
+    min-width: 23px !important;
+    height: 23px !important;
+    stroke-width: 2.5 !important;
+}
+
+body .main-content .section .section-body .stat-card .stat-content {
+    min-width: 0 !important;
+    gap: 4px !important;
+    overflow: hidden !important;
+}
+
+body .main-content .section .section-body .stat-card .stat-label {
+    order: 1 !important;
+    color: #516789 !important;
+    font-size: 0.82rem !important;
+    font-weight: 500 !important;
+    line-height: 1.2 !important;
+    text-transform: none !important;
+}
+
+body .main-content .section .section-body .stat-card .stat-value {
+    order: 2 !important;
+    color: #020617 !important;
+    font-size: 1.12rem !important;
+    font-weight: 800 !important;
+    line-height: 1.25 !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+}
+
+body .main-content .section .section-body .stat-card .stat-value-money {
+    font-size: clamp(0.96rem, 0.95vw, 1.12rem) !important;
+}
+
+body .main-content .section .section-body .stat-card-primary .card-body .stat-icon {
+    background: #2563eb !important;
+}
+
+body .main-content .section .section-body .stat-card-success .card-body .stat-icon {
+    background: #10b981 !important;
+}
+
+body .main-content .section .section-body .stat-card-info .card-body .stat-icon {
+    background: #0ea5e9 !important;
+}
+
+body .main-content .section .section-body .stat-card-warning .card-body .stat-icon {
+    background: #f59e0b !important;
+}
+
+body .main-content .section .section-body .stat-card-danger .card-body .stat-icon {
+    background: #ef4444 !important;
+}
+
+@media (min-width: 1200px) {
+    .section-body > .row.g-3:first-of-type > .col-lg-3 {
+        flex: 0 0 25%;
+        max-width: 25%;
+    }
+}
+
+@media (max-width: 575px) {
+    .section-body > .row.g-3 > .col-6 {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+
+    body .main-content .section .section-body .stat-card .card-body {
+        padding: 16px !important;
+    }
 }
 </style>
 
