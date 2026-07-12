@@ -186,7 +186,7 @@ function dashboardStatIcon($name) {
                     <div class="section-body">
                         <!-- Statistics Widgets -->
                         <div class="row g-3 align-items-stretch">
-                            <div class="col-lg-3 col-md-6 col-sm-6 col-12 d-flex">
+                            <div class="col-lg-3 col-md-6 col-sm-6 col-6 d-flex">
                                 <div class="card stat-card stat-card-primary flex-fill w-100">
                                     <div class="card-body">
                                         <div class="stat-icon-wrapper">
@@ -202,7 +202,7 @@ function dashboardStatIcon($name) {
                                 </div>
                             </div>
 
-                            <div class="col-lg-3 col-md-6 col-sm-6 col-12 d-flex">
+                            <div class="col-lg-3 col-md-6 col-sm-6 col-6 d-flex">
                                 <div class="card stat-card stat-card-success flex-fill w-100">
                                     <div class="card-body">
                                         <div class="stat-icon-wrapper">
@@ -218,7 +218,7 @@ function dashboardStatIcon($name) {
                                 </div>
                             </div>
 
-                            <div class="col-lg-3 col-md-6 col-sm-6 col-12 d-flex">
+                            <div class="col-lg-3 col-md-6 col-sm-6 col-6 d-flex">
                                 <div class="card stat-card stat-card-info flex-fill w-100">
                                     <div class="card-body">
                                         <div class="stat-icon-wrapper">
@@ -234,7 +234,7 @@ function dashboardStatIcon($name) {
                                 </div>
                             </div>
 
-                            <div class="col-lg-3 col-md-6 col-sm-6 col-12 d-flex">
+                            <div class="col-lg-3 col-md-6 col-sm-6 col-6 d-flex">
                                 <div class="card stat-card stat-card-warning flex-fill w-100">
                                     <div class="card-body">
                                         <div class="stat-icon-wrapper">
@@ -252,7 +252,7 @@ function dashboardStatIcon($name) {
                         </div>
 
                         <div class="row g-3 align-items-stretch">
-                            <div class="col-lg-4 col-md-6 col-sm-6 col-12 d-flex">
+                            <div class="col-lg-4 col-md-6 col-sm-6 col-6 d-flex">
                                 <div class="card stat-card stat-card-info flex-fill w-100">
                                     <div class="card-body">
                                         <div class="stat-icon-wrapper">
@@ -268,7 +268,7 @@ function dashboardStatIcon($name) {
                                 </div>
                             </div>
 
-                            <div class="col-lg-4 col-md-6 col-sm-6 col-12 d-flex">
+                            <div class="col-lg-4 col-md-6 col-sm-6 col-6 d-flex">
                                 <div class="card stat-card stat-card-primary flex-fill w-100">
                                     <div class="card-body">
                                         <div class="stat-icon-wrapper">
@@ -284,7 +284,7 @@ function dashboardStatIcon($name) {
                                 </div>
                             </div>
 
-                            <div class="col-lg-4 col-md-6 col-sm-6 col-12 d-flex">
+                            <div class="col-lg-4 col-md-12 col-sm-12 col-12 d-flex">
                                 <div class="card stat-card stat-card-danger flex-fill w-100">
                                     <div class="card-body">
                                         <div class="stat-icon-wrapper">
@@ -404,6 +404,69 @@ function dashboardStatIcon($name) {
     align-items: center;
     justify-content: space-between;
     gap: 18px;
+}
+
+/* Mobile Responsive Styles for Neat 2 Column Cards */
+@media (max-width: 768px) {
+    .row.g-3,
+    .row {
+        width: calc(100% + 20px) !important;
+        margin-left: -10px !important;
+        margin-right: -10px !important;
+    }
+    
+    .row.g-3 > [class*='col-'],
+    .row > [class*='col-'] {
+        padding-left: 10px !important;
+        padding-right: 10px !important;
+        margin-bottom: 16px !important;
+    }
+    
+    /* Fix col-6 to show 2 columns on mobile */
+    .row.g-3 > .col-6,
+    .row > .col-6 {
+        flex: 0 0 50% !important;
+        max-width: 50% !important;
+        width: 50% !important;
+    }
+    
+    /* Fix col-12 to stay 100% on mobile */
+    .row.g-3 > .col-12,
+    .row > .col-12 {
+        flex: 0 0 100% !important;
+        max-width: 100% !important;
+        width: 100% !important;
+    }
+    
+    body .main-content .section .section-body .stat-card .card-body {
+        gap: 12px !important;
+        min-height: 100px !important;
+        padding: 1rem !important;
+    }
+    
+    body .main-content .section .section-body .stat-card .card-body .stat-icon {
+        width: 56px !important;
+        height: 56px !important;
+        font-size: 36px !important;
+    }
+    
+    body .main-content .section .section-body .stat-card .card-body .stat-icon svg.dashboard-stat-icon {
+        width: 36px !important;
+        min-width: 36px !important;
+        height: 36px !important;
+    }
+    
+    body .main-content .section .section-body .stat-card .stat-value {
+        font-size: 0.95rem !important;
+    }
+    
+    body .main-content .section .section-body .stat-card .stat-value-money {
+        font-size: 0.85rem !important;
+    }
+    
+    body .main-content .section .section-body .stat-card .stat-label {
+        font-size: 0.65rem !important;
+    }
 }
 
 .dashboard-heading h1 {
