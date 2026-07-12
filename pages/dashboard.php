@@ -185,9 +185,9 @@ function dashboardStatIcon($name) {
 
                     <div class="section-body">
                         <!-- Statistics Widgets -->
-                        <div class="row g-3">
-                            <div class="col-lg-3 col-md-6 col-sm-6 col-6">
-                                <div class="card stat-card stat-card-primary">
+                        <div class="row g-3 align-items-stretch">
+                            <div class="col-lg-3 col-md-6 col-sm-6 col-12 d-flex">
+                                <div class="card stat-card stat-card-primary flex-fill w-100">
                                     <div class="card-body">
                                         <div class="stat-icon-wrapper">
                                             <div class="stat-icon">
@@ -202,8 +202,8 @@ function dashboardStatIcon($name) {
                                 </div>
                             </div>
 
-                            <div class="col-lg-3 col-md-6 col-sm-6 col-6">
-                                <div class="card stat-card stat-card-success">
+                            <div class="col-lg-3 col-md-6 col-sm-6 col-12 d-flex">
+                                <div class="card stat-card stat-card-success flex-fill w-100">
                                     <div class="card-body">
                                         <div class="stat-icon-wrapper">
                                             <div class="stat-icon">
@@ -218,8 +218,8 @@ function dashboardStatIcon($name) {
                                 </div>
                             </div>
 
-                            <div class="col-lg-3 col-md-6 col-sm-6 col-6">
-                                <div class="card stat-card stat-card-info">
+                            <div class="col-lg-3 col-md-6 col-sm-6 col-12 d-flex">
+                                <div class="card stat-card stat-card-info flex-fill w-100">
                                     <div class="card-body">
                                         <div class="stat-icon-wrapper">
                                             <div class="stat-icon">
@@ -234,8 +234,8 @@ function dashboardStatIcon($name) {
                                 </div>
                             </div>
 
-                            <div class="col-lg-3 col-md-6 col-sm-6 col-6">
-                                <div class="card stat-card stat-card-warning">
+                            <div class="col-lg-3 col-md-6 col-sm-6 col-12 d-flex">
+                                <div class="card stat-card stat-card-warning flex-fill w-100">
                                     <div class="card-body">
                                         <div class="stat-icon-wrapper">
                                             <div class="stat-icon">
@@ -251,9 +251,9 @@ function dashboardStatIcon($name) {
                             </div>
                         </div>
 
-                        <div class="row g-3">
-                            <div class="col-lg-4 col-md-6 col-sm-6 col-6">
-                                <div class="card stat-card stat-card-info">
+                        <div class="row g-3 align-items-stretch">
+                            <div class="col-lg-4 col-md-6 col-sm-6 col-12 d-flex">
+                                <div class="card stat-card stat-card-info flex-fill w-100">
                                     <div class="card-body">
                                         <div class="stat-icon-wrapper">
                                             <div class="stat-icon">
@@ -268,8 +268,8 @@ function dashboardStatIcon($name) {
                                 </div>
                             </div>
 
-                            <div class="col-lg-4 col-md-6 col-sm-6 col-6">
-                                <div class="card stat-card stat-card-primary">
+                            <div class="col-lg-4 col-md-6 col-sm-6 col-12 d-flex">
+                                <div class="card stat-card stat-card-primary flex-fill w-100">
                                     <div class="card-body">
                                         <div class="stat-icon-wrapper">
                                             <div class="stat-icon">
@@ -284,8 +284,8 @@ function dashboardStatIcon($name) {
                                 </div>
                             </div>
 
-                            <div class="col-lg-4 col-md-6 col-sm-6 col-6">
-                                <div class="card stat-card stat-card-danger">
+                            <div class="col-lg-4 col-md-6 col-sm-6 col-12 d-flex">
+                                <div class="card stat-card stat-card-danger flex-fill w-100">
                                     <div class="card-body">
                                         <div class="stat-icon-wrapper">
                                             <div class="stat-icon">
@@ -365,6 +365,39 @@ function dashboardStatIcon($name) {
             </div>
 
 <style>
+/* Fix Section Body, Row, and Column Width to Be Full Width */
+.section-body {
+    width: 100% !important;
+    padding: 1.5rem 0 0 0 !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+}
+
+.row.g-3,
+.row {
+    width: calc(100% + 24px) !important;
+    margin-left: -12px !important;
+    margin-right: -12px !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+}
+
+.row.g-3 > [class*='col-'],
+.row > [class*='col-'] {
+    display: flex !important;
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+    margin-bottom: 24px !important;
+}
+
+.row.g-3 > [class*='col-'] > .card,
+.row.g-3 > [class*='col-'] > .stat-card,
+.row > [class*='col-'] > .card {
+    flex: 1 !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
 .dashboard-heading {
     width: 100%;
     display: flex;
@@ -1094,6 +1127,28 @@ body .main-content .section .section-body .stat-card-danger .card-body .stat-ico
         flex: 0 0 25%;
         max-width: 25%;
     }
+
+    .section-body > .row.g-3:nth-of-type(2) > .col-lg-4 {
+        flex: 0 0 33.333333%;
+        max-width: 33.333333%;
+    }
+}
+
+/* Make sure row takes full width */
+.section-body > .row.g-3 {
+    width: 100%;
+    margin: 0 -12px;
+}
+
+.section-body > .row.g-3 > [class*='col-'] {
+    padding: 0 12px;
+    margin-bottom: 24px;
+}
+
+/* Ensure stat card takes full width of column */
+body .main-content .section .section-body .stat-card {
+    width: 100% !important;
+    flex-grow: 1 !important;
 }
 
 @media (max-width: 575px) {
