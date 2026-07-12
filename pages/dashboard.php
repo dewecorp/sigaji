@@ -126,12 +126,61 @@ $total_activities = $conn->query($sql_count)->fetch_assoc()['total'];
 // Get recent activities
 $sql = "SELECT * FROM activities ORDER BY created_at DESC LIMIT 20";
 $activities = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
+
+function formatPeriodeIndonesia($periode) {
+    $bulan = [
+        '01' => 'Januari',
+        '02' => 'Februari',
+        '03' => 'Maret',
+        '04' => 'April',
+        '05' => 'Mei',
+        '06' => 'Juni',
+        '07' => 'Juli',
+        '08' => 'Agustus',
+        '09' => 'September',
+        '10' => 'Oktober',
+        '11' => 'November',
+        '12' => 'Desember'
+    ];
+
+    if (preg_match('/^(\d{4})-(\d{2})$/', $periode, $matches)) {
+        return ($bulan[$matches[2]] ?? $matches[2]) . ' ' . $matches[1];
+    }
+
+    return $periode;
+}
+
+$periode_aktif_label = formatPeriodeIndonesia($periode_aktif);
+
+function dashboardStatIcon($name) {
+    $paths = [
+        'users' => '<path d="M17 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9.5" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+        'salary' => '<rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="12" cy="12" r="3"/><path d="M7 9h.01M17 15h.01"/>',
+        'allowance' => '<path d="M12 3v12"/><path d="M8 7h6a2 2 0 0 1 0 4h-4a2 2 0 0 0 0 4h6"/><path d="M4 19h16"/>',
+        'deduction' => '<circle cx="12" cy="12" r="9"/><path d="M8 12h8"/>',
+        'coins' => '<ellipse cx="12" cy="5" rx="7" ry="3"/><path d="M5 5v10c0 1.66 3.13 3 7 3s7-1.34 7-3V5"/><path d="M5 10c0 1.66 3.13 3 7 3s7-1.34 7-3"/>',
+        'net' => '<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 7h6M9 11h.01M12 11h.01M15 11h.01M9 15h.01M12 15h.01M15 15h.01"/>',
+        'wallet' => '<path d="M3 7a2 2 0 0 1 2-2h14v14H5a2 2 0 0 1-2-2Z"/><path d="M16 11h5v4h-5a2 2 0 0 1 0-4Z"/><path d="M17.5 13h.01"/>'
+    ];
+
+    return '<svg class="dashboard-stat-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false" style="width:52px;height:52px;display:block;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;">' . ($paths[$name] ?? $paths['salary']) . '</svg>';
+}
 ?>
 
             <div class="main-content">
                 <section class="section">
                     <div class="section-header">
-                        <h1>Dashboard</h1>
+                        <div class="dashboard-heading">
+                            <div>
+                                <h1>Dashboard</h1>
+                                <p>Ringkasan gaji dan aktivitas periode <?php echo htmlspecialchars($periode_aktif_label); ?></p>
+                            </div>
+                            <div class="dashboard-period-badge">
+                                <span>Periode Aktif</span>
+                                <strong><?php echo htmlspecialchars($periode_aktif_label); ?></strong>
+                                <small><?php echo (int) $jumlah_periode; ?> periode</small>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="section-body">
@@ -142,11 +191,11 @@ $activities = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
                                     <div class="card-body">
                                         <div class="stat-icon-wrapper">
                                             <div class="stat-icon">
-                                                <i class="fas fa-users"></i>
+                                                <?php echo dashboardStatIcon('users'); ?>
                                             </div>
                                         </div>
                                         <div class="stat-content">
-                                            <h3 class="stat-value"><?php echo number_format($stats['total_guru'], 0, ',', '.'); ?></h3>
+                                            <h3 class="stat-value stat-value-count"><?php echo number_format($stats['total_guru'], 0, ',', '.'); ?></h3>
                                             <p class="stat-label">Total Guru</p>
                                         </div>
                                     </div>
@@ -158,11 +207,11 @@ $activities = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
                                     <div class="card-body">
                                         <div class="stat-icon-wrapper">
                                             <div class="stat-icon">
-                                                <i class="fas fa-money-bill-wave"></i>
+                                                <?php echo dashboardStatIcon('salary'); ?>
                                             </div>
                                         </div>
                                         <div class="stat-content">
-                                            <h3 class="stat-value"><?php echo formatRupiah($stats['total_gaji_pokok']); ?></h3>
+                                            <h3 class="stat-value stat-value-money"><?php echo formatRupiah($stats['total_gaji_pokok']); ?></h3>
                                             <p class="stat-label">Total Gaji Pokok</p>
                                         </div>
                                     </div>
@@ -174,11 +223,11 @@ $activities = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
                                     <div class="card-body">
                                         <div class="stat-icon-wrapper">
                                             <div class="stat-icon">
-                                                <i class="fas fa-hand-holding-usd"></i>
+                                                <?php echo dashboardStatIcon('allowance'); ?>
                                             </div>
                                         </div>
                                         <div class="stat-content">
-                                            <h3 class="stat-value"><?php echo formatRupiah($stats['total_tunjangan']); ?></h3>
+                                            <h3 class="stat-value stat-value-money"><?php echo formatRupiah($stats['total_tunjangan']); ?></h3>
                                             <p class="stat-label">Total Tunjangan</p>
                                         </div>
                                     </div>
@@ -190,11 +239,11 @@ $activities = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
                                     <div class="card-body">
                                         <div class="stat-icon-wrapper">
                                             <div class="stat-icon">
-                                                <i class="fas fa-minus-circle"></i>
+                                                <?php echo dashboardStatIcon('deduction'); ?>
                                             </div>
                                         </div>
                                         <div class="stat-content">
-                                            <h3 class="stat-value"><?php echo formatRupiah($stats['total_potongan']); ?></h3>
+                                            <h3 class="stat-value stat-value-money"><?php echo formatRupiah($stats['total_potongan']); ?></h3>
                                             <p class="stat-label">Total Potongan</p>
                                         </div>
                                     </div>
@@ -208,11 +257,11 @@ $activities = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
                                     <div class="card-body">
                                         <div class="stat-icon-wrapper">
                                             <div class="stat-icon">
-                                                <i class="fas fa-coins"></i>
+                                                <?php echo dashboardStatIcon('coins'); ?>
                                             </div>
                                         </div>
                                         <div class="stat-content">
-                                            <h3 class="stat-value"><?php echo formatRupiah($stats['total_insentif']); ?></h3>
+                                            <h3 class="stat-value stat-value-money"><?php echo formatRupiah($stats['total_insentif']); ?></h3>
                                             <p class="stat-label">Total Insentif</p>
                                         </div>
                                     </div>
@@ -224,11 +273,11 @@ $activities = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
                                     <div class="card-body">
                                         <div class="stat-icon-wrapper">
                                             <div class="stat-icon">
-                                                <i class="fas fa-calculator"></i>
+                                                <?php echo dashboardStatIcon('net'); ?>
                                             </div>
                                         </div>
                                         <div class="stat-content">
-                                            <h3 class="stat-value"><?php echo formatRupiah($stats['total_gaji_bersih']); ?></h3>
+                                            <h3 class="stat-value stat-value-money"><?php echo formatRupiah($stats['total_gaji_bersih']); ?></h3>
                                             <p class="stat-label">Total Gaji Bersih</p>
                                         </div>
                                     </div>
@@ -240,11 +289,11 @@ $activities = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
                                     <div class="card-body">
                                         <div class="stat-icon-wrapper">
                                             <div class="stat-icon">
-                                                <i class="fas fa-wallet"></i>
+                                                <?php echo dashboardStatIcon('wallet'); ?>
                                             </div>
                                         </div>
                                         <div class="stat-content">
-                                            <h3 class="stat-value"><?php echo formatRupiah($stats['total_pengeluaran']); ?></h3>
+                                            <h3 class="stat-value stat-value-money"><?php echo formatRupiah($stats['total_pengeluaran']); ?></h3>
                                             <p class="stat-label">Total Pengeluaran</p>
                                         </div>
                                     </div>
@@ -316,11 +365,59 @@ $activities = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
             </div>
 
 <style>
+.dashboard-heading {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+}
+
+.dashboard-heading h1 {
+    margin-bottom: 5px;
+    color: #0f172a;
+    font-weight: 800;
+}
+
+.dashboard-heading p {
+    margin: 0;
+    color: #64748b;
+    font-weight: 600;
+}
+
+.dashboard-period-badge {
+    min-width: 175px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.08), rgba(16, 185, 129, 0.11));
+    border: 1px solid rgba(14, 165, 233, 0.16);
+    box-shadow: 0 10px 24px rgba(15, 118, 110, 0.08);
+    text-align: right;
+}
+
+.dashboard-period-badge span,
+.dashboard-period-badge small {
+    display: block;
+    color: #64748b;
+    font-size: 0.72rem;
+    font-weight: 800;
+    line-height: 1.2;
+}
+
+.dashboard-period-badge strong {
+    display: block;
+    color: #0f766e;
+    font-size: 1rem;
+    font-weight: 900;
+    line-height: 1.25;
+    margin: 3px 0;
+}
+
 /* Stat Card Styles */
 .stat-card {
     border: none;
     border-radius: 12px;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 10px 28px rgba(15, 118, 110, 0.08), 0 2px 8px rgba(37, 99, 235, 0.06);
     transition: all 0.3s ease;
     overflow: hidden;
     position: relative;
@@ -333,22 +430,33 @@ $activities = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
     box-sizing: border-box;
 }
 
+.stat-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.035), rgba(16, 185, 129, 0.045));
+    opacity: 0.85;
+    pointer-events: none;
+}
+
 .stat-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 18px 36px rgba(15, 118, 110, 0.14), 0 8px 18px rgba(37, 99, 235, 0.1);
 }
 
 .stat-card .card-body {
-    padding: 25px;
+    padding: 24px 26px;
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 22px;
     flex: 1;
-    min-height: 120px;
+    min-height: 122px;
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
     flex-wrap: nowrap;
+    position: relative;
+    z-index: 1;
 }
 
 .stat-card-large .card-body {
@@ -358,31 +466,46 @@ $activities = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
 
 .stat-icon-wrapper {
     flex-shrink: 0;
-}
-
-.stat-icon {
-    width: 70px;
-    height: 70px;
-    border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 28px;
-    color: #fff;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.stat-card .stat-icon {
+    width: 76px;
+    height: 76px;
+    border-radius: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 52px !important;
+    background: transparent !important;
+    box-shadow: none;
     transition: all 0.3s ease;
     flex-shrink: 0;
 }
 
+.stat-card .stat-icon i {
+    font-size: inherit !important;
+    line-height: 1;
+}
+
+body .main-content .section .section-body .stat-card .stat-icon svg.dashboard-stat-icon {
+    width: 52px !important;
+    min-width: 52px !important;
+    height: 52px !important;
+    display: block !important;
+}
+
 .stat-card-large .stat-icon {
-    width: 90px;
-    height: 90px;
-    font-size: 36px;
-    border-radius: 16px;
+    width: 86px;
+    height: 86px;
+    font-size: 60px !important;
+    border-radius: 0;
 }
 
 .stat-card:hover .stat-icon {
-    transform: scale(1.1) rotate(5deg);
+    transform: scale(1.08);
 }
 
 .stat-content {
@@ -390,20 +513,34 @@ $activities = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
     min-width: 0;
     width: 100%;
     max-width: 100%;
-    overflow: hidden;
+    overflow: visible;
     box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 6px;
 }
 
 .stat-value {
-    font-size: 1.75rem;
-    font-weight: 700;
-    margin: 0 0 8px 0;
-    color: #2d3748;
-    line-height: 1.2;
-    word-break: break-word;
-    overflow-wrap: break-word;
+    font-size: 1.28rem;
+    font-weight: 800;
+    margin: 0;
+    color: #102033;
+    line-height: 1.14;
+    word-break: normal;
+    overflow-wrap: anywhere;
     hyphens: auto;
     width: 100%;
+    letter-spacing: 0;
+}
+
+.stat-value-money {
+    font-size: clamp(0.88rem, 1vw, 1.08rem);
+    max-width: 100%;
+}
+
+.stat-value-count {
+    font-size: clamp(1.02rem, 1.18vw, 1.24rem);
 }
 
 .stat-card-large .stat-value {
@@ -411,34 +548,37 @@ $activities = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
 }
 
 .stat-label {
-    font-size: 0.9rem;
-    color: #718096;
+    font-size: 0.7rem;
+    color: #4f6480;
     margin: 0;
-    font-weight: 500;
+    font-weight: 800;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
-    word-wrap: break-word;
+    letter-spacing: 0;
+    word-break: normal;
+    overflow-wrap: anywhere;
+    line-height: 1.22;
+    max-width: 100%;
 }
 
 /* Color Themes */
 .stat-card-primary .stat-icon {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #667eea;
 }
 
 .stat-card-success .stat-icon {
-    background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+    color: #38a169;
 }
 
 .stat-card-info .stat-icon {
-    background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+    color: #3182ce;
 }
 
 .stat-card-warning .stat-icon {
-    background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
+    color: #dd6b20;
 }
 
 .stat-card-danger .stat-icon {
-    background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+    color: #e53e3e;
 }
 
 /* Timeline Styles */
@@ -609,10 +749,16 @@ $activities = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
         min-height: 110px;
     }
     
-    .stat-icon {
-        width: 60px;
-        height: 60px;
-        font-size: 24px;
+    .stat-card .stat-icon {
+        width: 70px;
+        height: 70px;
+        font-size: 48px !important;
+    }
+
+    body .main-content .section .section-body .stat-card .stat-icon svg.dashboard-stat-icon {
+        width: 48px !important;
+        min-width: 48px !important;
+        height: 48px !important;
     }
     
     .stat-value {
@@ -622,7 +768,7 @@ $activities = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
     .stat-card-large .stat-icon {
         width: 80px;
         height: 80px;
-        font-size: 32px;
+        font-size: 44px !important;
     }
     
     .stat-card-large .stat-value {
@@ -632,6 +778,16 @@ $activities = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
 
 /* Responsive - Mobile */
 @media (max-width: 768px) {
+    .dashboard-heading {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .dashboard-period-badge {
+        width: 100%;
+        text-align: left;
+    }
+
     /* Ensure proper spacing between widgets */
     .row {
         margin-left: -10px;
@@ -651,7 +807,7 @@ $activities = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
     
     .stat-card .card-body {
         padding: 18px;
-        gap: 12px;
+        gap: 14px;
         min-height: 110px;
         flex-wrap: nowrap;
     }
@@ -661,17 +817,23 @@ $activities = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
         min-height: 120px;
     }
     
-    .stat-icon {
-        width: 55px;
-        height: 55px;
-        font-size: 22px;
+    .stat-card .stat-icon {
+        width: 62px;
+        height: 62px;
+        font-size: 42px !important;
         flex-shrink: 0;
+    }
+
+    body .main-content .section .section-body .stat-card .stat-icon svg.dashboard-stat-icon {
+        width: 42px !important;
+        min-width: 42px !important;
+        height: 42px !important;
     }
     
     .stat-card-large .stat-icon {
         width: 65px;
         height: 65px;
-        font-size: 26px;
+        font-size: 40px !important;
     }
     
     .stat-value {
@@ -713,9 +875,9 @@ $activities = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
     }
     
     .stat-card .card-body {
-        padding: 15px;
-        gap: 10px;
-        min-height: 100px;
+        padding: 14px;
+        gap: 12px;
+        min-height: 104px;
     }
     
     .stat-card-large .card-body {
@@ -723,16 +885,22 @@ $activities = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
         min-height: 110px;
     }
     
-    .stat-icon {
-        width: 50px;
-        height: 50px;
-        font-size: 20px;
+    .stat-card .stat-icon {
+        width: 56px;
+        height: 56px;
+        font-size: 38px !important;
+    }
+
+    body .main-content .section .section-body .stat-card .stat-icon svg.dashboard-stat-icon {
+        width: 38px !important;
+        min-width: 38px !important;
+        height: 38px !important;
     }
     
     .stat-card-large .stat-icon {
         width: 60px;
         height: 60px;
-        font-size: 24px;
+        font-size: 36px !important;
     }
     
     .stat-value {
@@ -759,10 +927,16 @@ $activities = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
         gap: 15px;
     }
     
-    .stat-icon {
-        width: 60px;
-        height: 60px;
-        font-size: 24px;
+    .stat-card .stat-icon {
+        width: 70px;
+        height: 70px;
+        font-size: 48px !important;
+    }
+
+    body .main-content .section .section-body .stat-card .stat-icon svg.dashboard-stat-icon {
+        width: 48px !important;
+        min-width: 48px !important;
+        height: 48px !important;
     }
     
     .stat-value {
@@ -781,10 +955,16 @@ $activities = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
         gap: 20px;
     }
     
-    .stat-icon {
-        width: 70px;
-        height: 70px;
-        font-size: 28px;
+    .stat-card .stat-icon {
+        width: 82px;
+        height: 82px;
+        font-size: 56px !important;
+    }
+
+    body .main-content .section .section-body .stat-card .stat-icon svg.dashboard-stat-icon {
+        width: 56px !important;
+        min-width: 56px !important;
+        height: 56px !important;
     }
     
     .stat-value {

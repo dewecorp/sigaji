@@ -108,6 +108,11 @@ if (!empty($settings['logo'])) {
     }
 }
 
+function assetVersion($path) {
+    $file_path = __DIR__ . '/../' . ltrim($path, '/');
+    return file_exists($file_path) ? filemtime($file_path) : time();
+}
+
 // Cleanup old activities (older than 24 hours) on every page load
 cleanupOldActivities($conn);
 ?>
@@ -133,12 +138,12 @@ cleanupOldActivities($conn);
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
     
     <!-- Template CSS -->
-    <link rel="stylesheet" href="<?php echo BASE_URL; ?>assets/css/style.css">
-    <link rel="stylesheet" href="<?php echo BASE_URL; ?>assets/css/components.css">
-    <link rel="stylesheet" href="<?php echo BASE_URL; ?>assets/css/custom.css">
-    <link rel="stylesheet" href="<?php echo BASE_URL; ?>assets/css/responsive-fix.css">
-    <link rel="stylesheet" href="<?php echo BASE_URL; ?>assets/css/responsive-all.css">
-    <link rel="stylesheet" href="<?php echo BASE_URL; ?>assets/css/sidebar-expand.css">
+    <link rel="stylesheet" href="<?php echo BASE_URL; ?>assets/css/style.css?v=<?php echo assetVersion('assets/css/style.css'); ?>">
+    <link rel="stylesheet" href="<?php echo BASE_URL; ?>assets/css/components.css?v=<?php echo assetVersion('assets/css/components.css'); ?>">
+    <link rel="stylesheet" href="<?php echo BASE_URL; ?>assets/css/custom.css?v=<?php echo assetVersion('assets/css/custom.css'); ?>">
+    <link rel="stylesheet" href="<?php echo BASE_URL; ?>assets/css/responsive-fix.css?v=<?php echo assetVersion('assets/css/responsive-fix.css'); ?>">
+    <link rel="stylesheet" href="<?php echo BASE_URL; ?>assets/css/responsive-all.css?v=<?php echo assetVersion('assets/css/responsive-all.css'); ?>">
+    <link rel="stylesheet" href="<?php echo BASE_URL; ?>assets/css/sidebar-expand.css?v=<?php echo assetVersion('assets/css/sidebar-expand.css'); ?>">
     
     <!-- Sidebar Active Menu Styles -->
     <style>
