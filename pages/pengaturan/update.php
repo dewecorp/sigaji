@@ -78,6 +78,14 @@ function updateSystemFromGitHub() {
         ];
     }
 
+    // Pengecekan izin folder
+    if (!is_writable($rootDir)) {
+        return [
+            'success' => false,
+            'message' => 'Direktori root tidak dapat ditulis. Pastikan izin folder sudah benar.'
+        ];
+    }
+
     $lockHandle = fopen($lockFile, 'c');
     if (!$lockHandle || !flock($lockHandle, LOCK_EX | LOCK_NB)) {
         return [
@@ -115,10 +123,14 @@ function updateSystemFromGitHub() {
         validateUpdateZip($zip);
         
         if (!is_dir($extractDir)) {
-            mkdir($extractDir, 0755, true);
+            if (!mkdir($extractDir, 0755, true)) {
+                throw new Exception('Gagal membuat direktori sementara untuk ekstrak.');
+            }
         }
         
-        $zip->extractTo($extractDir);
+        if (!$zip->extractTo($extractDir)) {
+            throw new Exception('Gagal mengekstrak file zip.');
+        }
         $zip->close();
         
         // Step 3: Find extracted folder (GitHub adds -master suffix)
@@ -135,7 +147,12 @@ function updateSystemFromGitHub() {
             '.htaccess',
             '.git',
             'latest_update.zip',
-            'update_temp'
+            'update_temp',
+            'update.lock',
+            'git_save.bat',
+            'git_save.sh',
+            'git_setup.bat',
+            'git_setup.sh'
         ]);
         
         // Step 5: Restore config files
@@ -145,7 +162,9 @@ function updateSystemFromGitHub() {
             if (!is_dir($targetDir)) {
                 mkdir($targetDir, 0755, true);
             }
-            file_put_contents($targetFile, $content);
+            if (file_put_contents($targetFile, $content) === false) {
+                throw new Exception('Gagal memulihkan file konfigurasi: ' . $relativeFile);
+            }
         }
         
         // Step 6: Cleanup temp files
@@ -253,6 +272,19 @@ function validateUpdateFilePath($relativeName) {
         throw new Exception('ZIP update mengandung file yang tidak boleh diubah: ' . $relativeName);
     }
 
+    // Daftar file .bat/.sh yang diizinkan (bagian dari proyek)
+    $allowedScriptFiles = [
+        'git_save.bat',
+        'git_save.sh',
+        'git_setup.bat',
+        'git_setup.sh'
+    ];
+
+    // Jika basename termasuk dalam yang diizinkan, lewati pengecekan ekstensi
+    if (in_array($lowerBase, array_map('strtolower', $allowedScriptFiles), true)) {
+        return;
+    }
+
     $blockedExtensions = ['phar', 'phtml', 'shtml', 'cgi', 'pl', 'py', 'sh', 'bat', 'cmd', 'exe', 'dll', 'so'];
     $extension = strtolower(pathinfo($lowerBase, PATHINFO_EXTENSION));
     if (in_array($extension, $blockedExtensions, true)) {
@@ -284,9 +316,12 @@ function downloadUpdateZip($url) {
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_TIMEOUT => 60,
             CURLOPT_USERAGENT => 'SIGAJI-Updater',
+            CURLOPT_SSL_VERIFYPEER => true,
+            CURLOPT_SSL_VERIFYHOST => 2
         ]);
         $content = curl_exec($ch);
         $statusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $error = curl_error($ch);
         curl_close($ch);
 
         if ($content !== false && $statusCode >= 200 && $statusCode < 300) {
@@ -303,14 +338,16 @@ function copyDirectory($src, $dst, $baseSrc, $exclude = []) {
         throw new Exception('Tidak dapat membuka folder update: ' . $src);
     }
 
-    if (!is_dir($dst) && !mkdir($dst, 0755, true)) {
-        throw new Exception('Tidak dapat membuat folder tujuan: ' . $dst);
+    if (!is_dir($dst)) {
+        if (!mkdir($dst, 0755, true)) {
+            throw new Exception('Tidak dapat membuat folder tujuan: ' . $dst);
+        }
     }
     
     while (false !== ($file = readdir($dir))) {
         if ($file != '.' && $file != '..') {
-            $srcPath = $src . '/' . $file;
-            $dstPath = $dst . '/' . $file;
+            $srcPath = $src . DIRECTORY_SEPARATOR . $file;
+            $dstPath = $dst . DIRECTORY_SEPARATOR . $file;
             $relativePath = normalizePath(ltrim(str_replace($baseSrc, '', $srcPath), '/\\'));
             
             if (isExcludedPath($relativePath, $exclude)) {
@@ -323,6 +360,10 @@ function copyDirectory($src, $dst, $baseSrc, $exclude = []) {
                 if (!copy($srcPath, $dstPath)) {
                     throw new Exception('Gagal menyalin file: ' . $relativePath);
                 }
+                // Set permissions if not Windows
+                if (DIRECTORY_SEPARATOR !== '\\') {
+                    chmod($dstPath, 0644);
+                }
             }
         }
     }
@@ -334,6 +375,10 @@ function normalizePath($path) {
 }
 
 function isExcludedPath($relativePath, $exclude) {
+    // Exclude all .htaccess files anywhere
+    if (basename($relativePath) === '.htaccess') {
+        return true;
+    }
     foreach ($exclude as $excludedPath) {
         $excludedPath = normalizePath($excludedPath);
         if ($relativePath === $excludedPath || strpos($relativePath, rtrim($excludedPath, '/') . '/') === 0) {
