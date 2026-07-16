@@ -28,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['backup_file'])) {
             throw new Exception("Gagal membaca file backup");
         }
         
-        if (empty(trim($sql))) {
+        if (trim($sql) === '') {
             throw new Exception("File backup kosong");
         }
         

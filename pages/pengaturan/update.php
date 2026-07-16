@@ -26,7 +26,13 @@ if (!function_exists('csrfToken')) {
         }
 
         if (empty($_SESSION['csrf_tokens'][$key])) {
-            $_SESSION['csrf_tokens'][$key] = bin2hex(random_bytes(32));
+            if (function_exists('random_bytes')) {
+                $_SESSION['csrf_tokens'][$key] = bin2hex(random_bytes(32));
+            } elseif (function_exists('openssl_random_pseudo_bytes')) {
+                $_SESSION['csrf_tokens'][$key] = bin2hex(openssl_random_pseudo_bytes(32));
+            } else {
+                $_SESSION['csrf_tokens'][$key] = md5(uniqid(mt_rand(), true)) . md5(uniqid(mt_rand(), true));
+            }
         }
 
         return $_SESSION['csrf_tokens'][$key];
