@@ -2,7 +2,7 @@
 require_once __DIR__ . '/../../config/config.php';
 requireLogin();
 
-if (!verifyCsrfToken($_REQUEST['csrf_token'] ?? '')) { $_SESSION['error'] = 'Token tidak valid. Silakan coba lagi.'; header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? BASE_URL . 'pages/dashboard')); exit(); }
+if (!verifyCsrfToken($_REQUEST['csrf_token'] ?? '')) { $_SESSION['error'] = 'Sesi berakhir. Silakan muat ulang halaman dan coba lagi.'; header('Location: ' . BASE_URL . 'pages/gaji_pokok'); exit(); }
 
 $id = $_REQUEST['id'] ?? 0;
 $sql = "DELETE FROM gaji_pokok WHERE id = ?";

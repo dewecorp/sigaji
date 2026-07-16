@@ -533,7 +533,8 @@ var tableLegger;
                     url: '<?php echo BASE_URL; ?>pages/legger/generate_ajax.php',
                     type: 'POST',
                     data: {
-                        periode: '<?php echo $periode; ?>'
+                        periode: '<?php echo $periode; ?>',
+                        csrf_token: window.CSRF_TOKEN || ''
                     },
                     dataType: 'json',
                     beforeSend: function() {

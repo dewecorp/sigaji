@@ -207,8 +207,8 @@
                 icon: 'error',
                 title: 'Error',
                 text: '<?php echo addslashes($_SESSION['error']); ?>',
-                timer: 3000,
-                showConfirmButton: false
+                confirmButtonColor: '#6777ef',
+                confirmButtonText: 'OK'
             });
         </script>
         <?php unset($_SESSION['error']); ?>

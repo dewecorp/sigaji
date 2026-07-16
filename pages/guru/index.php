@@ -1278,7 +1278,8 @@ var selectedIds = new Set();
             tmt: {},
             jumlah_jam_mengajar: {},
             jabatan: {},
-            status_pegawai: {}
+            status_pegawai: {},
+            csrf_token: window.CSRF_TOKEN || ''
         };
         
         $('#editMultipleTableBody tr').each(function() {

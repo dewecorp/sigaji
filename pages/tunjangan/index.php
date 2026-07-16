@@ -709,7 +709,8 @@ function editTunjangan(id) {
                     id: tunjanganId,
                     nama_tunjangan: $('#nama_tunjangan').val().trim(),
                     jumlah_tunjangan_hidden: $('#jumlah_tunjangan_hidden').val() || '0',
-                    aktif: $('#aktif').is(':checked') ? 1 : 0
+                    aktif: $('#aktif').is(':checked') ? 1 : 0,
+                    csrf_token: window.CSRF_TOKEN || ''
                 };
                 
                 // Build data string with guru_ids[] array

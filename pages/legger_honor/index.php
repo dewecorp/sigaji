@@ -172,7 +172,7 @@ if ($stmt) {
                 $.ajax({
                     url: '<?php echo BASE_URL; ?>pages/legger_honor/generate_ajax.php',
                     type: 'POST',
-                    data: { periode: '<?php echo $periode_aktif; ?>' },
+                    data: { periode: '<?php echo $periode_aktif; ?>', csrf_token: window.CSRF_TOKEN || '' },
                     dataType: 'json',
                     success: function(response) {
                         if (response.success) {
