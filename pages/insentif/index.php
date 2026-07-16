@@ -417,6 +417,45 @@ foreach ($legger_detail_rows as $row) {
 #tableInsentif tbody td {
     height: auto !important;
 }
+
+/* Sticky columns for Legger Insentif */
+#tableLeggerInsentif {
+    border-collapse: separate;
+    border-spacing: 0;
+}
+#tableLeggerInsentif thead th:nth-child(1),
+#tableLeggerInsentif tbody td:nth-child(1) {
+    position: sticky;
+    left: 0;
+    z-index: 3;
+    background-color: #fff;
+}
+#tableLeggerInsentif thead th:nth-child(2),
+#tableLeggerInsentif tbody td:nth-child(2) {
+    position: sticky;
+    left: 45px;
+    z-index: 2;
+    background-color: #fff;
+}
+#tableLeggerInsentif thead th:nth-child(1),
+#tableLeggerInsentif thead th:nth-child(2) {
+    z-index: 4;
+}
+#tableLeggerInsentif tbody td:nth-child(1)::after,
+#tableLeggerInsentif tbody td:nth-child(2)::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: -1px;
+    height: 100%;
+    width: 1px;
+    background: #dee2e6;
+}
+/* DataTable wrapper needs to allow sticky */
+#tableLeggerInsentif_wrapper {
+    overflow-x: auto;
+    overflow-y: visible;
+}
             </style>
 
             <div id="print-config-insentif"
