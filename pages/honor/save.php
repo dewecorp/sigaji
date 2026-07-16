@@ -56,6 +56,7 @@ if ($result->num_rows == 0) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    if (!verifyCsrfToken($_POST['csrf_token'] ?? '')) { echo json_encode(['success' => false, 'message' => 'Token tidak valid. Silakan refresh halaman.']); exit(); }
     try {
         // Check both 'id' and 'honor_id' for backward compatibility
         $id = null;

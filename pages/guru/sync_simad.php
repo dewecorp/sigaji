@@ -9,6 +9,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit();
 }
 
+if (!verifyCsrfToken($_POST['csrf_token'] ?? '')) { $_SESSION['error'] = 'Token tidak valid. Silakan coba lagi.'; header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? BASE_URL . 'pages/dashboard')); exit(); }
+
 sync_simad_gurus_ensure_columns($conn);
 
 $result = sync_guru_nama_dari_simad($conn);

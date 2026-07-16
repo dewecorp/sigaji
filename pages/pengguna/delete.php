@@ -2,7 +2,9 @@
 require_once __DIR__ . '/../../config/config.php';
 requireLogin();
 
-$id = isset($_GET['id']) ? intval($_GET['id']) : 0;
+if (!verifyCsrfToken($_REQUEST['csrf_token'] ?? '')) { $_SESSION['error'] = 'Token tidak valid. Silakan coba lagi.'; header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? BASE_URL . 'pages/dashboard')); exit(); }
+
+$id = isset($_REQUEST['id']) ? intval($_REQUEST['id']) : 0;
 
 if ($id <= 0) {
     $_SESSION['error'] = "ID tidak valid";

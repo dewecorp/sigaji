@@ -16,6 +16,8 @@ if ($method !== 'POST') {
     exit();
 }
 
+if (!verifyCsrfToken($_POST['csrf_token'] ?? '')) { echo json_encode(['success' => false, 'message' => 'Token tidak valid. Silakan refresh halaman.']); exit(); }
+
 if (!empty($request)) {
     // Parse ID - handle both string and integer
     $id_raw = $request['id'] ?? null;

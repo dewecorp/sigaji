@@ -75,8 +75,9 @@ $ekstrakurikuler = $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
                                 <span>&times;</span>
                             </button>
                         </div>
-                        <form id="formEkstrakurikuler">
-                            <input type="hidden" name="id" id="ekstrakurikuler_id">
+<form id="formEkstrakurikuler">
+    <?php echo csrfField(); ?>
+    <input type="hidden" name="id" id="ekstrakurikuler_id">
                             <div class="modal-body">
                                 <div class="form-group">
                                     <label>Jenis Ekstrakurikuler</label>

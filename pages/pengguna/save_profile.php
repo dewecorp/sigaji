@@ -3,6 +3,7 @@ require_once __DIR__ . '/../../config/config.php';
 requireLogin();
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    if (!verifyCsrfToken($_POST['csrf_token'] ?? '')) { $_SESSION['error'] = 'Token tidak valid. Silakan coba lagi.'; header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? BASE_URL . 'pages/dashboard')); exit(); }
     $id = $_POST['id'] ?? null;
     $username = $_POST['username'] ?? '';
     $password = $_POST['password'] ?? '';
@@ -88,6 +89,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         if (in_array($file_ext, $allowed_extensions)) {
             // Validate file size (2MB max)
             if ($_FILES['foto']['size'] <= 2 * 1024 * 1024) {
+                if (@getimagesize($_FILES['foto']['tmp_name']) === false) {
+                    $_SESSION['error'] = "File bukan gambar yang valid";
+                    header('Location: ' . BASE_URL . 'pages/pengguna/profile.php');
+                    exit();
+                }
                 // Get current foto to delete old one if exists
                 $current_foto_sql = "SELECT foto FROM users WHERE id = ?";
                 $current_foto_stmt = $conn->prepare($current_foto_sql);

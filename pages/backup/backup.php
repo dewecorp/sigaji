@@ -2,6 +2,8 @@
 require_once __DIR__ . '/../../config/config.php';
 requireLogin();
 
+if (!verifyCsrfToken($_REQUEST['csrf_token'] ?? '')) { $_SESSION['error'] = 'Token tidak valid. Silakan coba lagi.'; header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? BASE_URL . 'pages/dashboard')); exit(); }
+
 $backup_dir = __DIR__ . '/../../backup/';
 if (!is_dir($backup_dir)) {
     mkdir($backup_dir, 0777, true);

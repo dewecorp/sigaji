@@ -1,8 +1,11 @@
 <?php
 require_once __DIR__ . '/../../config/config.php';
 requireLogin();
-$id = $_GET['id'] ?? 0;
-$potongan_id = $_GET['potongan_id'] ?? 0;
+
+if (!verifyCsrfToken($_REQUEST['csrf_token'] ?? '')) { $_SESSION['error'] = 'Token tidak valid. Silakan coba lagi.'; header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? BASE_URL . 'pages/dashboard')); exit(); }
+
+$id = $_REQUEST['id'] ?? 0;
+$potongan_id = $_REQUEST['potongan_id'] ?? 0;
 
 $sql = "DELETE FROM potongan_detail WHERE id = ?";
 $stmt = $conn->prepare($sql);

@@ -82,8 +82,9 @@ $ekstrakurikuler_list = $conn->query($sql_eks)->fetch_all(MYSQLI_ASSOC);
                                 <span>&times;</span>
                             </button>
                         </div>
-                        <form id="formPembina">
-                            <input type="hidden" name="id" id="pembina_id">
+<form id="formPembina">
+    <?php echo csrfField(); ?>
+    <input type="hidden" name="id" id="pembina_id">
                             <div class="modal-body">
                                 <div class="form-group">
                                     <label>Nama Pembina</label>

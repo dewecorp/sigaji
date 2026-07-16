@@ -246,8 +246,9 @@ foreach ($legger_detail_rows as $row) {
                                 <span>&times;</span>
                             </button>
                         </div>
-                        <form id="formInsentif" method="POST" action="save.php">
-                            <input type="hidden" name="id" id="insentif_id">
+<form id="formInsentif" method="POST" action="save.php">
+    <?php echo csrfField(); ?>
+    <input type="hidden" name="id" id="insentif_id">
                             <div class="modal-body">
                                 <div class="form-group">
                                     <label>Nama Insentif <span class="text-danger">*</span></label>

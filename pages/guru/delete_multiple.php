@@ -2,7 +2,9 @@
 require_once __DIR__ . '/../../config/config.php';
 requireLogin();
 
-$ids = $_GET['ids'] ?? '';
+if (!verifyCsrfToken($_REQUEST['csrf_token'] ?? '')) { $_SESSION['error'] = 'Token tidak valid. Silakan coba lagi.'; header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? BASE_URL . 'pages/dashboard')); exit(); }
+
+$ids = $_REQUEST['ids'] ?? '';
 
 if (empty($ids)) {
     $_SESSION['error'] = 'Tidak ada data yang dipilih';

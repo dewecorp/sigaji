@@ -3,6 +3,7 @@ require_once __DIR__ . '/../../config/config.php';
 requireLogin();
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    if (!verifyCsrfToken($_POST['csrf_token'] ?? '')) { $_SESSION['error'] = 'Token tidak valid. Silakan coba lagi.'; header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? BASE_URL . 'pages/dashboard')); exit(); }
     $nama_madrasah = $_POST['nama_madrasah'] ?? '';
     $nama_kepala = $_POST['nama_kepala'] ?? '';
     $nama_bendahara = $_POST['nama_bendahara'] ?? '';
@@ -76,6 +77,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         if (in_array($file_ext, $allowed_extensions)) {
             // Validate file size (2MB max)
             if ($_FILES['logo']['size'] <= 2 * 1024 * 1024) {
+                if (@getimagesize($_FILES['logo']['tmp_name']) === false) {
+                    $_SESSION['error'] = "File bukan gambar yang valid";
+                    $logo = $current_logo;
+                    header('Location: ' . BASE_URL . 'pages/pengaturan');
+                    exit();
+                }
                 $logo = 'logo.' . $file_ext;
                 $upload_path = $upload_dir . $logo;
                 

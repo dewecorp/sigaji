@@ -104,8 +104,9 @@ $users = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
                                 <span>&times;</span>
                             </button>
                         </div>
-                        <form id="formPengguna" method="POST" action="save.php" enctype="multipart/form-data">
-                            <input type="hidden" name="id" id="user_id">
+<form id="formPengguna" method="POST" action="save.php" enctype="multipart/form-data">
+    <?php echo csrfField(); ?>
+    <input type="hidden" name="id" id="user_id">
                             <div class="modal-body">
                                 <div class="form-group">
                                     <label>Username <span class="text-danger">*</span></label>

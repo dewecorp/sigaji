@@ -6,6 +6,7 @@ requireLogin();
 header('Content-Type: application/json');
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    if (!verifyCsrfToken($_POST['csrf_token'] ?? '')) { echo json_encode(['success' => false, 'message' => 'Token tidak valid. Silakan refresh halaman.']); exit(); }
     $ids = $_POST['ids'] ?? '';
     
     if (empty($ids)) {

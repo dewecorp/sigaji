@@ -51,8 +51,9 @@ $tunjangan_list = $result_tunjangan ? $result_tunjangan->fetch_all(MYSQLI_ASSOC)
                                         <button type="button" class="btn btn-success btn-sm" data-toggle="modal" data-target="#modalImport">
                                             <i class="fas fa-file-upload"></i> Import Excel
                                         </button>
-                                        <form action="sync_simad.php" method="post" class="d-inline" id="formSyncSimad">
-                                            <button type="button" class="btn btn-secondary btn-sm" id="btnSyncSimad" title="URL API dibentuk otomatis di config/simad.php (nama folder SIMAD / override manual)">
+<form action="sync_simad.php" method="post" class="d-inline" id="formSyncSimad">
+    <?php echo csrfField(); ?>
+    <button type="button" class="btn btn-secondary btn-sm" id="btnSyncSimad" title="URL API dibentuk otomatis di config/simad.php (nama folder SIMAD / override manual)">
                                                 <i class="fas fa-sync-alt"></i> Sinkron SIMAD
                                             </button>
                                         </form>
@@ -179,7 +180,7 @@ $tunjangan_list = $result_tunjangan ? $result_tunjangan->fetch_all(MYSQLI_ASSOC)
                                                     </td>
                                                     <td style="text-align: center;"><?php echo $no++; ?></td>
                                                     <td><strong><?php echo htmlspecialchars($g['nama_lengkap']); ?></strong></td>
-                                                    <td style="text-align: center;"><?php echo $g['tmt'] ? $g['tmt'] : '-'; ?></td>
+                                                    <td style="text-align: center;"><?php echo $g['tmt'] ? htmlspecialchars($g['tmt']) : '-'; ?></td>
                                                     <td style="text-align: center;"><?php 
                                                         if ($g['tmt'] !== null) {
                                                             $tahun_sekarang = (int)date('Y');
@@ -194,7 +195,7 @@ $tunjangan_list = $result_tunjangan ? $result_tunjangan->fetch_all(MYSQLI_ASSOC)
                                                             echo '-';
                                                         }
                                                     ?></td>
-                                                    <td style="text-align: center;"><?php echo $g['jumlah_jam_mengajar'] ?? 0; ?> jam</td>
+                                                    <td style="text-align: center;"><?php echo htmlspecialchars($g['jumlah_jam_mengajar'] ?? 0); ?> jam</td>
                                                     <td class="jabatan-cell">
                                                         <?php 
                                                         $jabatan_display = '-';
@@ -253,8 +254,9 @@ $tunjangan_list = $result_tunjangan ? $result_tunjangan->fetch_all(MYSQLI_ASSOC)
                                 <span>&times;</span>
                             </button>
                         </div>
-                        <form id="formGuru" method="POST" action="save.php">
-                            <input type="hidden" name="id" id="guru_id">
+<form id="formGuru" method="POST" action="save.php">
+    <?php echo csrfField(); ?>
+    <input type="hidden" name="id" id="guru_id">
                             <div class="modal-body">
                                 <div class="row">
                                     <div class="col-md-12">
@@ -353,8 +355,9 @@ $tunjangan_list = $result_tunjangan ? $result_tunjangan->fetch_all(MYSQLI_ASSOC)
                                 <span>&times;</span>
                             </button>
                         </div>
-                        <form id="formEditMultiple" method="POST" action="save_multiple.php">
-                            <input type="hidden" name="ids" id="editMultipleIds">
+<form id="formEditMultiple" method="POST" action="save_multiple.php">
+    <?php echo csrfField(); ?>
+    <input type="hidden" name="ids" id="editMultipleIds">
                             <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
                                 <style>
                                     #tableEditMultiple {
@@ -449,8 +452,9 @@ $tunjangan_list = $result_tunjangan ? $result_tunjangan->fetch_all(MYSQLI_ASSOC)
                                 <span>&times;</span>
                             </button>
                         </div>
-                        <form method="POST" action="import.php" enctype="multipart/form-data">
-                            <div class="modal-body">
+<form method="POST" action="import.php" enctype="multipart/form-data">
+    <?php echo csrfField(); ?>
+    <div class="modal-body">
                                 <div class="form-group pb-3 border-bottom">
                                     <label class="d-block mb-2"><strong>Template</strong></label>
                                     <button type="button" class="btn btn-info btn-sm" id="btnDownloadTemplate">
@@ -1090,7 +1094,16 @@ var selectedIds = new Set();
                 cancelButtonText: 'Batal'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    window.location.href = 'delete_multiple.php?ids=' + idsArray.join(',');
+                    var form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = 'delete_multiple.php?ids=' + idsArray.join(',');
+                    var input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'csrf_token';
+                    input.value = window.CSRF_TOKEN || '';
+                    form.appendChild(input);
+                    document.body.appendChild(form);
+                    form.submit();
                 }
             });
         } else {

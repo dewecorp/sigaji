@@ -2,7 +2,9 @@
 require_once __DIR__ . '/../../config/config.php';
 requireLogin();
 
-$id = $_GET['id'] ?? 0;
+if (!verifyCsrfToken($_REQUEST['csrf_token'] ?? '')) { $_SESSION['error'] = 'Token tidak valid. Silakan coba lagi.'; header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? BASE_URL . 'pages/dashboard')); exit(); }
+
+$id = $_REQUEST['id'] ?? 0;
 
 $sql = "SELECT nama_lengkap FROM guru WHERE id = ?";
 $stmt = $conn->prepare($sql);

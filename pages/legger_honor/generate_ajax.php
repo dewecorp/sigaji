@@ -9,6 +9,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit();
 }
 
+if (!verifyCsrfToken($_POST['csrf_token'] ?? '')) { echo json_encode(['success' => false, 'message' => 'Token tidak valid. Silakan refresh halaman.']); exit(); }
+
 // Get periode from POST or use current month (legger honor tidak ikut settingan periode gaji)
 $periode = $_POST['periode'] ?? date('Y-m');
 

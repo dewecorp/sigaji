@@ -96,8 +96,9 @@ $pembina_list = $result_pembina ? $result_pembina->fetch_all(MYSQLI_ASSOC) : [];
                                 <span>&times;</span>
                             </button>
                         </div>
-                        <form id="formHonor">
-                            <input type="hidden" name="id" id="honor_id">
+<form id="formHonor">
+    <?php echo csrfField(); ?>
+    <input type="hidden" name="id" id="honor_id">
                             <div class="modal-body">
                                 <div class="form-group">
                                     <label>Nama Pembina <span class="text-danger">*</span></label>

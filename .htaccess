@@ -18,7 +18,7 @@ RewriteRule ^ %1 [R=302,L]
 
 RewriteRule ^(?:config|database|vendor|backup)/ - [F,L,NC]
 RewriteRule ^(?:\.git|\.svn|\.hg)/ - [F,L,NC]
-RewriteRule ^(?:composer\.(?:json|lock)|\.env|\.gitignore|_cookies\.txt|.*\.(?:bat|sh|ps1))$ - [F,L,NC]
+RewriteRule ^(?:composer\.(?:json|lock)|\.env|\.gitignore|_cookies\.txt|.*\.(?:bat|sh|ps1|zip))$ - [F,L,NC]
 
 RewriteCond %{REQUEST_FILENAME} -f [OR]
 RewriteCond %{REQUEST_FILENAME} -d
@@ -29,7 +29,7 @@ RewriteRule ^(.+?)/?$ $1.php [L]
 </IfModule>
 
 # Protect sensitive files
-<FilesMatch "\.(sql|log|ini|bak|dist|old|env|phar|phtml)$">
+<FilesMatch "\.(sql|log|ini|bak|dist|old|env|phar|phtml|zip)$">
     <IfModule mod_authz_core.c>
         Require all denied
     </IfModule>
@@ -39,7 +39,7 @@ RewriteRule ^(.+?)/?$ $1.php [L]
     </IfModule>
 </FilesMatch>
 
-<FilesMatch "^(composer\.(json|lock)|\.env|\.gitignore|_cookies\.txt|.*\.(bat|sh|ps1))$">
+<FilesMatch "^(composer\.(json|lock)|\.env|\.gitignore|_cookies\.txt|.*\.(bat|sh|ps1|zip))$">
     <IfModule mod_authz_core.c>
         Require all denied
     </IfModule>

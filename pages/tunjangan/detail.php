@@ -93,8 +93,9 @@ $guru = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
                                 <span>&times;</span>
                             </button>
                         </div>
-                        <form method="POST" action="save_detail.php">
-                            <input type="hidden" name="id" id="detail_id">
+<form method="POST" action="save_detail.php">
+    <?php echo csrfField(); ?>
+    <input type="hidden" name="id" id="detail_id">
                             <input type="hidden" name="tunjangan_id" value="<?php echo $tunjangan_id; ?>">
                             <div class="modal-body">
                                 <div class="form-group">

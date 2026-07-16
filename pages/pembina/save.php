@@ -22,6 +22,7 @@ if ($result->num_rows == 0) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    if (!verifyCsrfToken($_POST['csrf_token'] ?? '')) { echo json_encode(['success' => false, 'message' => 'Token tidak valid. Silakan refresh halaman.']); exit(); }
     try {
         $id = isset($_POST['id']) && $_POST['id'] != '' && $_POST['id'] != '0' ? intval($_POST['id']) : null;
         $nama_pembina = trim($_POST['nama_pembina'] ?? '');

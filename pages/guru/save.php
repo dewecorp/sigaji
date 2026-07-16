@@ -61,6 +61,7 @@ function ensureGuruColumns($conn) {
 ensureGuruColumns($conn);
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    if (!verifyCsrfToken($_POST['csrf_token'] ?? '')) { $_SESSION['error'] = 'Token tidak valid. Silakan coba lagi.'; header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? BASE_URL . 'pages/dashboard')); exit(); }
     $id = $_POST['id'] ?? null;
     $nama_lengkap = $_POST['nama_lengkap'] ?? '';
     $tmt = $_POST['tmt'] ?? null;

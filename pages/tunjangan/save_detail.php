@@ -3,6 +3,7 @@ require_once __DIR__ . '/../../config/config.php';
 requireLogin();
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    if (!verifyCsrfToken($_POST['csrf_token'] ?? '')) { $_SESSION['error'] = 'Token tidak valid. Silakan coba lagi.'; header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? BASE_URL . 'pages/dashboard')); exit(); }
     $id = $_POST['id'] ?? null;
     $tunjangan_id = $_POST['tunjangan_id'] ?? 0;
     $guru_id = $_POST['guru_id'] ?? 0;

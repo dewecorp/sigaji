@@ -118,8 +118,9 @@ $all_guru = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
                                 <span>&times;</span>
                             </button>
                         </div>
-                        <form id="formTunjangan" method="POST" action="save.php">
-                            <input type="hidden" name="id" id="tunjangan_id">
+<form id="formTunjangan" method="POST" action="save.php">
+    <?php echo csrfField(); ?>
+    <input type="hidden" name="id" id="tunjangan_id">
                             <input type="hidden" name="periode" id="periode_form" value="<?php echo htmlspecialchars($periode, ENT_QUOTES); ?>">
                             <div class="modal-body">
                                 <div class="form-group">

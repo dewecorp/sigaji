@@ -52,6 +52,11 @@
         <?php endforeach; ?>
     <?php endif; ?>
     
+    <!-- CSRF Token for JavaScript -->
+    <script>
+        window.CSRF_TOKEN = '<?php echo htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8'); ?>';
+    </script>
+
     <!-- Logout Confirmation -->
     <script>
         function confirmLogout(event) {
@@ -131,6 +136,48 @@
                 }
             });
         }
+
+        // Global confirmDelete with CSRF protection (POST instead of GET)
+        window.confirmDelete = function(url) {
+            if (typeof Swal === 'undefined') {
+                if (confirm('Apakah Anda yakin ingin menghapus data ini?')) {
+                    var form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = url;
+                    var input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'csrf_token';
+                    input.value = window.CSRF_TOKEN || '';
+                    form.appendChild(input);
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+                return;
+            }
+            Swal.fire({
+                title: 'Apakah Anda yakin?',
+                text: "Data yang dihapus tidak dapat dikembalikan!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Ya, Hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    var form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = url;
+                    var input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'csrf_token';
+                    input.value = window.CSRF_TOKEN || '';
+                    form.appendChild(input);
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+            });
+        };
     </script>
     
     <!-- Notification Handler -->

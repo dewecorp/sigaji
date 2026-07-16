@@ -29,6 +29,7 @@ try {
 }
 
 $error = '';
+$expired = isset($_GET['expired']) ? true : false;
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $username = $_POST['username'] ?? '';
@@ -48,18 +49,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $password_hash = $user['password'];
             $is_valid = password_verify($password, $password_hash);
             
-            // If password verify fails, try to update with new hash (for admin123)
-            if (!$is_valid && $username == 'admin' && $password == 'admin123') {
-                // Regenerate password hash for admin123
-                $new_hash = password_hash('admin123', PASSWORD_DEFAULT);
-                $update_sql = "UPDATE users SET password = ? WHERE username = 'admin'";
-                $update_stmt = $conn->prepare($update_sql);
-                $update_stmt->bind_param("s", $new_hash);
-                $update_stmt->execute();
-                $is_valid = true; // Set to true after updating
-            }
-            
             if ($is_valid) {
+                session_regenerate_id(true);
                 $_SESSION['user_id'] = $user['id'];
                 $_SESSION['username'] = $user['username'];
                 $_SESSION['nama_lengkap'] = $user['nama_lengkap'];
@@ -68,7 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 
                 logActivity($conn, "User {$user['username']} berhasil login", 'success');
                 
-                // Direct redirect without welcome message
+                $_SESSION['success'] = "Selamat datang, {$user['nama_lengkap']}!";
                 header('Location: ' . BASE_URL . 'pages/dashboard.php');
                 exit();
             } else {
@@ -111,91 +102,131 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             display: flex;
             align-items: center;
             justify-content: center;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0ea5e9 100%);
             padding: 20px;
         }
         .login-card {
             background: #fff;
-            border-radius: 15px;
-            box-shadow: 0 10px 40px rgba(0,0,0,.2);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,.3);
             overflow: hidden;
             max-width: 1000px;
             width: 100%;
         }
         .login-image {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0ea5e9 0%, #10b981 100%);
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 40px;
             min-height: 500px;
+            position: relative;
+            overflow: hidden;
+        }
+        .login-image::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.06) 0%, transparent 60%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
         }
         .login-image img {
             max-width: 100%;
             height: auto;
             filter: drop-shadow(0 10px 20px rgba(0,0,0,.3));
+            position: relative;
+            z-index: 1;
         }
         .login-brand {
             text-align: center;
             color: #fff;
+            position: relative;
+            z-index: 1;
         }
         .login-logo {
             width: 180px;
             height: 180px;
             object-fit: contain;
             margin-bottom: 18px;
+            filter: drop-shadow(0 8px 24px rgba(0,0,0,0.2));
         }
         .login-brand-title {
-            font-size: 28px;
-            font-weight: 700;
+            font-size: 32px;
+            font-weight: 800;
             line-height: 1.2;
+            letter-spacing: 1px;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.15);
         }
         .login-brand-subtitle {
-            margin-top: 6px;
+            margin-top: 8px;
             font-size: 15px;
-            opacity: 0.85;
+            opacity: 0.9;
+            text-shadow: 0 1px 4px rgba(0,0,0,0.1);
         }
         .login-form {
-            padding: 40px;
+            padding: 48px;
             display: flex;
             flex-direction: column;
             justify-content: center;
         }
         .login-heading {
             text-align: center;
+            margin-bottom: 8px;
         }
         .login-title {
-            font-size: 2rem;
+            font-size: 1.75rem;
             font-weight: 700;
-            color: #191d21;
-            margin-bottom: 0.5rem;
+            color: #0f172a;
+            margin-bottom: 0.25rem;
         }
         .login-subtitle {
-            color: #6c757d;
+            color: #64748b;
             margin-bottom: 2rem;
+            font-size: 0.95rem;
         }
         .form-control {
-            border-radius: 8px;
-            padding: 12px 15px;
-            border: 1px solid #e3eaef;
+            border-radius: 10px;
+            padding: 12px 16px;
+            border: 1.5px solid #e2e8f0;
+            font-size: 0.95rem;
+            transition: all 0.2s;
         }
         .form-control:focus {
-            border-color: #6777ef;
-            box-shadow: 0 0 0 0.2rem rgba(103, 119, 239, 0.25);
+            border-color: #0ea5e9;
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
         }
         .btn-login {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0ea5e9 0%, #10b981 100%);
             border: none;
-            border-radius: 8px;
-            padding: 12px;
-            font-weight: 600;
+            border-radius: 10px;
+            padding: 14px;
+            font-weight: 700;
             color: #fff;
             width: 100%;
+            font-size: 1rem;
+            letter-spacing: 0.5px;
             transition: all 0.3s;
+            cursor: pointer;
         }
         .btn-login:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(103, 119, 239, 0.4);
+            box-shadow: 0 8px 24px rgba(14, 165, 233, 0.35);
+        }
+        .btn-login:active {
+            transform: translateY(0);
+        }
+        .form-group label {
+            font-weight: 600;
+            color: #334155;
+            font-size: 0.9rem;
+            margin-bottom: 6px;
         }
         @media (max-width: 768px) {
             .login-image {
@@ -235,9 +266,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                             <p class="login-subtitle">Silakan login untuk mengakses sistem</p>
                         </div>
                         
-                        <?php if ($error): ?>
-                            <div class="alert alert-danger" role="alert">
-                                <i class="fas fa-exclamation-circle"></i> <?php echo htmlspecialchars($error); ?>
+                        <?php if ($expired): ?>
+                            <div class="alert alert-warning" role="alert">
+                                <i class="fas fa-clock"></i> Sesi Anda telah berakhir. Silakan login kembali.
                             </div>
                         <?php endif; ?>
                         
@@ -272,10 +303,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
     <?php if ($error): ?>
     <script>
-        toastr.error('<?php echo addslashes($error); ?>', 'Login Gagal');
+        Swal.fire({
+            icon: 'error',
+            title: 'Login Gagal',
+            text: '<?php echo addslashes($error); ?>',
+            confirmButtonColor: '#6777ef',
+            confirmButtonText: 'Coba Lagi'
+        });
     </script>
     <?php endif; ?>
 </body>

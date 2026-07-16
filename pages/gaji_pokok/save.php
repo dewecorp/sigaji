@@ -3,6 +3,7 @@ require_once __DIR__ . '/../../config/config.php';
 requireLogin();
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    if (!verifyCsrfToken($_POST['csrf_token'] ?? '')) { $_SESSION['error'] = 'Token tidak valid. Silakan coba lagi.'; header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? BASE_URL . 'pages/dashboard')); exit(); }
     $id = $_POST['id'] ?? null;
     $guru_id = $_POST['guru_id'] ?? 0;
     $jumlah = str_replace(['.', ','], '', $_POST['jumlah'] ?? 0);
@@ -37,7 +38,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
     
     if ($stmt->execute()) {
-        $guru_name = $conn->query("SELECT nama_lengkap FROM guru WHERE id = $guru_id")->fetch_assoc()['nama_lengkap'];
+        $guru_stmt = $conn->prepare("SELECT nama_lengkap FROM guru WHERE id = ?");
+        $guru_stmt->bind_param("i", $guru_id);
+        $guru_stmt->execute();
+        $guru_name = $guru_stmt->get_result()->fetch_assoc()['nama_lengkap'];
+        $guru_stmt->close();
         logActivity($conn, "{$action} gaji pokok untuk {$guru_name}", 'success');
         $_SESSION['success'] = "Data gaji pokok berhasil " . ($id ? 'diubah' : 'ditambahkan');
     } else {

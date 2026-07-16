@@ -60,6 +60,7 @@ if ($savedTahunAjaran !== '' && !in_array($savedTahunAjaran, $tahunAjaranOptions
                             </div>
                             <div class="card-body">
                                 <form method="POST" action="save.php" enctype="multipart/form-data">
+                                    <?php echo csrfField(); ?>
                                     
                                     <!-- Informasi Madrasah -->
                                     <h6 class="section-title mb-3" style="color: #667eea; font-weight: 600; border-bottom: 2px solid #667eea; padding-bottom: 8px;">
@@ -169,13 +170,13 @@ if ($savedTahunAjaran !== '' && !in_array($savedTahunAjaran, $tahunAjaranOptions
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label><strong>Bulan Mulai</strong></label>
-                                                <input type="month" class="form-control" id="periode_mulai" name="periode_mulai" value="<?php echo $settings['periode_mulai']; ?>">
+                                                <input type="month" class="form-control" id="periode_mulai" name="periode_mulai" value="<?php echo htmlspecialchars($settings['periode_mulai'] ?? ''); ?>">
                                             </div>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label><strong>Bulan Akhir</strong></label>
-                                                <input type="month" class="form-control" id="periode_akhir" name="periode_akhir" value="<?php echo $settings['periode_akhir']; ?>">
+                                                <input type="month" class="form-control" id="periode_akhir" name="periode_akhir" value="<?php echo htmlspecialchars($settings['periode_akhir'] ?? ''); ?>">
                                             </div>
                                         </div>
                                     </div>

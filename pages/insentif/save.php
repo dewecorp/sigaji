@@ -44,6 +44,8 @@ $conn->query("CREATE TABLE IF NOT EXISTS insentif_detail (
     CONSTRAINT fk_insentif_detail_insentif FOREIGN KEY (insentif_id) REFERENCES insentif(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
 
+if (!verifyCsrfToken($_POST['csrf_token'] ?? '')) { echo json_encode(['success' => false, 'message' => 'Token tidak valid. Silakan refresh halaman.']); exit(); }
+
 if (empty($request)) {
     echo json_encode([
         'success' => false,

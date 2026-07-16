@@ -99,8 +99,9 @@ function formatFileSize($bytes) {
                                     </div>
                                     <div class="card-body">
                                         <p>Lakukan backup database untuk keamanan data.</p>
-                                        <form method="POST" action="backup.php" id="formBackup">
-                                            <button type="submit" class="btn btn-primary" id="btnBackup">
+<form method="POST" action="backup.php" id="formBackup">
+    <?php echo csrfField(); ?>
+    <button type="submit" class="btn btn-primary" id="btnBackup">
                                                 <i class="fas fa-download"></i> Backup Database
                                             </button>
                                         </form>
@@ -114,8 +115,9 @@ function formatFileSize($bytes) {
                                     </div>
                                     <div class="card-body">
                                         <p>Restore database dari file backup.</p>
-                                        <form method="POST" action="restore.php" enctype="multipart/form-data" id="formRestore">
-                                            <div class="form-group">
+<form method="POST" action="restore.php" enctype="multipart/form-data" id="formRestore">
+    <?php echo csrfField(); ?>
+    <div class="form-group">
                                                 <label>Pilih File Backup (.sql)</label>
                                                 <input type="file" class="form-control" name="backup_file" accept=".sql" required id="backupFileInput">
                                             </div>
