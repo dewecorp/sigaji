@@ -19,7 +19,7 @@ if (!defined('SIMAD_PUBLIC_FOLDER_FALLBACK')) {
 
 /** Hanya bila SIMAD benar‑benar di luar mesin/host ini */
 if (!defined('SIMAD_TEACHERS_URL_MANUAL')) {
-    define('SIMAD_TEACHERS_URL_MANUAL', '');
+    define('SIMAD_TEACHERS_URL_MANUAL', 'https://simad.misultanfattah.sch.id/api/v1/teachers.php');
 }
 
 /** Path marker relatif dari root web SIMAD (normalize FS) */

@@ -136,6 +136,18 @@ $tunjangan_list = $result_tunjangan ? $result_tunjangan->fetch_all(MYSQLI_ASSOC)
                                             font-size: 16px;
                                         }
                                         
+                                        /* Make action buttons side by side */
+                                        #tableGuru tbody td.aksi-cell {
+                                            display: flex;
+                                            gap: 5px;
+                                            justify-content: center;
+                                            align-items: center;
+                                            white-space: nowrap;
+                                        }
+                                        #tableGuru tbody td.aksi-cell .btn {
+                                            margin: 0;
+                                        }
+                                        
                                         /* Hide all sorting indicators and disable sorting */
                                         #tableGuru thead th.sorting,
                                         #tableGuru thead th.sorting_asc,
@@ -156,7 +168,7 @@ $tunjangan_list = $result_tunjangan ? $result_tunjangan->fetch_all(MYSQLI_ASSOC)
                                                 <th width="100" style="text-align: center;">Jumlah Jam</th>
                                                 <th style="min-width: 150px;">Jabatan</th>
                                                 <th width="100" style="text-align: center;">Status</th>
-                                                <th width="120" style="text-align: center;">Aksi</th>
+                                                <th width="150" style="text-align: center;">Aksi</th>
                                             </tr>
                                         </thead>
                                         <tbody data-order="fixed">
@@ -212,7 +224,7 @@ $tunjangan_list = $result_tunjangan ? $result_tunjangan->fetch_all(MYSQLI_ASSOC)
                                                             <?php echo htmlspecialchars($st); ?>
                                                         </span>
                                                     </td>
-                                                    <td style="text-align: center;">
+                                                    <td class="aksi-cell">
                                                         <button class="btn btn-sm btn-info" onclick="editGuru(<?php echo $g['id']; ?>)" data-toggle="tooltip" title="Edit">
                                                             <i class="fas fa-edit"></i>
                                                         </button>
@@ -559,6 +571,45 @@ var selectedIds = new Set();
         });
     };
 
+
+    // Confirm delete function
+    window.confirmDelete = function(url) {
+        if (typeof Swal === 'undefined') {
+            if (confirm('Apakah Anda yakin ingin menghapus data ini?')) {
+                window.location.href = url;
+            }
+            return;
+        }
+        Swal.fire({
+            title: 'Apakah Anda yakin?',
+            text: "Data yang dihapus tidak dapat dikembalikan!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Ya, Hapus!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = url;
+            }
+        });
+    };
+
+    // Calculate masa bakti
+    function calculateMasaBakti() {
+        var tmt = $('#tmt').val();
+        var tahunSekarang = new Date().getFullYear();
+        if (tmt) {
+            tmt = tmt.toString().replace(/\D/g, '').trim();
+        }
+        if (tmt && tmt.length >= 4) {
+            var tahunTmt = parseInt(tmt);
+            if (!isNaN(tahunTmt) && tahunTmt >= 1950 && tahunTmt <= tahunSekarang) {
+                var masaBakti = tahunSekarang - tahunTmt;
+            }
+        }
+    }
 
     // Also calculate when modal is shown (in case TMT already has value)
     $('#modalTambah').on('shown.bs.modal', function () {

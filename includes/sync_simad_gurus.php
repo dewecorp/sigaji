@@ -200,6 +200,8 @@ function sync_simad_gurus_sync_one(
                 'jumlah_jam_mengajar' => 0,
                 'jabatan' => '',
             ];
+        } else {
+            throw new RuntimeException('Gagal INSERT guru "' . $namaApi . '": ' . $stmtInsert->error);
         }
         return;
     }
@@ -227,7 +229,9 @@ function sync_simad_gurus_sync_one(
     if ($official !== null && (int)$official['id'] !== $keeperId) {
         $oldId = (int)$official['id'];
         $stmtClearSid->bind_param('i', $oldId);
-        $stmtClearSid->execute();
+        if (!$stmtClearSid->execute()) {
+            throw new RuntimeException('Gagal clear SID untuk id=' . $oldId . ': ' . $stmtClearSid->error);
+        }
 
         $oldScore = sync_simad_gurus_row_completeness($official);
         $keepScore = sync_simad_gurus_row_completeness($keeper);
@@ -260,6 +264,8 @@ function sync_simad_gurus_sync_one(
             }
         }
         unset($lr);
+    } else {
+        throw new RuntimeException('Gagal UPDATE guru "' . $namaApi . '" (id=' . $keeperId . '): ' . $stmtBind->error);
     }
 
     /*
@@ -369,7 +375,7 @@ function sync_guru_nama_dari_simad(mysqli $conn) {
         $stmtClearSid = $conn->prepare('UPDATE guru SET simad_id_guru = NULL WHERE id = ?');
         $stmtInsert = $conn->prepare(
             'INSERT INTO guru (nama_lengkap, jenis_kelamin, status_pegawai, simad_id_guru, jumlah_jam_mengajar, jabatan)
-             VALUES (?, \'L\', \'Honor\', ?, 0, \'\')'
+             VALUES (?, \'L\', \'Honorer\', ?, 0, \'\')'
         );
 
         if (!$stmtBind || !$stmtClearSid || !$stmtInsert) {
@@ -401,12 +407,18 @@ function sync_guru_nama_dari_simad(mysqli $conn) {
 
         $conn->commit();
 
+        $totalApi = count($list);
+        $totalProses = $updated + $inserted;
         return [
             'success' => true,
-            'message' => sprintf('Sinkron SIMAD selesai: %d diperbarui, %d ditambahkan.', $updated, $inserted),
+            'message' => sprintf(
+                'Sinkron SIMAD selesai: %d diperbarui, %d ditambahkan',
+                $updated,
+                $inserted
+            ),
             'inserted' => $inserted,
             'updated' => $updated,
-            'fetched' => count($list),
+            'fetched' => $totalApi,
         ];
     } catch (Throwable $e) {
         $conn->rollback();
