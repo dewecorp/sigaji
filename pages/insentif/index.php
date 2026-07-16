@@ -423,6 +423,9 @@ foreach ($legger_detail_rows as $row) {
     border-collapse: separate;
     border-spacing: 0;
 }
+#tableLeggerInsentif thead th {
+    text-align: center;
+}
 #tableLeggerInsentif thead th:nth-child(1),
 #tableLeggerInsentif tbody td:nth-child(1) {
     position: sticky;
@@ -436,7 +439,6 @@ foreach ($legger_detail_rows as $row) {
     left: 45px;
     z-index: 2;
     background-color: #fff;
-    min-width: 220px;
 }
 #tableLeggerInsentif thead th:nth-child(1),
 #tableLeggerInsentif thead th:nth-child(2) {
