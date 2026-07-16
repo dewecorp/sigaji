@@ -176,6 +176,7 @@ cleanupOldActivities($conn);
         .main-sidebar,
         .main-sidebar.sidebar-style-2 {
             background: linear-gradient(135deg, #0ea5e9 0%, #10b981 100%) !important;
+            overflow-x: hidden !important;
         }
         
         .main-sidebar .sidebar-brand a,
