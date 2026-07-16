@@ -218,6 +218,10 @@ cleanupOldActivities($conn);
             color: #ffffff !important;
         }
         
+        .navbar-nav.navbar-right .nav-link.nav-link-user {
+            color: #ffffff !important;
+        }
+        
         .main-sidebar .sidebar-menu li.active > a:hover {
             background-color: rgba(255, 255, 255, 0.3) !important;
         }
