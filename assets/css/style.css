@@ -173,7 +173,8 @@ h6 { font-size: 0.9rem !important; }
 
 .table-responsive {
     border-radius: 8px;
-    overflow: hidden;
+    overflow-x: auto;
+    overflow-y: hidden;
 }
 
 .btn-action {
