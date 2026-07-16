@@ -43,8 +43,12 @@ session_start();
 
 // Application Configuration
 define('APP_NAME', 'SIGaji');
-$ver = @exec('git describe --tags --always 2>nul', $out, $code);
-define('APP_VERSION', $code === 0 && $ver ? trim($ver) : '1.0.0');
+$vDate = @exec('git log -1 --format=%ct 2>nul', $vOut, $vCode);
+if ($vCode === 0 && ($vTs = trim($vOut[0] ?? ''))) {
+    define('APP_VERSION', date('ynjGis', (int)$vTs));
+} else {
+    define('APP_VERSION', '1.0.0');
+}
 $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
 if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] !== '') {
     $scheme = explode(',', $_SERVER['HTTP_X_FORWARDED_PROTO'])[0];
