@@ -1070,3 +1070,12 @@ body .main-content .section .section-body .stat-card-danger .stat-icon {
         font-size: 0.6rem !important;
     }
 }
+
+/* Action buttons in tables: prevent stacking */
+.table td:last-child,
+.table th:last-child {
+    white-space: nowrap;
+}
+.table td:last-child .btn {
+    margin: 1px 2px;
+}
