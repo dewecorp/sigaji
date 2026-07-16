@@ -87,7 +87,7 @@ $guruAll = $resultGuru ? $resultGuru->fetch_all(MYSQLI_ASSOC) : [];
 $stmtGuru->close();
 
 if (empty($guruAll)) {
-    echo json_encode(['status' => 'success', 'period_info' => [...], 'guru' => []], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+    echo json_encode(['status' => 'success', 'period_info' => [], 'guru' => []], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
     exit();
 }
 
