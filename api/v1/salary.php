@@ -58,7 +58,8 @@ if ($requestedPeriode !== '') {
     $periods[] = $periodeAktif;
 }
 
-// Build period list for SQL IN clause
+// Build period list for SQL IN clause (include empty string for period-independent records)
+$periods[] = '';
 $placeholders = implode(',', array_fill(0, count($periods), '?'));
 $periodTypes = str_repeat('s', count($periods));
 
