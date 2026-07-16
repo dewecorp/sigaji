@@ -17,8 +17,8 @@ RewriteCond %{REQUEST_URI} ^/[A-Za-z]:/.*/sistem_gaji/(.*)$ [NC]
 RewriteRule ^ %1 [R=302,L]
 
 RewriteRule ^(?:config|database|vendor|backup)/ - [F,L,NC]
-RewriteRule ^(?:\.git|\.svn|\.hg|\.version)/ - [F,L,NC]
-RewriteRule ^(?:composer\.(?:json|lock)|\.env|\.gitignore|_cookies\.txt|\.version|.*\.(?:bat|sh|ps1))$ - [F,L,NC]
+RewriteRule ^(?:\.git|\.svn|\.hg)/ - [F,L,NC]
+RewriteRule ^(?:composer\.(?:json|lock)|\.env|\.gitignore|_cookies\.txt|.*\.(?:bat|sh|ps1))$ - [F,L,NC]
 
 RewriteCond %{REQUEST_FILENAME} -f [OR]
 RewriteCond %{REQUEST_FILENAME} -d
