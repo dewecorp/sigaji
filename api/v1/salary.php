@@ -1,14 +1,15 @@
 <?php
 /**
- * API endpoint untuk SIMAD menarik data gaji (gaji pokok, tunjangan, potongan).
+ * API endpoint untuk SIMAD menarik data gaji.
+ * Mengembalikan data dari legger_gaji (hasil perhitungan final) + komponen gaji.
+ *
  * Autentikasi: X-API-KEY header atau api_key query parameter.
  *
  * Response: JSON
- *   {"status":"success","period_info":{...},"data":{...}}
- *   {"status":"error","message":"..."}
+ *   {"status":"success","period_info":{...},"data":{...,"legger":[...],"komponen":{...}}}
  *
  * Query params opsional:
- *   periode   - filter by periode (YYYY-MM). Jika tidak dikirim, pakai periode_aktif dari settings.
+ *   periode   - YYYY-MM. Jika tidak dikirim, pakai periode_aktif dari settings.
  *   guru_id   - filter by local guru.id
  *   simad_id  - filter by simad_id_guru
  */
@@ -19,7 +20,7 @@ header('Content-Type: application/json; charset=utf-8');
 
 // --- Auth ---
 $apiKey = $_SERVER['HTTP_X_API_KEY'] ?? $_GET['api_key'] ?? '';
-$expectedKey = function_exists('simad_get_teachers_api_key') ? simad_get_teachers_api_key() : '';
+$expectedKey = simad_get_teachers_api_key();
 
 if ($apiKey === '' || !hash_equals($expectedKey, $apiKey)) {
     http_response_code(401);
@@ -41,29 +42,26 @@ $honorPerJam   = isset($settings['honor_per_jam']) ? (float)$settings['honor_per
 
 // --- Determine period(s) to query ---
 $requestedPeriode = isset($_GET['periode']) ? trim($_GET['periode']) : '';
-$periods = [];
 
 if ($requestedPeriode !== '') {
-    $periods[] = $requestedPeriode;
+    $periods = [$requestedPeriode];
 } elseif ($jumlahPeriode > 1 && $periodeMulai !== '' && $periodeAkhir !== '') {
+    $periods = [];
     $start = new DateTime($periodeMulai . '-01');
     $end   = new DateTime($periodeAkhir . '-01');
     $end->modify('+1 month');
-    $interval = new DateInterval('P1M');
     while ($start < $end) {
         $periods[] = $start->format('Y-m');
         $start->modify('+1 month');
     }
 } else {
-    $periods[] = $periodeAktif;
+    $periods = [$periodeAktif];
 }
 
-// Build period list for SQL IN clause (include empty string for period-independent records)
-$periods[] = '';
 $placeholders = implode(',', array_fill(0, count($periods), '?'));
 $periodTypes = str_repeat('s', count($periods));
 
-// --- Filters ---
+// --- Guru filter ---
 $guruId  = isset($_GET['guru_id'])  ? (int)$_GET['guru_id']  : 0;
 $simadId = isset($_GET['simad_id']) ? (int)$_GET['simad_id'] : 0;
 
@@ -81,19 +79,52 @@ if ($simadId > 0) {
     $guruTypes .= 'i';
 }
 
-// --- 1. Gaji Pokok ---
-$gpParams = array_merge($periods, $guruParams);
-$gpTypes = $periodTypes . $guruTypes;
+// --- 1. Legger Gaji (calculated salary - final data matching SIGaji display) ---
+$lgParams = array_merge($periods, $guruParams);
+$lgTypes = $periodTypes . $guruTypes;
 
-$sqlGP = "SELECT gp.id, gp.guru_id, g.simad_id_guru, g.nama_lengkap, g.nip,
-                 gp.jumlah, gp.periode
+$sqlLG = "SELECT lg.id, lg.guru_id, g.simad_id_guru, g.nama_lengkap, g.nip,
+                 lg.periode,
+                 lg.gaji_pokok, lg.total_tunjangan, lg.total_potongan, lg.gaji_bersih,
+                 lg.tanda_tangan
+          FROM legger_gaji lg
+          JOIN guru g ON lg.guru_id = g.id
+          WHERE lg.periode IN ($placeholders) $guruWhere
+          ORDER BY g.nama_lengkap ASC, lg.periode ASC";
+$stmtLG = $conn->prepare($sqlLG);
+$stmtLG->bind_param($lgTypes, ...$lgParams);
+$stmtLG->execute();
+$resultLG = $stmtLG->get_result();
+$leggerRaw = $resultLG ? $resultLG->fetch_all(MYSQLI_ASSOC) : [];
+$stmtLG->close();
+
+$legger = [];
+foreach ($leggerRaw as $row) {
+    $legger[] = [
+        'id'               => (int)$row['id'],
+        'guru_id'          => (int)$row['guru_id'],
+        'simad_id_guru'    => $row['simad_id_guru'] ? (int)$row['simad_id_guru'] : null,
+        'nama_lengkap'     => $row['nama_lengkap'],
+        'nip'              => $row['nip'],
+        'periode'          => $row['periode'],
+        'gaji_pokok'       => (float)$row['gaji_pokok'],
+        'total_tunjangan'  => (float)$row['total_tunjangan'],
+        'total_potongan'   => (float)$row['total_potongan'],
+        'gaji_bersih'      => (float)$row['gaji_bersih'],
+        'tanda_tangan'     => (int)$row['tanda_tangan'],
+    ];
+}
+
+// --- 2. Komponen Gaji (raw data) ---
+// Gaji Pokok (period-independent, monthly base)
+$sqlGP = "SELECT gp.id, gp.guru_id, g.simad_id_guru, g.nama_lengkap, gp.jumlah AS jumlah_bulanan
           FROM gaji_pokok gp
           JOIN guru g ON gp.guru_id = g.id
-          WHERE gp.periode IN ($placeholders) $guruWhere
-          ORDER BY g.nama_lengkap ASC, gp.periode ASC";
+          WHERE 1=1 $guruWhere
+          ORDER BY g.nama_lengkap ASC";
 $stmtGP = $conn->prepare($sqlGP);
-if (!empty($gpParams)) {
-    $stmtGP->bind_param($gpTypes, ...$gpParams);
+if (!empty($guruParams)) {
+    $stmtGP->bind_param($guruTypes, ...$guruParams);
 }
 $stmtGP->execute();
 $resultGP = $stmtGP->get_result();
@@ -103,32 +134,26 @@ $stmtGP->close();
 $gajiPokok = [];
 foreach ($gajiPokokRaw as $row) {
     $gajiPokok[] = [
-        'id'            => (int)$row['id'],
         'guru_id'       => (int)$row['guru_id'],
         'simad_id_guru' => $row['simad_id_guru'] ? (int)$row['simad_id_guru'] : null,
         'nama_lengkap'  => $row['nama_lengkap'],
-        'nip'           => $row['nip'],
-        'jumlah'        => (float)$row['jumlah'],
-        'periode'       => $row['periode'],
+        'jumlah_bulanan' => (float)$row['jumlah_bulanan'],
     ];
 }
 
-// --- 2. Tunjangan + Detail ---
+// Tunjangan per guru per periode (from detail)
 $tjParams = array_merge($periods, $guruParams);
 $tjTypes = $periodTypes . $guruTypes;
 
-$sqlTJ = "SELECT td.id, td.guru_id, g.simad_id_guru, g.nama_lengkap,
-                 td.tunjangan_id, t.nama_tunjangan, t.jumlah_tunjangan, t.aktif,
-                 td.jumlah, td.periode
+$sqlTJ = "SELECT td.id, td.guru_id, g.simad_id_guru, td.tunjangan_id,
+                 t.nama_tunjangan, td.jumlah, td.periode
           FROM tunjangan_detail td
           JOIN guru g ON td.guru_id = g.id
           JOIN tunjangan t ON td.tunjangan_id = t.id
           WHERE td.periode IN ($placeholders) $guruWhere
-          ORDER BY t.nama_tunjangan ASC, g.nama_lengkap ASC, td.periode ASC";
+          ORDER BY g.nama_lengkap ASC, t.nama_tunjangan ASC";
 $stmtTJ = $conn->prepare($sqlTJ);
-if (!empty($tjParams)) {
-    $stmtTJ->bind_param($tjTypes, ...$tjParams);
-}
+$stmtTJ->bind_param($tjTypes, ...$tjParams);
 $stmtTJ->execute();
 $resultTJ = $stmtTJ->get_result();
 $tunjanganRaw = $resultTJ ? $resultTJ->fetch_all(MYSQLI_ASSOC) : [];
@@ -136,43 +161,28 @@ $stmtTJ->close();
 
 $tunjangan = [];
 foreach ($tunjanganRaw as $row) {
-    $tid = $row['tunjangan_id'];
-    if (!isset($tunjangan[$tid])) {
-        $tunjangan[$tid] = [
-            'id'               => (int)$tid,
-            'nama_tunjangan'   => $row['nama_tunjangan'],
-            'jumlah_tunjangan' => (float)$row['jumlah_tunjangan'],
-            'aktif'            => (int)$row['aktif'],
-            'detail'           => [],
-        ];
-    }
-    $tunjangan[$tid]['detail'][] = [
-        'id'             => (int)$row['id'],
-        'guru_id'        => (int)$row['guru_id'],
-        'simad_id_guru'  => $row['simad_id_guru'] ? (int)$row['simad_id_guru'] : null,
-        'nama_lengkap'   => $row['nama_lengkap'],
-        'jumlah'         => (float)$row['jumlah'],
-        'periode'        => $row['periode'],
+    $tunjangan[] = [
+        'guru_id'       => (int)$row['guru_id'],
+        'simad_id_guru' => $row['simad_id_guru'] ? (int)$row['simad_id_guru'] : null,
+        'nama_tunjangan' => $row['nama_tunjangan'],
+        'jumlah'        => (float)$row['jumlah'],
+        'periode'       => $row['periode'],
     ];
 }
-$tunjangan = array_values($tunjangan);
 
-// --- 3. Potongan + Detail ---
+// Potongan per guru per periode
 $ptParams = array_merge($periods, $guruParams);
 $ptTypes = $periodTypes . $guruTypes;
 
-$sqlPT = "SELECT pd.id, pd.guru_id, g.simad_id_guru, g.nama_lengkap,
-                 pd.potongan_id, p.nama_potongan, p.jumlah_potongan, p.aktif,
-                 pd.jumlah, pd.periode
+$sqlPT = "SELECT pd.id, pd.guru_id, g.simad_id_guru, pd.potongan_id,
+                 p.nama_potongan, pd.jumlah, pd.periode
           FROM potongan_detail pd
           JOIN guru g ON pd.guru_id = g.id
           JOIN potongan p ON pd.potongan_id = p.id
           WHERE pd.periode IN ($placeholders) $guruWhere
-          ORDER BY p.nama_potongan ASC, g.nama_lengkap ASC, pd.periode ASC";
+          ORDER BY g.nama_lengkap ASC, p.nama_potongan ASC";
 $stmtPT = $conn->prepare($sqlPT);
-if (!empty($ptParams)) {
-    $stmtPT->bind_param($ptTypes, ...$ptParams);
-}
+$stmtPT->bind_param($ptTypes, ...$ptParams);
 $stmtPT->execute();
 $resultPT = $stmtPT->get_result();
 $potonganRaw = $resultPT ? $resultPT->fetch_all(MYSQLI_ASSOC) : [];
@@ -180,42 +190,38 @@ $stmtPT->close();
 
 $potongan = [];
 foreach ($potonganRaw as $row) {
-    $pid = $row['potongan_id'];
-    if (!isset($potongan[$pid])) {
-        $potongan[$pid] = [
-            'id'              => (int)$pid,
-            'nama_potongan'   => $row['nama_potongan'],
-            'jumlah_potongan' => (float)$row['jumlah_potongan'],
-            'aktif'           => (int)$row['aktif'],
-            'detail'          => [],
-        ];
-    }
-    $potongan[$pid]['detail'][] = [
-        'id'             => (int)$row['id'],
-        'guru_id'        => (int)$row['guru_id'],
-        'simad_id_guru'  => $row['simad_id_guru'] ? (int)$row['simad_id_guru'] : null,
-        'nama_lengkap'   => $row['nama_lengkap'],
-        'jumlah'         => (float)$row['jumlah'],
-        'periode'        => $row['periode'],
+    $potongan[] = [
+        'guru_id'       => (int)$row['guru_id'],
+        'simad_id_guru' => $row['simad_id_guru'] ? (int)$row['simad_id_guru'] : null,
+        'nama_potongan' => $row['nama_potongan'],
+        'jumlah'        => (float)$row['jumlah'],
+        'periode'       => $row['periode'],
     ];
 }
-$potongan = array_values($potongan);
 
 // --- Response ---
 echo json_encode([
     'status' => 'success',
     'period_info' => [
-        'periode_aktif'  => $periodeAktif,
-        'periode_mulai'  => $periodeMulai,
-        'periode_akhir'  => $periodeAkhir,
-        'jumlah_periode' => $jumlahPeriode,
-        'tahun_ajaran'   => $tahunAjaran,
-        'honor_per_jam'  => $honorPerJam,
-        'periods_used'   => $periods,
+        'periode_aktif'   => $periodeAktif,
+        'periode_mulai'   => $periodeMulai,
+        'periode_akhir'   => $periodeAkhir,
+        'jumlah_periode'  => $jumlahPeriode,
+        'jumlah_bulan'    => $jumlahPeriode,
+        'tahun_ajaran'    => $tahunAjaran,
+        'honor_per_jam'   => $honorPerJam,
+        'periods_used'    => $periods,
+        'penjelasan'      => "Periode mencakup {$jumlahPeriode} bulan (dari {$periodeMulai} sampai {$periodeAkhir}). "
+                           . "Gaji bulanan dikalikan {$jumlahPeriode} untuk mendapatkan total periode. "
+                           . "Data 'legger' sudah dalam nilai total periode (sesuai tampilan SIGaji). "
+                           . "Data 'komponen.gaji_pokok.jumlah_bulanan' adalah nilai per bulan — kalikan dengan {$jumlahPeriode} untuk total.",
     ],
     'data' => [
-        'gaji_pokok' => $gajiPokok,
-        'tunjangan'  => $tunjangan,
-        'potongan'   => $potongan,
+        'legger'   => $legger,
+        'komponen' => [
+            'gaji_pokok' => $gajiPokok,
+            'tunjangan'  => $tunjangan,
+            'potongan'   => $potongan,
+        ],
     ],
 ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
