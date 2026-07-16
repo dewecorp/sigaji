@@ -146,6 +146,7 @@ function updateSystemFromGitHub() {
             'config/database.php',
             '.htaccess',
             '.git',
+            '.version',
             'latest_update.zip',
             'update_temp',
             'update.lock',
@@ -167,7 +168,10 @@ function updateSystemFromGitHub() {
             }
         }
         
-        // Step 6: Cleanup temp files
+        // Step 6: Write version timestamp
+        file_put_contents($rootDir . '/.version', time());
+        
+        // Step 7: Cleanup temp files
         deleteFile($zipFile);
         deleteDirectory($extractDir);
         releaseUpdateLock($lockHandle, $lockFile);

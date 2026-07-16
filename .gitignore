@@ -11,6 +11,9 @@ config/config.php
 *.env
 .env.local
 
+# Version file (auto-updated on each system update)
+/.version
+
 # Logs
 *.log
 debug_post.log
