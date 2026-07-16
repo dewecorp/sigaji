@@ -96,17 +96,26 @@ $guruIds = array_column($guruAll, 'id');
 $guruIdPlaceholders = implode(',', array_fill(0, count($guruIds), '?'));
 $guruIdTypes = str_repeat('i', count($guruIds));
 
-// --- Gaji Pokok (per guru, period-independent) ---
-$sqlGP = "SELECT guru_id, jumlah FROM gaji_pokok WHERE guru_id IN ($guruIdPlaceholders)";
+// --- Gaji Pokok per guru (ambil SEMUA, prioritas di PHP) ---
+$sqlGP = "SELECT guru_id, jumlah, periode FROM gaji_pokok WHERE guru_id IN ($guruIdPlaceholders)";
 $stmtGP = $conn->prepare($sqlGP);
 $stmtGP->bind_param($guruIdTypes, ...$guruIds);
 $stmtGP->execute();
 $resultGP = $stmtGP->get_result();
 $gajiPokokMap = [];
 while ($row = $resultGP->fetch_assoc()) {
-    $gajiPokokMap[(int)$row['guru_id']] = (float)$row['jumlah'];
+    $gid = (int)$row['guru_id'];
+    $p   = $row['periode'];
+    $jml = (float)$row['jumlah'];
+    // Prioritas: (1) periode cocok dgn yg diminta, (2) periode blank, (3) any
+    $isMatch = $p !== '' && $p !== null && in_array($p, $periods, true);
+    $newPrio = $isMatch ? 1 : (($p === '' || $p === null) ? 2 : 3);
+    if (!array_key_exists($gid, $gajiPokokMap) || $newPrio < $gajiPokokMap[$gid]['priority']) {
+        $gajiPokokMap[$gid] = ['amount' => $jml, 'periode' => $p, 'priority' => $newPrio];
+    }
 }
 $stmtGP->close();
+$gajiPokokMap = array_map(fn($v) => $v['amount'], $gajiPokokMap);
 
 // --- Tunjangan per guru (grouped by period) ---
 $sqlTJ = "SELECT td.guru_id, td.tunjangan_id, t.nama_tunjangan, td.jumlah, td.periode
