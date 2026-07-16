@@ -43,7 +43,7 @@ session_start();
 
 // Application Configuration
 define('APP_NAME', 'SIGaji');
-require_once __DIR__ . '/includes/version.php';
+define('APP_VERSION', '1.0.0');
 $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
 if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] !== '') {
     $scheme = explode(',', $_SERVER['HTTP_X_FORWARDED_PROTO'])[0];

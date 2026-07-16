@@ -177,7 +177,7 @@
                     <span style="color: #667eea; font-weight: 600; margin-left: 5px; font-size: 13px;">Madrasah Ibtidaiyah Sultan Fattah Sukosono</span>
                 </div>
                 <div style="color: #666; font-weight: 500; font-size: 12px;">
-                    Sistem Informasi Gaji | Versi <?php echo APP_VERSION; ?> | Dibuat dengan <span style="color: #e74c3c;">❤️</span>
+                    Sistem Informasi Gaji | Versi <?php echo $APP_VERSION ?? APP_VERSION; ?> | Dibuat dengan <span style="color: #e74c3c;">❤️</span>
                 </div>
             </div>
         </div>
