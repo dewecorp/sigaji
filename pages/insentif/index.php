@@ -436,6 +436,7 @@ foreach ($legger_detail_rows as $row) {
     left: 45px;
     z-index: 2;
     background-color: #fff;
+    min-width: 220px;
 }
 #tableLeggerInsentif thead th:nth-child(1),
 #tableLeggerInsentif thead th:nth-child(2) {
