@@ -426,6 +426,9 @@ foreach ($legger_detail_rows as $row) {
 #tableLeggerInsentif thead th {
     text-align: center;
 }
+#tableLeggerInsentif tbody td {
+    white-space: nowrap;
+}
 #tableLeggerInsentif thead th:nth-child(1),
 #tableLeggerInsentif tbody td:nth-child(1) {
     position: sticky;
