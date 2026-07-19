@@ -3,8 +3,8 @@ $page_title = 'Riwayat';
 require_once __DIR__ . '/../../includes/header.php';
 require_once __DIR__ . '/../../includes/sidebar.php';
 
-// Get all activities
-$sql = "SELECT * FROM activities ORDER BY created_at DESC";
+// Get activities with pagination limit
+$sql = "SELECT * FROM activities ORDER BY created_at DESC LIMIT 500";
 $activities = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
 ?>
 

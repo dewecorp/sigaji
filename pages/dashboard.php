@@ -117,10 +117,6 @@ if ($check_insentif && ($check_insentif->num_rows ?? 0) > 0) {
 
 $stats['total_pengeluaran'] = floatval($stats['total_gaji_bersih'] ?? 0) + floatval($stats['total_insentif'] ?? 0);
 
-// Delete activities older than 24 hours
-$delete_sql = "DELETE FROM activities WHERE created_at < DATE_SUB(NOW(), INTERVAL 24 HOUR)";
-$conn->query($delete_sql);
-
 // Get total count of activities
 $sql_count = "SELECT COUNT(*) as total FROM activities";
 $total_activities = $conn->query($sql_count)->fetch_assoc()['total'];

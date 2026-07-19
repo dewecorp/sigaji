@@ -110,12 +110,18 @@ if (!empty($settings['logo'])) {
 }
 
 function assetVersion($path) {
+    static $cache = [];
+    if (isset($cache[$path])) return $cache[$path];
     $file_path = __DIR__ . '/../' . ltrim($path, '/');
-    return file_exists($file_path) ? filemtime($file_path) : time();
+    $cache[$path] = file_exists($file_path) ? filemtime($file_path) : time();
+    return $cache[$path];
 }
 
-// Cleanup old activities (older than 24 hours) on every page load
-cleanupOldActivities($conn);
+// Cleanup old activities once per session (not on every page load)
+if (!isset($_SESSION['_cleanup_done'])) {
+    cleanupOldActivities($conn);
+    $_SESSION['_cleanup_done'] = true;
+}
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -131,7 +137,6 @@ cleanupOldActivities($conn);
     <!-- General CSS Files -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <!-- CSS Libraries -->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap4.min.css">

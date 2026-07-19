@@ -75,7 +75,6 @@ if (!function_exists('logActivity')) {
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("issss", $user_id, $username, $activity, $type, $timestamp);
         $stmt->execute();
-        cleanupOldActivities($conn);
     }
 }
 
