@@ -638,14 +638,14 @@ foreach ($legger_list as $l) {
                 <div class="signature-col">
                     <p><strong>Kepala Madrasah</strong></p>
                     <div class="signature-line">
-                        <img class="qr-signature" src="<?php echo BASE_URL; ?>qrcode.php?data=<?php echo rawurlencode('Kepala Madrasah|' . ($settings['nama_kepala'] ?? '') . '|Slip Gaji'); ?>" alt="QR Kepala Madrasah">
+                        <img class="qr-signature" src="<?php echo BASE_URL; ?>qrcode?data=<?php echo rawurlencode('Kepala Madrasah|' . ($settings['nama_kepala'] ?? '') . '|Slip Gaji'); ?>" alt="QR Kepala Madrasah">
                         <div class="signature-name"><?php echo htmlspecialchars($settings['nama_kepala'] ?? ''); ?></div>
                     </div>
                 </div>
                 <div class="signature-col">
                     <p><strong>Bendahara</strong></p>
                     <div class="signature-line">
-                        <img class="qr-signature" src="<?php echo BASE_URL; ?>qrcode.php?data=<?php echo rawurlencode('Bendahara|' . ($settings['nama_bendahara'] ?? '') . '|Slip Gaji'); ?>" alt="QR Bendahara">
+                        <img class="qr-signature" src="<?php echo BASE_URL; ?>qrcode?data=<?php echo rawurlencode('Bendahara|' . ($settings['nama_bendahara'] ?? '') . '|Slip Gaji'); ?>" alt="QR Bendahara">
                         <div class="signature-name"><?php echo htmlspecialchars($settings['nama_bendahara'] ?? ''); ?></div>
                     </div>
                 </div>

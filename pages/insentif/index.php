@@ -156,7 +156,7 @@ foreach ($legger_detail_rows as $row) {
                                                         <button class="btn btn-sm btn-info btn-edit-insentif" data-id="<?php echo $i['id']; ?>" data-toggle="tooltip" title="Edit">
                                                             <i class="fas fa-edit"></i>
                                                         </button>
-                                                        <button class="btn btn-sm btn-danger" onclick="confirmDelete('<?php echo BASE_URL; ?>pages/insentif/delete.php?id=<?php echo $i['id']; ?>')" data-toggle="tooltip" title="Hapus">
+                                                        <button class="btn btn-sm btn-danger" onclick="confirmDelete('<?php echo BASE_URL; ?>pages/insentif/delete?id=<?php echo $i['id']; ?>')" data-toggle="tooltip" title="Hapus">
                                                             <i class="fas fa-trash"></i>
                                                         </button>
                                                     </td>
@@ -173,10 +173,10 @@ foreach ($legger_detail_rows as $row) {
                                 <h4>Legger Insentif</h4>
                                 <div class="card-header-action" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
                                     <div id="tableLeggerInsentif_buttons" style="display: flex; gap: 5px; flex-wrap: wrap;"></div>
-                                    <a href="cetak_slip_semua.php?v=<?php echo (int)@filemtime(__DIR__ . '/cetak_slip_semua.php'); ?>" class="btn btn-warning" target="_blank">
+                                    <a href="cetak_slip_semua?v=<?php echo (int)@filemtime(__DIR__ . '/cetak_slip_semua.php'); ?>" class="btn btn-warning" target="_blank">
                                         <i class="fas fa-file-invoice"></i> Cetak Slip Semua
                                     </a>
-                                    <a href="cetak_legger.php?v=<?php echo (int)@filemtime(__DIR__ . '/cetak_legger.php'); ?>" class="btn btn-primary" target="_blank">
+                                    <a href="cetak_legger?v=<?php echo (int)@filemtime(__DIR__ . '/cetak_legger.php'); ?>" class="btn btn-primary" target="_blank">
                                         <i class="fas fa-print"></i> Cetak Legger Insentif
                                     </a>
                                 </div>
@@ -221,7 +221,7 @@ foreach ($legger_detail_rows as $row) {
                                                         <?php endforeach; ?>
                                                         <td style="text-align: right; white-space: nowrap; font-weight: bold;"><?php echo formatRupiahTanpaRp($row_total); ?></td>
                                                         <td>
-                                                            <a href="cetak_slip.php?guru_id=<?php echo intval($l['guru_id']); ?>" class="btn btn-sm btn-info" target="_blank">
+                                                            <a href="cetak_slip?guru_id=<?php echo intval($l['guru_id']); ?>" class="btn btn-sm btn-info" target="_blank">
                                                                 <i class="fas fa-print"></i> Cetak Slip
                                                             </a>
                                                         </td>
@@ -246,7 +246,7 @@ foreach ($legger_detail_rows as $row) {
                                 <span>&times;</span>
                             </button>
                         </div>
-<form id="formInsentif" method="POST" action="save.php">
+<form id="formInsentif" method="POST" action="save">
     <?php echo csrfField(); ?>
     <input type="hidden" name="id" id="insentif_id">
                             <div class="modal-body">
@@ -561,7 +561,7 @@ function editInsentif(id) {
     }
     var $ = jQuery;
     $.ajax({
-        url: 'get.php?id=' + id,
+        url: 'get?id=' + id,
         type: 'GET',
         dataType: 'json',
         success: function(data) {
@@ -587,7 +587,7 @@ function editInsentif(id) {
             refreshTotalInsentifModal();
             $('#aktif').prop('checked', data.aktif == 1 || data.aktif == '1' || data.aktif === 1);
             $.ajax({
-                url: 'get_guru.php?insentif_id=' + data.id,
+                url: 'get_guru?insentif_id=' + data.id,
                 type: 'GET',
                 dataType: 'json',
                 success: function(guruData) {

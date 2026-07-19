@@ -57,7 +57,7 @@ $ekstrakurikuler_list = $conn->query($sql_eks)->fetch_all(MYSQLI_ASSOC);
                                                         <button class="btn btn-sm btn-info btn-edit" data-id="<?php echo $p['id']; ?>" onclick="editPembina(<?php echo $p['id']; ?>)">
                                                             <i class="fas fa-edit"></i>
                                                         </button>
-                                                        <button class="btn btn-sm btn-danger" onclick="confirmDelete('<?php echo BASE_URL; ?>pages/pembina/delete.php?id=<?php echo $p['id']; ?>')">
+                                                        <button class="btn btn-sm btn-danger" onclick="confirmDelete('<?php echo BASE_URL; ?>pages/pembina/delete?id=<?php echo $p['id']; ?>')">
                                                             <i class="fas fa-trash"></i>
                                                         </button>
                                                     </td>
@@ -131,7 +131,7 @@ $ekstrakurikuler_list = $conn->query($sql_eks)->fetch_all(MYSQLI_ASSOC);
             $('#formPembina').on('submit', function(e) {
                 e.preventDefault();
                 $.ajax({
-                    url: '<?php echo BASE_URL; ?>pages/pembina/save.php',
+                    url: '<?php echo BASE_URL; ?>pages/pembina/save',
                     type: 'POST',
                     data: $(this).serialize(),
                     dataType: 'json',
@@ -182,7 +182,7 @@ function editPembina(id) {
     var $ = window.jQuery;
     
     $.ajax({
-        url: '<?php echo BASE_URL; ?>pages/pembina/get.php',
+        url: '<?php echo BASE_URL; ?>pages/pembina/get',
         type: 'GET',
         data: { id: id },
         dataType: 'json',

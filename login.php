@@ -29,6 +29,8 @@ try {
 }
 
 $error = '';
+$login_success = false;
+$login_name = '';
 $expired = isset($_GET['expired']) ? true : false;
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -59,9 +61,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 
                 logActivity($conn, "User {$user['username']} berhasil login", 'success');
                 
-                $_SESSION['success'] = "Selamat datang, {$user['nama_lengkap']}!";
-                header('Location: ' . BASE_URL . 'pages/dashboard.php');
-                exit();
+                $login_success = true;
+                $login_name = $user['nama_lengkap'];
             } else {
                 $error = 'Username atau password salah!';
             }
@@ -314,6 +315,24 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             confirmButtonColor: '#6777ef',
             confirmButtonText: 'Coba Lagi'
         });
+    </script>
+    <?php endif; ?>
+    
+    <?php if ($login_success): ?>
+    <script>
+        Swal.fire({
+            icon: 'success',
+            title: 'Berhasil',
+            text: 'Selamat datang, <?php echo addslashes($login_name); ?>!',
+            timer: 2000,
+            showConfirmButton: false
+        }).then(() => {
+            window.location.href = '<?php echo BASE_URL; ?>pages/dashboard';
+        });
+        // Fallback: redirect after timer if SweetAlert fails to load
+        setTimeout(function() {
+            window.location.href = '<?php echo BASE_URL; ?>pages/dashboard';
+        }, 2500);
     </script>
     <?php endif; ?>
 </body>

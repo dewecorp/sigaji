@@ -5,7 +5,7 @@ require_once 'config/config.php';
 if (isLoggedIn()) {
     header('Location: ' . BASE_URL . 'pages/dashboard');
 } else {
-    header('Location: ' . BASE_URL . 'login.php');
+    header('Location: ' . BASE_URL . 'login');
 }
 exit();
 ?>

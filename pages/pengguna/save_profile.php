@@ -3,7 +3,7 @@ require_once __DIR__ . '/../../config/config.php';
 requireLogin();
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    if (!verifyCsrfToken($_POST['csrf_token'] ?? '')) { $_SESSION['error'] = 'Sesi berakhir. Silakan muat ulang halaman dan coba lagi.'; header('Location: ' . BASE_URL . 'pages/pengguna/profile.php'); exit(); }
+    if (!verifyCsrfToken($_POST['csrf_token'] ?? '')) { $_SESSION['error'] = 'Sesi berakhir. Silakan muat ulang halaman dan coba lagi.'; header('Location: ' . BASE_URL . 'pages/pengguna/profile'); exit(); }
     $id = $_POST['id'] ?? null;
     $username = $_POST['username'] ?? '';
     $password = $_POST['password'] ?? '';
@@ -14,7 +14,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Validate: user can only edit their own profile
     if ($id != $_SESSION['user_id']) {
         $_SESSION['error'] = "Anda tidak memiliki izin untuk mengubah profil ini";
-        header('Location: ' . BASE_URL . 'pages/pengguna/profile.php');
+        header('Location: ' . BASE_URL . 'pages/pengguna/profile');
         exit();
     }
     
@@ -25,20 +25,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     
     if (empty($username)) {
         $_SESSION['error'] = "Username tidak boleh kosong";
-        header('Location: ' . BASE_URL . 'pages/pengguna/profile.php');
+        header('Location: ' . BASE_URL . 'pages/pengguna/profile');
         exit();
     }
     
     if (empty($nama_lengkap)) {
         $_SESSION['error'] = "Nama lengkap tidak boleh kosong";
-        header('Location: ' . BASE_URL . 'pages/pengguna/profile.php');
+        header('Location: ' . BASE_URL . 'pages/pengguna/profile');
         exit();
     }
     
     // Validate email format if provided
     if (!empty($email) && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $_SESSION['error'] = "Format email tidak valid";
-        header('Location: ' . BASE_URL . 'pages/pengguna/profile.php');
+        header('Location: ' . BASE_URL . 'pages/pengguna/profile');
         exit();
     }
     
@@ -52,7 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if ($check_username_result->num_rows > 0) {
         $check_username_stmt->close();
         $_SESSION['error'] = "Username sudah digunakan oleh pengguna lain";
-        header('Location: ' . BASE_URL . 'pages/pengguna/profile.php');
+        header('Location: ' . BASE_URL . 'pages/pengguna/profile');
         exit();
     }
     $check_username_stmt->close();
@@ -61,13 +61,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if ($password) {
         if (strlen($password) < 6) {
             $_SESSION['error'] = "Password minimal 6 karakter";
-            header('Location: ' . BASE_URL . 'pages/pengguna/profile.php');
+            header('Location: ' . BASE_URL . 'pages/pengguna/profile');
             exit();
         }
         
         if ($password !== $password_confirm) {
             $_SESSION['error'] = "Password dan konfirmasi password tidak cocok";
-            header('Location: ' . BASE_URL . 'pages/pengguna/profile.php');
+            header('Location: ' . BASE_URL . 'pages/pengguna/profile');
             exit();
         }
     }
@@ -91,7 +91,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             if ($_FILES['foto']['size'] <= 2 * 1024 * 1024) {
                 if (@getimagesize($_FILES['foto']['tmp_name']) === false) {
                     $_SESSION['error'] = "File bukan gambar yang valid";
-                    header('Location: ' . BASE_URL . 'pages/pengguna/profile.php');
+                    header('Location: ' . BASE_URL . 'pages/pengguna/profile');
                     exit();
                 }
                 // Get current foto to delete old one if exists
@@ -117,17 +117,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     // File uploaded successfully
                 } else {
                     $_SESSION['error'] = "Gagal mengupload foto";
-                    header('Location: ' . BASE_URL . 'pages/pengguna/profile.php');
+                    header('Location: ' . BASE_URL . 'pages/pengguna/profile');
                     exit();
                 }
             } else {
                 $_SESSION['error'] = "Ukuran file terlalu besar. Maksimal 2MB";
-                header('Location: ' . BASE_URL . 'pages/pengguna/profile.php');
+                header('Location: ' . BASE_URL . 'pages/pengguna/profile');
                 exit();
             }
         } else {
             $_SESSION['error'] = "Format file tidak didukung. Gunakan JPG, PNG, atau GIF";
-            header('Location: ' . BASE_URL . 'pages/pengguna/profile.php');
+            header('Location: ' . BASE_URL . 'pages/pengguna/profile');
             exit();
         }
     }
@@ -181,7 +181,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $stmt->close();
 }
 
-header('Location: ' . BASE_URL . 'pages/pengguna/profile.php');
+header('Location: ' . BASE_URL . 'pages/pengguna/profile');
 exit();
 ?>
 

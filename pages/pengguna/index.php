@@ -78,7 +78,7 @@ $users = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
                                                         // Bendahara bisa dihapus oleh admin atau user lain
                                                         if ($u['id'] != $_SESSION['user_id'] && $u['role'] != 'admin'): 
                                                         ?>
-                                                            <button class="btn btn-sm btn-danger" onclick="confirmDelete('<?php echo BASE_URL; ?>pages/pengguna/delete.php?id=<?php echo $u['id']; ?>')" data-toggle="tooltip" title="Hapus">
+                                                            <button class="btn btn-sm btn-danger" onclick="confirmDelete('<?php echo BASE_URL; ?>pages/pengguna/delete?id=<?php echo $u['id']; ?>')" data-toggle="tooltip" title="Hapus">
                                                                 <i class="fas fa-trash"></i>
                                                             </button>
                                                         <?php endif; ?>
@@ -104,7 +104,7 @@ $users = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
                                 <span>&times;</span>
                             </button>
                         </div>
-<form id="formPengguna" method="POST" action="save.php" enctype="multipart/form-data">
+<form id="formPengguna" method="POST" action="save" enctype="multipart/form-data">
     <?php echo csrfField(); ?>
     <input type="hidden" name="id" id="user_id">
                             <div class="modal-body">
@@ -247,7 +247,7 @@ function resetFormPengguna() {
         // Make editPengguna available globally
         window.editPengguna = function(id) {
             $.ajax({
-                url: 'get.php?id=' + id,
+                url: 'get?id=' + id,
                 type: 'GET',
                 dataType: 'json',
                 success: function(data) {

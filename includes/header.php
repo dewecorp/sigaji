@@ -625,7 +625,7 @@ cleanupOldActivities($conn);
                             <div class="d-sm-none d-lg-inline-block" style="font-size: 14px; font-weight: 600; color: #ffffff; vertical-align: middle;"><?php echo htmlspecialchars($nama_lengkap ?? ''); ?></div>
                         </a>
                         <div class="dropdown-menu dropdown-menu-right">
-                            <a href="<?php echo BASE_URL; ?>pages/pengguna/profile.php" class="dropdown-item has-icon">
+                            <a href="<?php echo BASE_URL; ?>pages/pengguna/profile" class="dropdown-item has-icon">
                                 <i class="far fa-user"></i> Profile
                             </a>
                             <a href="#" onclick="confirmUpdate(event)" class="dropdown-item has-icon">
@@ -654,7 +654,7 @@ cleanupOldActivities($conn);
                         <span>User</span>
                     </button>
                     <div class="mobile-user-menu" id="mobile-user-menu">
-                        <a href="<?php echo BASE_URL; ?>pages/pengguna/profile.php">Profile</a>
+                        <a href="<?php echo BASE_URL; ?>pages/pengguna/profile">Profile</a>
                         <a href="#" onclick="confirmUpdate(event)">Update Sistem</a>
                         <a href="#" onclick="confirmLogout(event)">Logout</a>
                     </div>

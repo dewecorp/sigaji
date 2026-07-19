@@ -28,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 }
 
-header('Location: ' . BASE_URL . 'pages/potongan/detail.php?potongan_id=' . $_POST['potongan_id']);
+header('Location: ' . BASE_URL . 'pages/potongan/detail?potongan_id=' . $_POST['potongan_id']);
 exit();
 ?>
 

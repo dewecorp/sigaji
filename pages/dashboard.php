@@ -12,11 +12,13 @@ $result = $conn->query($sql);
 $stats['total_guru'] = $result->fetch_assoc()['total'];
 
 // Get current period from settings
-$sql = "SELECT periode_aktif, jumlah_periode FROM settings LIMIT 1";
+$sql = "SELECT periode_aktif, jumlah_periode, periode_mulai, periode_akhir FROM settings LIMIT 1";
 $result = $conn->query($sql);
 $settings = $result->fetch_assoc();
 $periode_aktif = $settings['periode_aktif'] ?? date('Y-m');
 $jumlah_periode = isset($settings['jumlah_periode']) ? intval($settings['jumlah_periode']) : 1;
+$periode_mulai = $settings['periode_mulai'] ?? '';
+$periode_akhir = $settings['periode_akhir'] ?? '';
 
 // Get statistics from legger_gaji (source of truth - already multiplied by jumlah_periode)
 // This ensures consistency with the legger display
@@ -150,7 +152,11 @@ function formatPeriodeIndonesia($periode) {
     return $periode;
 }
 
-$periode_aktif_label = formatPeriodeIndonesia($periode_aktif);
+if ($jumlah_periode > 1 && !empty($periode_mulai) && !empty($periode_akhir)) {
+    $periode_aktif_label = formatPeriodeIndonesia($periode_mulai) . ' - ' . formatPeriodeIndonesia($periode_akhir);
+} else {
+    $periode_aktif_label = formatPeriodeIndonesia($periode_aktif);
+}
 
 function dashboardStatIcon($name) {
     $paths = [

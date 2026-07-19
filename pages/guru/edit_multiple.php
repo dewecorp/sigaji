@@ -48,7 +48,7 @@ $guru_list = $result->fetch_all(MYSQLI_ASSOC);
                     <h4>Edit <?php echo count($guru_list); ?> Data Guru</h4>
                 </div>
                 <div class="card-body">
-                    <form method="POST" action="save_multiple.php">
+                    <form method="POST" action="save_multiple">
                         <input type="hidden" name="ids" value="<?php echo htmlspecialchars($ids); ?>">
                         
                         <div class="alert alert-info">

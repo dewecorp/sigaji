@@ -68,7 +68,7 @@ $guru = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
                                                         <button class="btn btn-sm btn-info" onclick="editDetail(<?php echo $d['id']; ?>)">
                                                             <i class="fas fa-edit"></i>
                                                         </button>
-                                                        <button class="btn btn-sm btn-danger" onclick="confirmDelete('<?php echo BASE_URL; ?>pages/tunjangan/delete_detail.php?id=<?php echo $d['id']; ?>')">
+                                                        <button class="btn btn-sm btn-danger" onclick="confirmDelete('<?php echo BASE_URL; ?>pages/tunjangan/delete_detail?id=<?php echo $d['id']; ?>')">
                                                             <i class="fas fa-trash"></i>
                                                         </button>
                                                     </td>
@@ -93,7 +93,7 @@ $guru = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
                                 <span>&times;</span>
                             </button>
                         </div>
-<form method="POST" action="save_detail.php">
+<form method="POST" action="save_detail">
     <?php echo csrfField(); ?>
     <input type="hidden" name="id" id="detail_id">
                             <input type="hidden" name="tunjangan_id" value="<?php echo $tunjangan_id; ?>">
@@ -128,7 +128,7 @@ $guru = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
 <script>
 function editDetail(id) {
     $.ajax({
-        url: 'get_detail.php?id=' + id,
+        url: 'get_detail?id=' + id,
         type: 'GET',
         dataType: 'json',
         success: function(data) {

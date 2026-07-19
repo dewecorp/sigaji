@@ -99,7 +99,7 @@ function formatFileSize($bytes) {
                                     </div>
                                     <div class="card-body">
                                         <p>Lakukan backup database untuk keamanan data.</p>
-<form method="POST" action="backup.php" id="formBackup">
+<form method="POST" action="backup" id="formBackup">
     <?php echo csrfField(); ?>
     <button type="submit" class="btn btn-primary" id="btnBackup">
                                                 <i class="fas fa-download"></i> Backup Database
@@ -115,7 +115,7 @@ function formatFileSize($bytes) {
                                     </div>
                                     <div class="card-body">
                                         <p>Restore database dari file backup.</p>
-<form method="POST" action="restore.php" enctype="multipart/form-data" id="formRestore">
+<form method="POST" action="restore" enctype="multipart/form-data" id="formRestore">
     <?php echo csrfField(); ?>
     <div class="form-group">
                                                 <label>Pilih File Backup (.sql)</label>
@@ -159,7 +159,7 @@ function formatFileSize($bytes) {
                                                                 <td><?php echo htmlspecialchars($backup['nama_lengkap'] ?? '-'); ?></td>
                                                                 <td><?php echo date('d/m/Y H:i:s', strtotime($backup['created_at'])); ?></td>
                                                                 <td>
-                                                                    <a href="download.php?id=<?php echo $backup['id']; ?>" class="btn btn-sm btn-primary download-backup" 
+                                                                    <a href="download?id=<?php echo $backup['id']; ?>" class="btn btn-sm btn-primary download-backup" 
                                                                        data-filename="<?php echo htmlspecialchars($backup['filename']); ?>" 
                                                                        title="Unduh">
                                                                         <i class="fas fa-download"></i> Unduh
@@ -329,7 +329,7 @@ function formatFileSize($bytes) {
                             showConfirmButton: false,
                             didOpen: function() { Swal.showLoading(); }
                         });
-                        window.location.href = '<?php echo BASE_URL; ?>pages/backup/delete.php?id=' + id;
+                        window.location.href = '<?php echo BASE_URL; ?>pages/backup/delete?id=' + id;
                     }
                 });
                 return false;

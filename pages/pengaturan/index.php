@@ -59,7 +59,7 @@ if ($savedTahunAjaran !== '' && !in_array($savedTahunAjaran, $tahunAjaranOptions
                                 <h4>Pengaturan Sistem</h4>
                             </div>
                             <div class="card-body">
-                                <form method="POST" action="save.php" enctype="multipart/form-data">
+                                <form method="POST" action="save" enctype="multipart/form-data">
                                     <?php echo csrfField(); ?>
                                     
                                     <!-- Informasi Madrasah -->

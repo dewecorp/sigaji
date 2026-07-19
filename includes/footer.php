@@ -78,7 +78,7 @@
                 cancelButtonText: 'Batal'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    window.location.href = '<?php echo BASE_URL; ?>logout.php';
+                    window.location.href = '<?php echo BASE_URL; ?>logout';
                 }
             });
         }
@@ -96,7 +96,7 @@
                 cancelButtonText: 'Batal',
                 showLoaderOnConfirm: true,
                 preConfirm: () => {
-                    return fetch('<?php echo BASE_URL; ?>pages/pengaturan/ajax_update.php', {
+                    return fetch('<?php echo BASE_URL; ?>pages/pengaturan/ajax_update', {
                         method: 'POST',
                         credentials: 'same-origin',
                         headers: {

@@ -6,7 +6,7 @@ if (isLoggedIn()) {
 }
 
 session_destroy();
-header('Location: ' . BASE_URL . 'login.php');
+header('Location: ' . BASE_URL . 'login');
 exit();
 ?>
 

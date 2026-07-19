@@ -12,7 +12,7 @@ if (!function_exists('isLoggedIn')) {
 if (!function_exists('requireLogin')) {
     function requireLogin() {
         if (!isLoggedIn()) {
-            header('Location: ' . BASE_URL . 'login.php');
+            header('Location: ' . BASE_URL . 'login');
             exit();
         }
     }
@@ -207,7 +207,7 @@ if (function_exists('isLoggedIn') && isLoggedIn()) {
         session_unset();
         session_destroy();
         if (defined('BASE_URL')) {
-            header('Location: ' . BASE_URL . 'login.php?expired=1');
+            header('Location: ' . BASE_URL . 'login?expired=1');
         }
         exit();
     }

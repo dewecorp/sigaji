@@ -28,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 }
 
-header('Location: ' . BASE_URL . 'pages/tunjangan/detail.php?tunjangan_id=' . $_POST['tunjangan_id']);
+header('Location: ' . BASE_URL . 'pages/tunjangan/detail?tunjangan_id=' . $_POST['tunjangan_id']);
 exit();
 ?>
 

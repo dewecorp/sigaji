@@ -93,7 +93,7 @@ $all_guru = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
                                                         <button class="btn btn-sm btn-info btn-edit-tunjangan" data-id="<?php echo $t['id']; ?>" onclick="if(typeof editTunjangan==='function'){editTunjangan(<?php echo $t['id']; ?>);}" data-toggle="tooltip" title="Edit">
                                                             <i class="fas fa-edit"></i>
                                                         </button>
-                                                        <button class="btn btn-sm btn-danger" onclick="confirmDelete('<?php echo BASE_URL; ?>pages/tunjangan/delete.php?id=<?php echo $t['id']; ?>')" data-toggle="tooltip" title="Hapus">
+                                                        <button class="btn btn-sm btn-danger" onclick="confirmDelete('<?php echo BASE_URL; ?>pages/tunjangan/delete?id=<?php echo $t['id']; ?>')" data-toggle="tooltip" title="Hapus">
                                                             <i class="fas fa-trash"></i>
                                                         </button>
                                                     </td>
@@ -118,7 +118,7 @@ $all_guru = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
                                 <span>&times;</span>
                             </button>
                         </div>
-<form id="formTunjangan" method="POST" action="save.php">
+<form id="formTunjangan" method="POST" action="save">
     <?php echo csrfField(); ?>
     <input type="hidden" name="id" id="tunjangan_id">
                             <input type="hidden" name="periode" id="periode_form" value="<?php echo htmlspecialchars($periode, ENT_QUOTES); ?>">
@@ -330,7 +330,7 @@ function editTunjangan(id) {
     // console.log('editTunjangan executing with ID:', id);
     
     $.ajax({
-        url: 'get.php?id=' + id,
+        url: 'get?id=' + id,
         type: 'GET',
         dataType: 'json',
         success: function(data) {
@@ -388,7 +388,7 @@ function editTunjangan(id) {
             
             // Load selected gurus for this tunjangan
             $.ajax({
-                url: 'get_guru.php?tunjangan_id=' + data.id + '&periode=' + encodeURIComponent(window.currentPeriode || ''),
+                url: 'get_guru?tunjangan_id=' + data.id + '&periode=' + encodeURIComponent(window.currentPeriode || ''),
                 type: 'GET',
                 dataType: 'json',
                 success: function(guruData) {
@@ -751,7 +751,7 @@ function editTunjangan(id) {
                 
                 // Submit via AJAX
                 $.ajax({
-                    url: 'save.php',
+                    url: 'save',
                     type: 'POST',
                     data: dataString,
                     contentType: 'application/x-www-form-urlencoded; charset=UTF-8',

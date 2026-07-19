@@ -66,10 +66,10 @@ $legger = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                                         <i class="fas fa-sync"></i> <span id="btnGenerateText">Generate Legger</span>
                                         <span id="btnGenerateSpinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
                                     </button>
-                                    <a href="cetak_slip_semua.php?periode=<?php echo $periode; ?>" class="btn btn-warning" target="_blank">
+                                    <a href="cetak_slip_semua?periode=<?php echo $periode; ?>" class="btn btn-warning" target="_blank">
                                         <i class="fas fa-file-invoice"></i> Cetak Slip Semua
                                     </a>
-                                    <a href="cetak_legger.php?periode=<?php echo $periode; ?>" class="btn btn-primary" target="_blank">
+                                    <a href="cetak_legger?periode=<?php echo $periode; ?>" class="btn btn-primary" target="_blank">
                                         <i class="fas fa-print"></i> Cetak Legger
                                     </a>
                                 </div>
@@ -179,7 +179,7 @@ $legger = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                                                     <td style="text-align: right; font-weight: bold;"><?php echo formatRupiahTanpaRp($total_potongan_display); ?></td>
                                                     <td style="text-align: right; font-weight: bold;"><?php echo formatRupiahTanpaRp($gaji_bersih_display); ?></td>
                                                     <td>
-                                                        <a href="cetak_struk.php?id=<?php echo $l['id']; ?>" class="btn btn-sm btn-info" target="_blank" data-toggle="tooltip" title="Cetak Slip Gaji">
+                                                        <a href="cetak_struk?id=<?php echo $l['id']; ?>" class="btn btn-sm btn-info" target="_blank" data-toggle="tooltip" title="Cetak Slip Gaji">
                                                             <i class="fas fa-print"></i> Cetak Slip Gaji
                                                         </a>
                                                     </td>
@@ -475,21 +475,21 @@ var tableLegger;
                         text: '<i class="fas fa-file-excel"></i> Excel', 
                         className: 'btn btn-success btn-sm',
                         action: function (e, dt, node, config) {
-                            window.location.href = 'export_excel.php?periode=<?php echo $periode; ?>';
+                            window.location.href = 'export_excel?periode=<?php echo $periode; ?>';
                         }
                     },
                     { 
                         text: '<i class="fas fa-file-pdf"></i> PDF',
                         className: 'btn btn-danger btn-sm',
                         action: function (e, dt, node, config) {
-                            window.open('cetak_legger.php?periode=<?php echo $periode; ?>', '_blank');
+                            window.open('cetak_legger?periode=<?php echo $periode; ?>', '_blank');
                         }
                     },
                     { 
                         text: '<i class="fas fa-print"></i> Print',
                         className: 'btn btn-info btn-sm',
                         action: function (e, dt, node, config) {
-                            window.open('cetak_legger.php?periode=<?php echo $periode; ?>', '_blank');
+                            window.open('cetak_legger?periode=<?php echo $periode; ?>', '_blank');
                         }
                     }
                 ],
@@ -530,7 +530,7 @@ var tableLegger;
                 
                 // Send AJAX request
                 $.ajax({
-                    url: '<?php echo BASE_URL; ?>pages/legger/generate_ajax.php',
+                    url: '<?php echo BASE_URL; ?>pages/legger/generate_ajax',
                     type: 'POST',
                     data: {
                         periode: '<?php echo $periode; ?>',

@@ -51,7 +51,7 @@ $tunjangan_list = $result_tunjangan ? $result_tunjangan->fetch_all(MYSQLI_ASSOC)
                                         <button type="button" class="btn btn-success btn-sm" data-toggle="modal" data-target="#modalImport">
                                             <i class="fas fa-file-upload"></i> Import Excel
                                         </button>
-<form action="sync_simad.php" method="post" class="d-inline" id="formSyncSimad">
+<form action="sync_simad" method="post" class="d-inline" id="formSyncSimad">
     <?php echo csrfField(); ?>
     <button type="button" class="btn btn-secondary btn-sm" id="btnSyncSimad" title="URL API dibentuk otomatis di config/simad.php (nama folder SIMAD / override manual)">
                                                 <i class="fas fa-sync-alt"></i> Sinkron SIMAD
@@ -229,7 +229,7 @@ $tunjangan_list = $result_tunjangan ? $result_tunjangan->fetch_all(MYSQLI_ASSOC)
                                                         <button class="btn btn-sm btn-info" onclick="editGuru(<?php echo $g['id']; ?>)" data-toggle="tooltip" title="Edit">
                                                             <i class="fas fa-edit"></i>
                                                         </button>
-                                                        <button class="btn btn-sm btn-danger" onclick="confirmDelete('<?php echo BASE_URL; ?>pages/guru/delete.php?id=<?php echo $g['id']; ?>')" data-toggle="tooltip" title="Hapus">
+                                                        <button class="btn btn-sm btn-danger" onclick="confirmDelete('<?php echo BASE_URL; ?>pages/guru/delete?id=<?php echo $g['id']; ?>')" data-toggle="tooltip" title="Hapus">
                                                             <i class="fas fa-trash"></i>
                                                         </button>
                                                     </td>
@@ -254,7 +254,7 @@ $tunjangan_list = $result_tunjangan ? $result_tunjangan->fetch_all(MYSQLI_ASSOC)
                                 <span>&times;</span>
                             </button>
                         </div>
-<form id="formGuru" method="POST" action="save.php">
+<form id="formGuru" method="POST" action="save">
     <?php echo csrfField(); ?>
     <input type="hidden" name="id" id="guru_id">
                             <div class="modal-body">
@@ -355,7 +355,7 @@ $tunjangan_list = $result_tunjangan ? $result_tunjangan->fetch_all(MYSQLI_ASSOC)
                                 <span>&times;</span>
                             </button>
                         </div>
-<form id="formEditMultiple" method="POST" action="save_multiple.php">
+<form id="formEditMultiple" method="POST" action="save_multiple">
     <?php echo csrfField(); ?>
     <input type="hidden" name="ids" id="editMultipleIds">
                             <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
@@ -452,7 +452,7 @@ $tunjangan_list = $result_tunjangan ? $result_tunjangan->fetch_all(MYSQLI_ASSOC)
                                 <span>&times;</span>
                             </button>
                         </div>
-<form method="POST" action="import.php" enctype="multipart/form-data">
+<form method="POST" action="import" enctype="multipart/form-data">
     <?php echo csrfField(); ?>
     <div class="modal-body">
                                 <div class="form-group pb-3 border-bottom">
@@ -517,7 +517,7 @@ var selectedIds = new Set();
     // Function to edit guru - must be global for onclick
     window.editGuru = function(id) {
         $.ajax({
-            url: 'get.php?id=' + id,
+            url: 'get?id=' + id,
             type: 'GET',
             dataType: 'json',
             success: function(data) {
@@ -1051,7 +1051,7 @@ var selectedIds = new Set();
     $(document).on('click', '#btnDownloadTemplate', function(e) {
         e.preventDefault();
         // Download template Excel dari server
-        window.location.href = 'download_template.php';
+        window.location.href = 'download_template';
     });
 
     $(document).on('click', '#btnSyncSimad', function(e) {
@@ -1096,7 +1096,7 @@ var selectedIds = new Set();
                 if (result.isConfirmed) {
                     var form = document.createElement('form');
                     form.method = 'POST';
-                    form.action = 'delete_multiple.php?ids=' + idsArray.join(',');
+                    form.action = 'delete_multiple?ids=' + idsArray.join(',');
                     var input = document.createElement('input');
                     input.type = 'hidden';
                     input.name = 'csrf_token';
@@ -1138,7 +1138,7 @@ var selectedIds = new Set();
             
             // Load data via AJAX
             $.ajax({
-                url: 'get_multiple.php?ids=' + idsArray.join(','),
+                url: 'get_multiple?ids=' + idsArray.join(','),
                 type: 'GET',
                 dataType: 'json',
                 success: function(response) {
@@ -1305,7 +1305,7 @@ var selectedIds = new Set();
         
         // Submit via AJAX
         $.ajax({
-            url: 'save_multiple.php',
+            url: 'save_multiple',
             type: 'POST',
             data: formData,
             dataType: 'json',

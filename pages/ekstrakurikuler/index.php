@@ -50,7 +50,7 @@ $ekstrakurikuler = $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
                                                         <button class="btn btn-sm btn-info btn-edit" data-id="<?php echo $e['id']; ?>" onclick="editEkstrakurikuler(<?php echo $e['id']; ?>)">
                                                             <i class="fas fa-edit"></i>
                                                         </button>
-                                                        <button class="btn btn-sm btn-danger" onclick="confirmDelete('<?php echo BASE_URL; ?>pages/ekstrakurikuler/delete.php?id=<?php echo $e['id']; ?>')">
+                                                        <button class="btn btn-sm btn-danger" onclick="confirmDelete('<?php echo BASE_URL; ?>pages/ekstrakurikuler/delete?id=<?php echo $e['id']; ?>')">
                                                             <i class="fas fa-trash"></i>
                                                         </button>
                                                     </td>
@@ -123,7 +123,7 @@ $ekstrakurikuler = $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
                 var formData = $(this).serialize();
                 
                 $.ajax({
-                    url: '<?php echo BASE_URL; ?>pages/ekstrakurikuler/save.php',
+                    url: '<?php echo BASE_URL; ?>pages/ekstrakurikuler/save',
                     type: 'POST',
                     data: formData,
                     dataType: 'json',
@@ -184,7 +184,7 @@ function editEkstrakurikuler(id) {
     var $ = window.jQuery;
     
     $.ajax({
-        url: '<?php echo BASE_URL; ?>pages/ekstrakurikuler/get.php',
+        url: '<?php echo BASE_URL; ?>pages/ekstrakurikuler/get',
         type: 'GET',
         data: { id: id },
         dataType: 'json',

@@ -101,7 +101,7 @@ $all_guru = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
                                                         <button class="btn btn-sm btn-info btn-edit-potongan" data-id="<?php echo $p['id']; ?>" onclick="if(typeof editPotongan==='function'){editPotongan(<?php echo $p['id']; ?>);}" data-toggle="tooltip" title="Edit">
                                                             <i class="fas fa-edit"></i>
                                                         </button>
-                                                        <button class="btn btn-sm btn-danger" onclick="confirmDelete('<?php echo BASE_URL; ?>pages/potongan/delete.php?id=<?php echo $p['id']; ?>')" data-toggle="tooltip" title="Hapus">
+                                                        <button class="btn btn-sm btn-danger" onclick="confirmDelete('<?php echo BASE_URL; ?>pages/potongan/delete?id=<?php echo $p['id']; ?>')" data-toggle="tooltip" title="Hapus">
                                                             <i class="fas fa-trash"></i>
                                                         </button>
                                                     </td>
@@ -126,7 +126,7 @@ $all_guru = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
                                 <span>&times;</span>
                             </button>
                         </div>
-<form id="formPotongan" method="POST" action="save.php">
+<form id="formPotongan" method="POST" action="save">
     <?php echo csrfField(); ?>
     <input type="hidden" name="id" id="potongan_id">
                             <input type="hidden" name="periode" id="periode_form" value="<?php echo date('Y-m'); ?>">
@@ -329,7 +329,7 @@ function editPotongan(id) {
     // console.log('editPotongan executing with ID:', id);
     
     $.ajax({
-        url: 'get.php?id=' + id,
+        url: 'get?id=' + id,
         type: 'GET',
         dataType: 'json',
         success: function(data) {
@@ -387,7 +387,7 @@ function editPotongan(id) {
             
             // Load selected gurus for this potongan
             $.ajax({
-                url: 'get_guru.php?potongan_id=' + data.id + '&periode=' + encodeURIComponent(window.currentPeriode || ''),
+                url: 'get_guru?potongan_id=' + data.id + '&periode=' + encodeURIComponent(window.currentPeriode || ''),
                 type: 'GET',
                 dataType: 'json',
                 success: function(guruData) {
@@ -773,7 +773,7 @@ function editPotongan(id) {
                 
                 // Submit via AJAX
                 $.ajax({
-                    url: 'save.php',
+                    url: 'save',
                     type: 'POST',
                     data: dataString,
                     contentType: 'application/x-www-form-urlencoded; charset=UTF-8',

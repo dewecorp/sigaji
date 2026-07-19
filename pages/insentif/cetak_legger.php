@@ -396,7 +396,7 @@ foreach ($detail_rows as $row) {
             <div class="signature-line">
                 <img
                     class="qr-signature"
-                    src="<?php echo BASE_URL; ?>qrcode.php?data=<?php echo rawurlencode($qr_kepala_data); ?>"
+                    src="<?php echo BASE_URL; ?>qrcode?data=<?php echo rawurlencode($qr_kepala_data); ?>"
                     alt="QR Kepala Madrasah"
                     onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='https://api.qrserver.com/v1/create-qr-code/?size=180x180&data='+encodeURIComponent('<?php echo htmlspecialchars($qr_kepala_data, ENT_QUOTES); ?>');}"
                 >
@@ -409,7 +409,7 @@ foreach ($detail_rows as $row) {
             <div class="signature-line">
                 <img
                     class="qr-signature"
-                    src="<?php echo BASE_URL; ?>qrcode.php?data=<?php echo rawurlencode($qr_bendahara_data); ?>"
+                    src="<?php echo BASE_URL; ?>qrcode?data=<?php echo rawurlencode($qr_bendahara_data); ?>"
                     alt="QR Bendahara"
                     onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src='https://api.qrserver.com/v1/create-qr-code/?size=180x180&data='+encodeURIComponent('<?php echo htmlspecialchars($qr_bendahara_data, ENT_QUOTES); ?>');}"
                 >

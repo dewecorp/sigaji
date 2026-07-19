@@ -48,13 +48,13 @@ if ($stmt) {
                                         <i class="fas fa-sync"></i> <span id="btnGenerateText">Generate Legger</span>
                                         <span id="btnGenerateSpinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
                                     </button>
-                                    <a href="cetak_slip_semua.php?periode=<?php echo $periode_aktif; ?>" class="btn btn-info" target="_blank">
+                                    <a href="cetak_slip_semua?periode=<?php echo $periode_aktif; ?>" class="btn btn-info" target="_blank">
                                         <i class="fas fa-print"></i> Cetak Semua Slip
                                     </a>
-                                    <a href="cetak_legger.php?periode=<?php echo $periode_aktif; ?>" class="btn btn-warning" target="_blank">
+                                    <a href="cetak_legger?periode=<?php echo $periode_aktif; ?>" class="btn btn-warning" target="_blank">
                                         <i class="fas fa-file-alt"></i> Cetak Legger
                                     </a>
-                                    <a href="export_excel.php?periode=<?php echo $periode_aktif; ?>" class="btn btn-success">
+                                    <a href="export_excel?periode=<?php echo $periode_aktif; ?>" class="btn btn-success">
                                         <i class="fas fa-file-excel"></i> Ekspor Excel
                                     </a>
                                 </div>
@@ -87,7 +87,7 @@ if ($stmt) {
                                                         <td><?php echo htmlspecialchars($l['jabatan']); ?></td>
                                                         <td style="text-align: right; white-space: nowrap;"><?php echo formatRupiah($l['total_honor']); ?></td>
                                                         <td>
-                                                            <a href="cetak_slip.php?id=<?php echo $l['id']; ?>" class="btn btn-sm btn-info" target="_blank">
+                                                            <a href="cetak_slip?id=<?php echo $l['id']; ?>" class="btn btn-sm btn-info" target="_blank">
                                                                 <i class="fas fa-print"></i> Cetak Slip
                                                             </a>
                                                         </td>
@@ -170,7 +170,7 @@ if ($stmt) {
                 btnSpinner.removeClass('d-none');
                 
                 $.ajax({
-                    url: '<?php echo BASE_URL; ?>pages/legger_honor/generate_ajax.php',
+                    url: '<?php echo BASE_URL; ?>pages/legger_honor/generate_ajax',
                     type: 'POST',
                     data: { periode: '<?php echo $periode_aktif; ?>', csrf_token: window.CSRF_TOKEN || '' },
                     dataType: 'json',

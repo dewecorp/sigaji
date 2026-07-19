@@ -301,14 +301,14 @@ foreach ($items as $it) {
                 <div class="signature-col">
                     <p><strong>Kepala Madrasah</strong></p>
                     <div class="signature-line">
-                        <img class="qr-signature" src="<?php echo BASE_URL; ?>qrcode.php?data=<?php echo rawurlencode('Kepala Madrasah|' . ($settings['nama_kepala'] ?? '') . '|Slip'); ?>" alt="QR Kepala Madrasah">
+                        <img class="qr-signature" src="<?php echo BASE_URL; ?>qrcode?data=<?php echo rawurlencode('Kepala Madrasah|' . ($settings['nama_kepala'] ?? '') . '|Slip'); ?>" alt="QR Kepala Madrasah">
                         <div class="signature-name"><?php echo htmlspecialchars($settings['nama_kepala'] ?? ''); ?></div>
                     </div>
                 </div>
                 <div class="signature-col">
                     <p><strong>Bendahara</strong></p>
                     <div class="signature-line">
-                        <img class="qr-signature" src="<?php echo BASE_URL; ?>qrcode.php?data=<?php echo rawurlencode('Bendahara|' . ($settings['nama_bendahara'] ?? '') . '|Slip'); ?>" alt="QR Bendahara">
+                        <img class="qr-signature" src="<?php echo BASE_URL; ?>qrcode?data=<?php echo rawurlencode('Bendahara|' . ($settings['nama_bendahara'] ?? '') . '|Slip'); ?>" alt="QR Bendahara">
                         <div class="signature-name"><?php echo htmlspecialchars($settings['nama_bendahara'] ?? ''); ?></div>
                     </div>
                 </div>

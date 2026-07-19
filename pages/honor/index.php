@@ -71,7 +71,7 @@ $pembina_list = $result_pembina ? $result_pembina->fetch_all(MYSQLI_ASSOC) : [];
                                                         <button class="btn btn-sm btn-info btn-edit" data-id="<?php echo $h['id']; ?>" onclick="editHonor(<?php echo $h['id']; ?>)">
                                                             <i class="fas fa-edit"></i>
                                                         </button>
-                                                        <button class="btn btn-sm btn-danger" onclick="confirmDelete('<?php echo BASE_URL; ?>pages/honor/delete.php?id=<?php echo $h['id']; ?>')">
+                                                        <button class="btn btn-sm btn-danger" onclick="confirmDelete('<?php echo BASE_URL; ?>pages/honor/delete?id=<?php echo $h['id']; ?>')">
                                                             <i class="fas fa-trash"></i>
                                                         </button>
                                                     </td>
@@ -278,7 +278,7 @@ $pembina_list = $result_pembina ? $result_pembina->fetch_all(MYSQLI_ASSOC) : [];
                 var formData = $(this).serialize();
                 
                 $.ajax({
-                    url: '<?php echo BASE_URL; ?>pages/honor/save.php',
+                    url: '<?php echo BASE_URL; ?>pages/honor/save',
                     type: 'POST',
                     data: formData,
                     dataType: 'json',
@@ -352,7 +352,7 @@ function editHonor(id) {
     var $ = window.jQuery;
     
     $.ajax({
-        url: '<?php echo BASE_URL; ?>pages/honor/get.php',
+        url: '<?php echo BASE_URL; ?>pages/honor/get',
         type: 'GET',
         data: { id: id },
         dataType: 'json',
