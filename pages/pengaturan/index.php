@@ -41,6 +41,15 @@ $savedTahunAjaran = trim((string)($settings['tahun_ajaran'] ?? ''));
 if ($savedTahunAjaran !== '' && !in_array($savedTahunAjaran, $tahunAjaranOptions, true)) {
     $tahunAjaranOptions[] = $savedTahunAjaran;
 }
+
+// Get all guru for dropdown
+$guru_list = [];
+$guru_result = $conn->query("SELECT id, nama_lengkap, nip FROM guru ORDER BY nama_lengkap ASC");
+if ($guru_result) {
+    while ($row = $guru_result->fetch_assoc()) {
+        $guru_list[] = $row;
+    }
+}
 ?>
 
             <div class="main-content">
@@ -117,13 +126,27 @@ if ($savedTahunAjaran !== '' && !in_array($savedTahunAjaran, $tahunAjaranOptions
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label><strong>Nama Kepala Madrasah</strong></label>
-                                                <input type="text" class="form-control" name="nama_kepala" value="<?php echo htmlspecialchars($settings['nama_kepala'] ?? ''); ?>" placeholder="Nama Kepala Madrasah">
+                                                <select class="form-control" name="nama_kepala">
+                                                    <option value="">-- Pilih Kepala Madrasah --</option>
+                                                    <?php foreach ($guru_list as $guru): ?>
+                                                        <option value="<?php echo htmlspecialchars($guru['nama_lengkap']); ?>" <?php echo (($settings['nama_kepala'] ?? '') === $guru['nama_lengkap']) ? 'selected' : ''; ?>>
+                                                            <?php echo htmlspecialchars($guru['nama_lengkap']); ?> <?php echo $guru['nip'] ? '(' . htmlspecialchars($guru['nip']) . ')' : ''; ?>
+                                                        </option>
+                                                    <?php endforeach; ?>
+                                                </select>
                                             </div>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label><strong>Nama Bendahara</strong></label>
-                                                <input type="text" class="form-control" name="nama_bendahara" value="<?php echo htmlspecialchars($settings['nama_bendahara'] ?? ''); ?>" placeholder="Nama Bendahara">
+                                                <select class="form-control" name="nama_bendahara">
+                                                    <option value="">-- Pilih Bendahara --</option>
+                                                    <?php foreach ($guru_list as $guru): ?>
+                                                        <option value="<?php echo htmlspecialchars($guru['nama_lengkap']); ?>" <?php echo (($settings['nama_bendahara'] ?? '') === $guru['nama_lengkap']) ? 'selected' : ''; ?>>
+                                                            <?php echo htmlspecialchars($guru['nama_lengkap']); ?> <?php echo $guru['nip'] ? '(' . htmlspecialchars($guru['nip']) . ')' : ''; ?>
+                                                        </option>
+                                                    <?php endforeach; ?>
+                                                </select>
                                             </div>
                                         </div>
                                     </div>
