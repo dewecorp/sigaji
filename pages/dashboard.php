@@ -20,84 +20,88 @@ $jumlah_periode = isset($settings['jumlah_periode']) ? intval($settings['jumlah_
 $periode_mulai = $settings['periode_mulai'] ?? '';
 $periode_akhir = $settings['periode_akhir'] ?? '';
 
-// Get statistics from legger_gaji (source of truth - already multiplied by jumlah_periode)
-// This ensures consistency with the legger display
+// Build list of periods for queries
+$periode_list = [];
+if ($jumlah_periode > 1 && !empty($periode_mulai) && !empty($periode_akhir)) {
+    $start = new DateTime($periode_mulai . '-01');
+    $end = new DateTime($periode_akhir . '-01');
+    while ($start <= $end) {
+        $periode_list[] = $start->format('Y-m');
+        $start->modify('+1 month');
+    }
+} else {
+    $periode_list[] = $periode_aktif;
+}
+
+$periode_placeholders = implode(',', array_fill(0, count($periode_list), '?'));
+$periode_types = str_repeat('s', count($periode_list));
+
+// Get statistics from legger_gaji for all relevant periods
 $sql = "SELECT 
         COALESCE(SUM(gaji_pokok), 0) as total_gaji_pokok,
         COALESCE(SUM(total_tunjangan), 0) as total_tunjangan,
         COALESCE(SUM(total_potongan), 0) as total_potongan,
         COALESCE(SUM(gaji_bersih), 0) as total_gaji_bersih
         FROM legger_gaji 
-        WHERE periode = ?";
+        WHERE periode IN ($periode_placeholders)";
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("s", $periode_aktif);
+$stmt->bind_param($periode_types, ...$periode_list);
 $stmt->execute();
 $result = $stmt->get_result();
 $legger_stats = $result->fetch_assoc();
 
-// Check if legger_gaji has data for this period (even if all values are 0)
-// If exists, use it as source of truth (already multiplied by jumlah_periode)
-// This ensures consistency with the legger display
-$sql_check = "SELECT COUNT(*) as count FROM legger_gaji WHERE periode = ?";
+// Check if legger_gaji has data for these periods
+$sql_check = "SELECT COUNT(*) as count FROM legger_gaji WHERE periode IN ($periode_placeholders)";
 $stmt_check = $conn->prepare($sql_check);
-$stmt_check->bind_param("s", $periode_aktif);
+$stmt_check->bind_param($periode_types, ...$periode_list);
 $stmt_check->execute();
 $check_result = $stmt_check->get_result();
 $legger_exists = ($check_result->fetch_assoc()['count'] ?? 0) > 0;
 $stmt_check->close();
 
 if ($legger_exists && $legger_stats) {
-    // Use data from legger_gaji (already multiplied by jumlah_periode)
-    // This is the source of truth and ensures consistency with legger display
     $stats['total_gaji_pokok'] = floatval($legger_stats['total_gaji_pokok'] ?? 0);
     $stats['total_tunjangan'] = floatval($legger_stats['total_tunjangan'] ?? 0);
     $stats['total_potongan'] = floatval($legger_stats['total_potongan'] ?? 0);
     $stats['total_gaji_bersih'] = floatval($legger_stats['total_gaji_bersih'] ?? 0);
     $stmt->close();
 } else {
-    // Fallback: calculate from detail tables and multiply by jumlah_periode
-    // This is used when legger hasn't been generated yet
     $stmt->close();
     
-    // Total Gaji Pokok (gaji pokok tidak tergantung periode)
     $sql = "SELECT COALESCE(SUM(jumlah), 0) as total FROM gaji_pokok";
     $stmt = $conn->prepare($sql);
     $stmt->execute();
     $result = $stmt->get_result();
     $gaji_pokok_base = floatval($result->fetch_assoc()['total'] ?? 0);
-    // Kalikan dengan jumlah_periode karena ini untuk periode tertentu
     $stats['total_gaji_pokok'] = $gaji_pokok_base * $jumlah_periode;
     $stmt->close();
     
-    // Total Tunjangan
     $sql = "SELECT COALESCE(SUM(td.jumlah), 0) as total
             FROM tunjangan_detail td
             JOIN tunjangan t ON td.tunjangan_id = t.id
-            WHERE td.periode = ?
+            WHERE td.periode IN ($periode_placeholders)
             AND t.aktif = 1";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("s", $periode_aktif);
+    $stmt->bind_param($periode_types, ...$periode_list);
     $stmt->execute();
     $result = $stmt->get_result();
     $tunjangan_base = floatval($result->fetch_assoc()['total'] ?? 0);
     $stats['total_tunjangan'] = $tunjangan_base * $jumlah_periode;
     $stmt->close();
     
-    // Total Potongan
     $sql = "SELECT COALESCE(SUM(pd.jumlah), 0) as total
             FROM potongan_detail pd
             JOIN potongan p ON pd.potongan_id = p.id
-            WHERE pd.periode = ?
+            WHERE pd.periode IN ($periode_placeholders)
             AND p.aktif = 1";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("s", $periode_aktif);
+    $stmt->bind_param($periode_types, ...$periode_list);
     $stmt->execute();
     $result = $stmt->get_result();
     $potongan_base = floatval($result->fetch_assoc()['total'] ?? 0);
     $stats['total_potongan'] = $potongan_base * $jumlah_periode;
     $stmt->close();
     
-    // Total Gaji Bersih
     $stats['total_gaji_bersih'] = $stats['total_gaji_pokok'] + $stats['total_tunjangan'] - $stats['total_potongan'];
 }
 
@@ -115,7 +119,36 @@ if ($check_insentif && ($check_insentif->num_rows ?? 0) > 0) {
     }
 }
 
-$stats['total_pengeluaran'] = floatval($stats['total_gaji_bersih'] ?? 0) + floatval($stats['total_insentif'] ?? 0);
+$stats['total_honor'] = 0;
+$check_honor_card = $conn->query("SHOW TABLES LIKE 'legger_honor'");
+if ($check_honor_card && $check_honor_card->num_rows > 0) {
+    $sql_honor = "SELECT COALESCE(SUM(total_honor), 0) as total FROM legger_honor WHERE periode IN ($periode_placeholders)";
+    $stmt_honor = $conn->prepare($sql_honor);
+    $stmt_honor->bind_param($periode_types, ...$periode_list);
+    $stmt_honor->execute();
+    $result_honor = $stmt_honor->get_result();
+    if ($result_honor) {
+        $stats['total_honor'] = floatval($result_honor->fetch_assoc()['total'] ?? 0);
+    }
+    $stmt_honor->close();
+}
+
+$stats['total_pengeluaran'] = floatval($stats['total_gaji_bersih'] ?? 0);
+
+// Data grafik pengeluaran per periode
+$chart_periods = [];
+$chart_totals = [];
+
+$result = $conn->query("SELECT periode, SUM(gaji_bersih) as total FROM legger_gaji GROUP BY periode ORDER BY periode ASC");
+if ($result) {
+    while ($row = $result->fetch_assoc()) {
+        $chart_periods[] = $row['periode'];
+        $chart_totals[] = floatval($row['total']);
+    }
+}
+
+$chart_labels_json = json_encode($chart_periods);
+$chart_data_json = json_encode($chart_totals);
 
 // Get total count of activities
 $sql_count = "SELECT COUNT(*) as total FROM activities";
@@ -254,23 +287,7 @@ function dashboardStatIcon($name) {
                         </div>
 
                         <div class="row g-3 align-items-stretch">
-                            <div class="col-lg-4 col-md-6 col-sm-6 col-6 d-flex">
-                                <div class="card stat-card stat-card-info flex-fill w-100">
-                                    <div class="card-body">
-                                        <div class="stat-icon-wrapper">
-                                            <div class="stat-icon">
-                                                <?php echo dashboardStatIcon('coins'); ?>
-                                            </div>
-                                        </div>
-                                        <div class="stat-content">
-                                            <h3 class="stat-value stat-value-money"><?php echo formatRupiah($stats['total_insentif']); ?></h3>
-                                            <p class="stat-label">Total Insentif</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="col-lg-4 col-md-6 col-sm-6 col-6 d-flex">
+                            <div class="col-lg-3 col-md-6 col-sm-6 col-6 d-flex">
                                 <div class="card stat-card stat-card-primary flex-fill w-100">
                                     <div class="card-body">
                                         <div class="stat-icon-wrapper">
@@ -286,7 +303,7 @@ function dashboardStatIcon($name) {
                                 </div>
                             </div>
 
-                            <div class="col-lg-4 col-md-12 col-sm-12 col-12 d-flex">
+                            <div class="col-lg-3 col-md-6 col-sm-6 col-6 d-flex">
                                 <div class="card stat-card stat-card-danger flex-fill w-100">
                                     <div class="card-body">
                                         <div class="stat-icon-wrapper">
@@ -298,6 +315,52 @@ function dashboardStatIcon($name) {
                                             <h3 class="stat-value stat-value-money"><?php echo formatRupiah($stats['total_pengeluaran']); ?></h3>
                                             <p class="stat-label">Total Pengeluaran</p>
                                         </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-3 col-md-6 col-sm-6 col-6 d-flex">
+                                <div class="card stat-card stat-card-info flex-fill w-100">
+                                    <div class="card-body">
+                                        <div class="stat-icon-wrapper">
+                                            <div class="stat-icon">
+                                                <?php echo dashboardStatIcon('coins'); ?>
+                                            </div>
+                                        </div>
+                                        <div class="stat-content">
+                                            <h3 class="stat-value stat-value-money"><?php echo formatRupiah($stats['total_insentif']); ?></h3>
+                                            <p class="stat-label">Total Insentif</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-3 col-md-6 col-sm-6 col-6 d-flex">
+                                <div class="card stat-card stat-card-warning flex-fill w-100">
+                                    <div class="card-body">
+                                        <div class="stat-icon-wrapper">
+                                            <div class="stat-icon">
+                                                <?php echo dashboardStatIcon('salary'); ?>
+                                            </div>
+                                        </div>
+                                        <div class="stat-content">
+                                            <h3 class="stat-value stat-value-money"><?php echo formatRupiah($stats['total_honor']); ?></h3>
+                                            <p class="stat-label">Total Honor</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Chart Pengeluaran per Periode -->
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h4><i class="fas fa-chart-bar"></i> Total Gaji per Periode</h4>
+                                    </div>
+                                    <div class="card-body">
+                                        <canvas id="pengeluaranChart" style="height: 300px; width: 100%;"></canvas>
                                     </div>
                                 </div>
                             </div>
@@ -1288,4 +1351,84 @@ function getTimeAgo(timestamp) {
 })();
 </script>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<script>
+(function() {
+    function initChart() {
+        if (typeof Chart === 'undefined') {
+            setTimeout(initChart, 100);
+            return;
+        }
+
+        var ctx = document.getElementById('pengeluaranChart');
+        if (!ctx) return;
+
+        var labels = <?php echo $chart_labels_json; ?>;
+        var data = <?php echo $chart_data_json; ?>;
+
+        if (labels.length === 0) {
+            ctx.parentElement.innerHTML = '<div class="text-center text-muted py-4"><i class="fas fa-chart-bar fa-3x mb-3"></i><p>Belum ada data pengeluaran</p></div>';
+            return;
+        }
+
+        var bulan = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+        var formattedLabels = labels.map(function(p) {
+            var parts = p.split('-');
+            return bulan[parseInt(parts[1])-1] + ' ' + parts[0];
+        });
+
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: formattedLabels,
+                datasets: [{
+                    label: 'Total Pengeluaran',
+                    data: data,
+                    backgroundColor: 'rgba(16, 185, 129, 0.7)',
+                    borderColor: 'rgba(16, 185, 129, 1)',
+                    borderWidth: 2,
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                var val = context.raw;
+                                return 'Rp ' + val.toLocaleString('id-ID');
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                if (value >= 1000000000) return 'Rp' + (value / 1000000000).toFixed(1) + 'M';
+                                if (value >= 1000000) return 'Rp' + (value / 1000000).toFixed(1) + 'Jt';
+                                if (value >= 1000) return 'Rp' + (value / 1000).toFixed(0) + 'Rb';
+                                return 'Rp' + value;
+                            }
+                        }
+                    },
+                    x: {
+                        grid: { display: false }
+                    }
+                }
+            }
+        });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() { setTimeout(initChart, 200); });
+    } else {
+        setTimeout(initChart, 200);
+    }
+})();
+</script>
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>
